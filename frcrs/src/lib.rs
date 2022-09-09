@@ -11,4 +11,5 @@ fn entrypoint() { // called on rio boot
     let jvm = Jvm::attach_thread().unwrap();
 
     //jvm.invoke_static(class_name, method_name, inv_args)
+    loop {}
 }

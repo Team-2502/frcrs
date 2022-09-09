@@ -13,3 +13,11 @@ rustflags = [
 
 
 use the web dash (172.22.11.2) to set rio 2.0 hostname
+
+
+~/Documents/Applications/Conductor/target/release/conductor
+drivers station 
+    I modified (heavily)
+    changed internal code to use bonjour whatever it's called
+    !!! "usb mode" is specific to current configuration !!!
+
