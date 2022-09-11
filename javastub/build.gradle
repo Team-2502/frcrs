@@ -45,9 +45,14 @@ wpi.java.debugJni = false
 // Set this to true to enable desktop support.
 def includeDesktopSupport = false
 
+repositories {
+    mavenCentral()
+}
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 4.
 dependencies {
+    implementation "io.github.astonbitecode:j4rs:0.12.0"
+
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
