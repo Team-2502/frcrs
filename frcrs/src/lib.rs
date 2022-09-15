@@ -20,13 +20,23 @@ fn entrypoint() { // called on rio boot
     let ds = jvm.invoke_static("edu.wpi.first.wpilibj.DriverStation", "getInstance", &Vec::new()).unwrap();
 
     loop {
-        //jvm.invoke(&ds, "isTeleop",
-        //    &Vec::new());
+        let teleop: bool = jvm.to_rust(jvm.invoke(&ds, "isTeleop",
+            &Vec::new()).unwrap()).unwrap();
 
 
-        jvm.invoke(&ds, "reportWarning",
-            &[InvocationArg::try_from(format!("test warn, {} ms", &delta)).unwrap(),
-            InvocationArg::try_from(false).unwrap().into_primitive().unwrap()]);
+        match teleop {
+            true => {
+                //stub
+            }
+            false => {
+                //stub
+            }
+        };
+
+
+        //jvm.invoke(&ds, "reportWarning",
+        //    &[InvocationArg::try_from(format!("test warn")).unwrap(),
+        //    InvocationArg::try_from(false).unwrap().into_primitive().unwrap()]);
 
         
     }
