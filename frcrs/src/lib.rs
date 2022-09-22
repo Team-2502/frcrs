@@ -19,6 +19,15 @@ fn entrypoint() { // called on rio boot
 
     let ds = jvm.invoke_static("edu.wpi.first.wpilibj.DriverStation", "getInstance", &Vec::new()).unwrap();
 
+    let motor = jvm.create_instance("com.revrobotics.CANSparkMax", &[
+        InvocationArg::try_from(1).unwrap().into_primitive().unwrap(),
+        InvocationArg::try_from({
+                let motor_types = jvm.static_class("com.revrobotics.CANSparkMaxLowLevel.MotorType").unwrap();
+                let k_brushless = jvm.field(&motor_types, "kBrushless").unwrap();
+                k_brushless
+            }).unwrap()
+    ]).unwrap();
+
     loop {
         let teleop: bool = jvm.to_rust(jvm.invoke(&ds, "isTeleop",
             &Vec::new()).unwrap()).unwrap();
@@ -26,10 +35,12 @@ fn entrypoint() { // called on rio boot
 
         match teleop {
             true => {
-                //stub
+                jvm.invoke(&motor, "set", &[
+                    InvocationArg::try_from(0.5).unwrap().into_primitive().unwrap(),
+                ]);
             }
             false => {
-                //stub
+                jvm.invoke(&motor, "stopMotor", &Vec::new()).unwrap();
             }
         };
 
