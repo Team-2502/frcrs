@@ -22,12 +22,8 @@ fn entrypoint() { // called on rio boot
     let motor = jvm.create_instance("com.revrobotics.CANSparkMax", &[
         InvocationArg::try_from(1).unwrap().into_primitive().unwrap(),
         InvocationArg::try_from({
-            let primitive_int = InvocationArg::try_from(1).unwrap().into_primitive().unwrap();
-            //let k_brushless = jvm.invoke_static("com.revrobotics.CANSparkMaxLowLevel.MotorType", "fromID", &[primitive_int]).unwrap();
-            let spark_ll = jvm.static_class("com.revrobotics.CANSparkMaxLowLevel").unwrap();
-            //let motor_types = jvm.field(&spark_ll, "MotorType").unwrap();
-            //let k_brushless = jvm.field(&motor_types, "kBrushless").unwrap();
-            let k_brushless = jvm.invoke(&spark_ll, "MotorType.fromID", &[primitive_int]).unwrap();
+            let reexports = jvm.static_class("frc.robot.Reexports").unwrap();
+            let k_brushless = jvm.field(&reexports, "kBrushless").unwrap();
             k_brushless
         }).unwrap()
     ]).unwrap();
@@ -39,8 +35,8 @@ fn entrypoint() { // called on rio boot
         match teleop {
             true => {
                 jvm.invoke(&motor, "set", &[
-                    InvocationArg::try_from(0.5).unwrap().into_primitive().unwrap(),
-                ]);
+                    InvocationArg::try_from(1.0).unwrap().into_primitive().unwrap(),
+                ]).unwrap();
             }
             false => {
                 jvm.invoke(&motor, "stopMotor", &Vec::new()).unwrap();
