@@ -1,5 +1,6 @@
 package frc.robot;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
 
 /**
  * support class for rust bindings
@@ -7,6 +8,10 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
  * */
 public class Reexports {
     // sparkmax
-    public static MotorType[] motorTypes = MotorType.values();
-    public static MotorType kBrushless = MotorType.kBrushless;
+    public static final MotorType[] motorTypes = MotorType.values();
+    public static final MotorType kBrushless = MotorType.kBrushless;
+
+    public static final CANSparkMax.IdleMode[] idleModes= CANSparkMax.IdleMode.values();
+    public static final CANSparkMax.ExternalFollower phoenixFollower = CANSparkMax.ExternalFollower.kFollowerPhoenix;
+    public static final CANSparkMax.ExternalFollower sparkFollower = CANSparkMax.ExternalFollower.kFollowerSparkMax;
 }
