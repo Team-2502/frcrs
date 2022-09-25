@@ -1,6 +1,6 @@
 {
-  "java.configuration.updateBuildConfiguration": "automatic",
-  "java.server.launchMode": "Standard",
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "java.import.gradle.enabled": false,
   "files.exclude": {
     "**/.git": true,
     "**/.svn": true,
@@ -14,16 +14,5 @@
     "**/.factorypath": true,
     "**/*~": true
   },
-  "java.test.config": [
-    {
-      "name": "WPIlibUnitTests",
-      "workingDirectory": "${workspaceFolder}/build/jni/release",
-      "vmargs": [ "-Djava.library.path=${workspaceFolder}/build/jni/release" ],
-      "env": {
-        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release" ,
-        "DYLD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release"
-      }
-    },
-  ],
-  "java.test.defaultConfig": "WPIlibUnitTests"
+  "C_Cpp.default.configurationProvider": "vscode-wpilib"
 }
