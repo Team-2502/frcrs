@@ -1,14 +1,2 @@
-[package]
-name = "frcrs"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[lib]
-crate-type = ["cdylib"]
-
-[dependencies]
-j4rs = "0.12"
-j4rs_derive = "0.1"
-serde = { version = "1.0", features = ["derive"] }
+[workspace]
+members = ["frc-sys", "robotcode"]
