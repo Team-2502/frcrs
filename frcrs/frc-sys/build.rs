@@ -21,14 +21,14 @@ fn main() {
         }
         ).unwrap();
     // extract header paths
-    let header_paths = parse_header_paths(compile_options);
+    let header_paths = parse_header_paths(&compile_options);
 
 
     let mut header = String::new(); // generated header to bind
 
     // include every header
     for header_path in header_paths { 
-        //println!("{}",header_path);
+        println!("cargo:warning={}",header_path);
         // iterate over all headers in paths
         for entry in glob(&(header_path.clone()+"/**/*.h")).unwrap() {
             // generate line of header
@@ -60,9 +60,13 @@ fn main() {
         println!("cargo:rustc-link-search={}",link_path);
     };
 
-    let bindings = bindgen::Builder::default()
+    println!("cargo:warning={}",&header);
+
+    let  bindings = bindgen::Builder::default()
         .header_contents("frcCpp.h", &header)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .clang_args(compile_options.lines())
+        .clang_arg("-stdlib=libc++")
         .generate()
         .unwrap();
 
@@ -71,7 +75,7 @@ fn main() {
 }
 
 /// returns a vec of the header paths in the command line args
-fn parse_header_paths(options: String) -> Vec<String> {
+fn parse_header_paths(options: &String) -> Vec<String> {
     let mut header_paths: Vec<String> = Vec::new();
     let mut include: bool = false; // keeps track of include paths
     for line in options.lines() {
