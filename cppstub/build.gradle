@@ -99,14 +99,14 @@ model {
 }
 
 tasks.register("buildRustComponent") {
-    dependsOn(buildDependentsFrcUserProgramReleaseExecutable)
+    dependsOn(build)
 
     def outputPath = projectDir.toString() + "/src/main/deploy";
     def rustProjectPath = projectDir.toString() + "/../frcrs";
 
     exec {
         workingDir = rustProjectPath;
-        commandLine "cargo", "build", "--release"
+        commandLine "cargo", "build", "--release", "-vv"
     }
 }
 

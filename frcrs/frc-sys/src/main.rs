@@ -3,6 +3,7 @@ extern crate bindgen;
 use std::env;
 use std::path::PathBuf;
 use std::fs;
+use glob::glob;
 
 fn main() {
     let gradle_include_path = PathBuf::from("../../../cppstub/build/tmp/");
@@ -22,17 +23,26 @@ fn main() {
     // extract header paths
     let header_paths = parse_header_paths(compile_options);
 
-    for header_path in header_paths {
-        println!("{}",header_path);
-    }
 
-    /*
-    let header = String::new(); // generated header to bind
+    let mut header = String::new(); // generated header to bind
 
     for header_path in header_paths { 
-
+        //println!("{}",header_path);
+        // iterate over all headers in paths
+        for entry in glob(&(header_path+"/**/*.h")).unwrap() {
+            // generate line of header
+            header.push_str(&format!("#include <{}>\n", entry.unwrap().as_os_str().to_str().unwrap()));
+        }
     }
-    */
+
+    let bindings = bindgen::Builder::default()
+        .header_contents("frcCpp.h", &header)
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .generate()
+        .unwrap();
+
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    bindings.write_to_file(out_path.join("bindings.rs")).unwrap();
 
 
     /*
