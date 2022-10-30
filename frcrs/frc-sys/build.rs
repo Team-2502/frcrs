@@ -26,17 +26,23 @@ fn main() {
 
     let mut header = String::new(); // generated header to bind
 
+    let whitelist: Vec<&str> = Vec::from(["wpilibNewCommands-cpp","wpilibc-cpp","ntcore-cpp","wpimath-cpp","wpiutil-cpp"]);
+
     // include every header
     for header_path in header_paths { 
+        let mut whitelisted = false;
+        for whitelist_elem in &whitelist {
+            whitelisted = whitelisted || header_path.contains(whitelist_elem);
+        }
+        if !whitelisted {continue};
+        
         println!("cargo:warning={}",header_path);
         // iterate over all headers in paths
-        for entry in glob(&(header_path.clone()+"/**/*.h")).unwrap() {
+        for entry in 
+            glob(&(header_path.clone()+"/**/*.h")).unwrap().chain(
+            glob(&(header_path+"/**/*.hpp")).unwrap()) {
             // generate line of header
-            header.push_str(&format!("#include \"{}\"\n", entry.unwrap().as_os_str().to_str().unwrap()));
-        }
-        for entry in glob(&(header_path+"/**/*.hpp")).unwrap() {
-            // generate line of header
-            header.push_str(&format!("#include \"{}\"\n", entry.unwrap().as_os_str().to_str().unwrap()));
+            header.push_str(&format!("#include <{}>\n", entry.unwrap().as_os_str().to_str().unwrap()));
         }
     }
 
@@ -63,10 +69,16 @@ fn main() {
     println!("cargo:warning={}",&header);
 
     let  bindings = bindgen::Builder::default()
-        .header_contents("frcCpp.h", &header)
+        .header_contents("frcCpp.hpp", &header)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .clang_args(compile_options.lines())
-        .clang_arg("-stdlib=libc++")
+//        .clang_arg("-stdlib=libc++")
+        .clang_arg("--target=arm-frc2022-linux-gnueabi-g++")
+        .clang_arg(format!("--gcc-toolchain={}/.gradle/toolchains/frc/2022/roborio/",env::var("HOME").unwrap()))
+        .clang_arg("-xc++")
+        .clang_arg("-nostdinc")
+        .clang_arg("-nostdinc++")
+//        .clang_arg("-std=c++14")
         .generate()
         .unwrap();
 
