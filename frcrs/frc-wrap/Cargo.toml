@@ -1,0 +1,18 @@
+[package]
+name = "frc-wrap"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["java"]
+java = ["dep:j4rs", "dep:j4rs_derive", "dep:serde"]
+cpp = ["dep:frc-sys"]
+
+[lib]
+
+[dependencies]
+j4rs = { version = "0.12", optional = true }
+j4rs_derive = { version = "0.1", optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+
+frc-sys = { path = "../frc-sys", optional = true }

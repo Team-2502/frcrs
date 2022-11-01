@@ -1,2 +1,2 @@
 [workspace]
-members = ["frc-sys", "robotcode"]
+members = ["frc-sys", "frc-wrap", "robotcode"]
