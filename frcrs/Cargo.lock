@@ -130,6 +130,7 @@ dependencies = [
  "frc-sys",
  "j4rs",
  "j4rs_derive",
+ "lazy_static",
  "serde",
 ]
 
