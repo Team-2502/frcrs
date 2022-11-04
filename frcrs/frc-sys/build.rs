@@ -3,6 +3,8 @@ extern crate bindgen;
 use std::env;
 use std::path::PathBuf;
 use std::fs;
+use std::fs::{File, OpenOptions};
+use std::io::Write;
 use glob::glob;
 
 fn main() {
@@ -26,20 +28,22 @@ fn main() {
 
     let mut header = String::new(); // generated header to bind
 
-    let whitelist: Vec<&str> = Vec::from(["wpilibNewCommands-cpp","wpilibc-cpp","ntcore-cpp","wpimath-cpp","wpiutil-cpp"]);
+
+    // headers causing errors: wpimath-cpp, wpiutil-cpp
+    let whitelist: Vec<&str> = Vec::from(["wpilibNewCommands-cpp","wpilibc-cpp","ntcore-cpp","hal"]);
 
     // include every header
-    for header_path in header_paths { 
+    for header_path in header_paths {
         let mut whitelisted = false;
         for whitelist_elem in &whitelist {
             whitelisted = whitelisted || header_path.contains(whitelist_elem);
         }
         if !whitelisted {continue};
-        
+
         println!("cargo:warning={}",header_path);
         // iterate over all headers in paths
-        for entry in 
-            glob(&(header_path.clone()+"/**/*.h")).unwrap().chain(
+        for entry in
+        glob(&(header_path.clone()+"/**/*.h")).unwrap().chain(
             glob(&(header_path+"/**/*.hpp")).unwrap()) {
             // generate line of header
             header.push_str(&format!("#include <{}>\n", entry.unwrap().as_os_str().to_str().unwrap()));
@@ -66,23 +70,22 @@ fn main() {
         println!("cargo:rustc-link-search={}",link_path);
     };
 
-    println!("cargo:warning={}",&header);
+    //println!("cargo:warning={}",&header);
 
     let  bindings = bindgen::Builder::default()
+        .layout_tests(false)
         .header_contents("frcCpp.hpp", &header)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .clang_args(compile_options.lines())
-//        .clang_arg("-stdlib=libc++")
         .clang_arg("--target=arm-frc2022-linux-gnueabi-g++")
         .clang_arg(format!("--gcc-toolchain={}/.gradle/toolchains/frc/2022/roborio/",env::var("HOME").unwrap()))
         .clang_arg("-xc++")
         .clang_arg("-nostdinc")
         .clang_arg("-nostdinc++")
-//        .clang_arg("-std=c++14")
         .generate()
         .unwrap();
 
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out_path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     bindings.write_to_file(out_path.join("bindings.rs")).unwrap();
 }
 
