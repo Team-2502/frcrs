@@ -1,0 +1,17 @@
+[package]
+name = "frc-wrap"
+version = "0.1.0"
+edition = "2021"
+
+
+#[lib]
+#crate-type = ["cdylib"]
+
+
+[dependencies]
+pyo3 = "0.17.3"
+glob = "0.3.1"
+
+[build-dependencies]
+pyo3 = "0.17.3"
+glob = "0.3.1"
