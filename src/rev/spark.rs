@@ -1,5 +1,5 @@
 use j4rs::{Instance, InvocationArg, Jvm};
-use crate::rev::{IdleMode, MotorType};
+use crate::rev::{ControlType, IdleMode, MotorType, SparkPIDController};
 
 pub struct Spark {
     can_id: i32,
@@ -45,9 +45,29 @@ impl Spark {
         ]).unwrap();
     }
 
+    pub(crate) fn instance(&self) -> &Instance {
+        &self.instance
+    }
+
+    pub fn get_pid(&self) -> SparkPIDController {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        // TODO: get values from spark
+        SparkPIDController::from(&self.instance, jvm.invoke(&self.instance, "getPIDController", &Vec::new()).unwrap(), 0.0, 0.0, 0.0)
+    }
+
+    pub fn set_reference(&self, value: f64, control_type: ControlType) {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        let _control_type = jvm.invoke_static("frc.robot.Wrapper", control_type.as_str(), &Vec::new()).unwrap();
+
+        jvm.invoke(&self.get_pid().instance(), "setReference", &[InvocationArg::try_from(value).unwrap().into_primitive().unwrap(), InvocationArg::try_from(_control_type).unwrap()]).unwrap();
+    }
+
     /// Stop the motor
     pub fn stop(&self) {
         let jvm = Jvm::attach_thread().unwrap();
         jvm.invoke(&self.instance, "stopMotor", &Vec::new()).unwrap();
     }
 }
+

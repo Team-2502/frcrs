@@ -1,5 +1,7 @@
 mod spark;
+mod pid;
 
+pub use pid::*;
 pub use spark::*;
 
 pub enum MotorType {
@@ -10,6 +12,10 @@ pub enum MotorType {
 pub enum IdleMode {
     Brake,
     Coast
+}
+
+pub enum ControlType {
+    Position,
 }
 
 impl MotorType {
@@ -26,6 +32,14 @@ impl IdleMode {
         match &self {
             IdleMode::Brake => "kBrake",
             IdleMode::Coast => "kCoast"
+        }
+    }
+}
+
+impl ControlType {
+    pub fn as_str(&self)-> &str {
+        match &self {
+            ControlType::Position => "kPosition"
         }
     }
 }

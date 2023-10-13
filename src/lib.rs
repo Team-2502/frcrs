@@ -5,7 +5,8 @@ use j4rs_derive::call_from_java;
 
 use std::convert::TryFrom;
 use j4rs::prelude::*;
-use crate::rev::{IdleMode, MotorType, Spark};
+use crate::rev::{IdleMode, MotorType, Spark, SparkPIDController};
+use crate::rev::ControlType::Position;
 
 #[call_from_java("frc.robot.Main.rustentry")]
 fn entrypoint() { // called on rio boot
@@ -16,14 +17,19 @@ fn entrypoint() { // called on rio boot
 
 
     let motor = Spark::new(5, MotorType::Brushless);
-    motor.set_idle_mode(IdleMode::Coast);
+    &motor.set_idle_mode(IdleMode::Coast);
+    let pid = SparkPIDController::new(&motor);
+    pid.set_p(1.);
+    pid.set_i(1.);
+    pid.set_d(1.);
 
     loop {
         let teleop: bool = jvm.to_rust(jvm.invoke_static("edu.wpi.first.wpilibj.DriverStation", "isTeleop", &Vec::new()).unwrap()).unwrap();
 
         match teleop {
             true => {
-                motor.set(0.1);
+                //motor.set(0.1);
+                motor.set_reference(4f64, Position)
             }
             false => {
                 motor.stop();
