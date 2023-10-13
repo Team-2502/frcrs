@@ -3,6 +3,7 @@ mod pid;
 
 pub use pid::*;
 pub use spark::*;
+pub use spark::JavaSpark as Spark;
 
 pub enum MotorType {
     Brushed,
