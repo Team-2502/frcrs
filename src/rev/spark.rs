@@ -1,6 +1,8 @@
 use j4rs::{Instance, InvocationArg, Jvm};
 use crate::rev::{ControlType, IdleMode, MotorType, SparkPIDController};
-use uom::si;
+use uom::si::f64::*;
+use uom::si::angle;
+
 
 pub struct JavaSpark {
     can_id: i32,
@@ -17,7 +19,7 @@ pub trait SparkMax {
     fn set_idle_mode(&self, idle_mode: IdleMode);
     fn get_pid(&self) -> SparkPIDController;
     fn stop(&self);
-    fn set_position(&self, position: si::angle::revolution);
+    fn set_position(&self, position: Angle);
 }
 
 impl JavaSpark {
@@ -85,8 +87,8 @@ impl SparkMax for JavaSpark {
         jvm.invoke(&self.instance, "stopMotor", &Vec::new()).unwrap();
     }
 
-    fn set_position(&self, position: si::angle::revolution) {
-        todo!()
+    fn set_position(&self, position: Angle) {
+        self.set_reference(position.get::<angle::revolution>(), ControlType::Position);
     }
 }
 

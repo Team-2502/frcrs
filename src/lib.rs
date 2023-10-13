@@ -6,6 +6,8 @@ use rev::SparkMax;
 
 use std::convert::TryFrom;
 use j4rs::prelude::*;
+use uom::si::f64::*;
+use uom::si::angle::degree;
 use crate::rev::{IdleMode, MotorType, Spark, SparkPIDController};
 use crate::rev::ControlType::Position;
 
@@ -19,7 +21,7 @@ fn entrypoint() { // called on rio boot
     let motor = Spark::new(5, MotorType::Brushless);
     &motor.set_idle_mode(IdleMode::Coast);
     let pid = SparkPIDController::new(&motor);
-    pid.set_p(0.004f64);
+    pid.set_p(0.4f64);
     pid.set_i(0f64);
     pid.set_d(0f64);
 
@@ -28,7 +30,7 @@ fn entrypoint() { // called on rio boot
 
         match teleop {
             true => {
-                motor.set(0.1);
+                motor.set_position(Angle::new::<degree>(180.0));
                 // TODO: get actual pid before testing
                 //motor.set_reference(4f64, Position)
             }
