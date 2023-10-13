@@ -4,6 +4,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMax.ControlType;
 
+/// Wrapper to use rev classes in rust, for whatever reason they cannot be accesed from rust directly
 public class Wrapper {
     public static MotorType kBrushless() {
         return MotorType.kBrushless;

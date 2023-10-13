@@ -19,9 +19,9 @@ fn entrypoint() { // called on rio boot
     let motor = Spark::new(5, MotorType::Brushless);
     &motor.set_idle_mode(IdleMode::Coast);
     let pid = SparkPIDController::new(&motor);
-    pid.set_p(1.);
-    pid.set_i(1.);
-    pid.set_d(1.);
+    pid.set_p(1f64);
+    pid.set_i(1f64);
+    pid.set_d(1f64);
 
     loop {
         let teleop: bool = jvm.to_rust(jvm.invoke_static("edu.wpi.first.wpilibj.DriverStation", "isTeleop", &Vec::new()).unwrap()).unwrap();
@@ -29,7 +29,8 @@ fn entrypoint() { // called on rio boot
         match teleop {
             true => {
                 //motor.set(0.1);
-                motor.set_reference(4f64, Position)
+                // TODO: get actual pid before testing
+                //motor.set_reference(4f64, Position)
             }
             false => {
                 motor.stop();
