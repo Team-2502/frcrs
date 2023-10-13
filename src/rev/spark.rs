@@ -1,5 +1,5 @@
 use j4rs::{Instance, InvocationArg, Jvm};
-use crate::rev::MotorType;
+use crate::rev::{IdleMode, MotorType};
 
 pub struct Spark {
     can_id: i32,
@@ -33,6 +33,16 @@ impl Spark {
         jvm.invoke(&self.instance, "set", &[
             InvocationArg::try_from(amount).unwrap().into_primitive().unwrap(),
         ]).unwrap();//.expect("Failed to call `set` on motor");
+    }
+
+    pub fn set_idle_mode(&self, idle_mode: IdleMode) {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        let mode = jvm.invoke_static("frc.robot.Wrapper", idle_mode.as_str(), &Vec::new()).unwrap();
+
+        jvm.invoke(&self.instance, "setIdleMode", &[
+            InvocationArg::try_from(mode).unwrap(),
+        ]).unwrap();
     }
 
     /// Stop the motor
