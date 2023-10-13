@@ -4,7 +4,12 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.hal.DriverStationJNI;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * Do NOT add any static variables to this class, or any initialization at all. Unless you know what
@@ -23,11 +28,16 @@ public final class Main {
   private static native void rustentry(); // stub for entrypoint
   static {
     System.load( // load rust static library
-      Filesystem.getDeployDirectory()
-      + "/libfrcrs.so"
+      Filesystem.getDeployDirectory() + "/libfrcrs.so"
     );
   }
   public static void main(String... args) {
     rustentry();
+    //CANSparkMax spark = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
+    //com.revrobotics.CANSparkMaxLowLevel.MotorType.fromId(1);
+    //DriverStation.reportWarning("In Teleop!", false);
+    //DriverStationJNI.observeUserProgramStarting();
+    //RobotBase.startRobot(Robot::new);
   }
 }
+
