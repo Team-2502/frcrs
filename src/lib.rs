@@ -1,4 +1,5 @@
 pub mod ctre;
+pub mod input;
 pub mod rev;
 pub mod robot;
 

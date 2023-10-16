@@ -10,7 +10,9 @@ import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Do NOT add any static variables to this class, or any initialization at all. Unless you know what
@@ -34,8 +36,7 @@ public final class Main {
   }
   public static void main(String... args) {
     rustentry();
-    var talon = new WPI_TalonFX(4);
-    talon.stop
+    SmartDashboard.putNumber()
     //CANSparkMax spark = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
     //com.revrobotics.CANSparkMaxLowLevel.MotorType.fromId(1);
     //DriverStation.reportWarning("In Teleop!", false);
