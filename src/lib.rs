@@ -1,22 +1,29 @@
+pub mod ctre;
 pub mod rev;
 pub mod robot;
 
 use j4rs_derive::call_from_java;
 use rev::SparkMax;
 
-use std::convert::TryFrom;
-use j4rs::prelude::*;
-use uom::si::f64::*;
-use uom::si::angle::degree;
-use crate::rev::{IdleMode, MotorType, Spark, SparkPIDController};
 use crate::rev::ControlType::Position;
+use crate::rev::{IdleMode, MotorType, Spark, SparkPIDController};
+use j4rs::prelude::*;
+use std::convert::TryFrom;
+use uom::si::angle::degree;
+use uom::si::f64::*;
 
 #[call_from_java("frc.robot.Main.rustentry")]
-fn entrypoint() { // called on rio boot
+fn entrypoint() {
+    // called on rio boot
     let jvm = Jvm::attach_thread().unwrap();
 
     // Show "robot code" on driver's station
-    jvm.invoke_static("edu.wpi.first.hal.DriverStationJNI", "observeUserProgramStarting", &Vec::new()).unwrap();
+    jvm.invoke_static(
+        "edu.wpi.first.hal.DriverStationJNI",
+        "observeUserProgramStarting",
+        &Vec::new(),
+    )
+    .unwrap();
 
     let motor = Spark::new(5, MotorType::Brushless);
     &motor.set_idle_mode(IdleMode::Coast);
@@ -26,7 +33,16 @@ fn entrypoint() { // called on rio boot
     pid.set_d(0f64);
 
     loop {
-        let teleop: bool = jvm.to_rust(jvm.invoke_static("edu.wpi.first.wpilibj.DriverStation", "isTeleop", &Vec::new()).unwrap()).unwrap();
+        let teleop: bool = jvm
+            .to_rust(
+                jvm.invoke_static(
+                    "edu.wpi.first.wpilibj.DriverStation",
+                    "isTeleop",
+                    &Vec::new(),
+                )
+                .unwrap(),
+            )
+            .unwrap();
 
         match teleop {
             true => {
