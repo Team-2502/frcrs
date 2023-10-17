@@ -1,9 +1,12 @@
 pub mod ctre;
 pub mod input;
+pub mod networktables;
 pub mod rev;
 pub mod robot;
 
+use input::Joystick;
 use j4rs_derive::call_from_java;
+use networktables::SmartDashboard;
 use rev::SparkMax;
 
 use crate::rev::ControlType::Position;
@@ -26,12 +29,8 @@ fn entrypoint() {
     )
     .unwrap();
 
-    let motor = Spark::new(5, MotorType::Brushless);
-    &motor.set_idle_mode(IdleMode::Coast);
-    let pid = SparkPIDController::new(&motor);
-    pid.set_p(0.4f64);
-    pid.set_i(0f64);
-    pid.set_d(0f64);
+    let spark = Spark::new(5, MotorType::Brushless);
+    let joystick = Joystick::new(0);
 
     loop {
         let teleop: bool = jvm
@@ -47,12 +46,12 @@ fn entrypoint() {
 
         match teleop {
             true => {
-                motor.set_position(Angle::new::<degree>(180.0));
-                // TODO: get actual pid before testing
-                //motor.set_reference(4f64, Position)
+                if joystick.get(1) {
+                    spark.set(0.1);
+                }
             }
             false => {
-                motor.stop();
+                spark.stop();
             }
         };
     }

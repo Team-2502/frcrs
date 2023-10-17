@@ -35,7 +35,7 @@ impl Joystick {
         let jvm = Jvm::attach_thread().unwrap();
 
         let value: f64 = jvm
-            .to_rust(jvm.invoke(&self.instance, "getX", &Vec::new()).unwrap())
+            .to_rust(jvm.invoke(&self.instance, "getY", &Vec::new()).unwrap())
             .unwrap();
         value
     }
@@ -44,7 +44,26 @@ impl Joystick {
         let jvm = Jvm::attach_thread().unwrap();
 
         let value: f64 = jvm
-            .to_rust(jvm.invoke(&self.instance, "getX", &Vec::new()).unwrap())
+            .to_rust(jvm.invoke(&self.instance, "getZ", &Vec::new()).unwrap())
+            .unwrap();
+        value
+    }
+
+    pub fn get(&self, id: i32) -> bool {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        let value: bool = jvm
+            .to_rust(
+                jvm.invoke(
+                    &self.instance,
+                    "getRawButton",
+                    &[InvocationArg::try_from(id)
+                        .unwrap()
+                        .into_primitive()
+                        .unwrap()],
+                )
+                .unwrap(),
+            )
             .unwrap();
         value
     }

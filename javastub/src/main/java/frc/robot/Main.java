@@ -36,7 +36,6 @@ public final class Main {
   }
   public static void main(String... args) {
     rustentry();
-    SmartDashboard.putNumber()
     //CANSparkMax spark = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
     //com.revrobotics.CANSparkMaxLowLevel.MotorType.fromId(1);
     //DriverStation.reportWarning("In Teleop!", false);
