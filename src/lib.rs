@@ -14,6 +14,7 @@ use crate::rev::{IdleMode, MotorType, Spark, SparkPIDController};
 use j4rs::prelude::*;
 use std::convert::TryFrom;
 use uom::si::angle::degree;
+use uom::si::angle::revolution;
 use uom::si::f64::*;
 
 #[call_from_java("frc.robot.Main.rustentry")]
@@ -30,6 +31,11 @@ fn entrypoint() {
     .unwrap();
 
     let spark = Spark::new(5, MotorType::Brushless);
+    spark.set_idle_mode(IdleMode::Coast);
+    let pid = SparkPIDController::new(&spark);
+    pid.set_p(0.04f64);
+    pid.set_i(0f64);
+    pid.set_d(0f64);
     let joystick = Joystick::new(0);
 
     loop {
@@ -47,7 +53,10 @@ fn entrypoint() {
         match teleop {
             true => {
                 if joystick.get(1) {
-                    spark.set(0.1);
+                    println!("trigger");
+                    spark.set_position(Angle::new::<degree>(180.0));
+                } else {
+                    spark.set_position(Angle::new::<revolution>(4.0));
                 }
             }
             false => {

@@ -52,15 +52,28 @@ impl Joystick {
     pub fn get(&self, id: i32) -> bool {
         let jvm = Jvm::attach_thread().unwrap();
 
+        jvm.invoke_static(
+            "edu.wpi.first.wpilibj.DriverStation",
+            "refreshData",
+            &Vec::new(),
+        )
+        .unwrap();
+
         let value: bool = jvm
             .to_rust(
-                jvm.invoke(
-                    &self.instance,
-                    "getRawButton",
-                    &[InvocationArg::try_from(id)
+                jvm.invoke_static(
+                    "edu.wpi.first.wpilibj.DriverStation",
+                    "getStickButton",
+                    &[
+                    InvocationArg::try_from(self.id)
                         .unwrap()
                         .into_primitive()
-                        .unwrap()],
+                        .unwrap(),
+                    InvocationArg::try_from(id)
+                        .unwrap()
+                        .into_primitive()
+                        .unwrap()
+                    ],
                 )
                 .unwrap(),
             )
