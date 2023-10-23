@@ -12,7 +12,7 @@ impl SmartDashboard {
             &[
                 InvocationArg::try_from(key).unwrap(),
                 InvocationArg::try_from(data).unwrap().into_primitive().unwrap(),
-            ],
+            ]
         )
         .unwrap();
     }
