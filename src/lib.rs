@@ -5,7 +5,7 @@ pub mod rev;
 pub mod robot;
 
 use input::Joystick;
-use j4rs_derive::call_from_java;
+pub use j4rs_derive::call_from_java;
 use networktables::SmartDashboard;
 use rev::SparkMax;
 

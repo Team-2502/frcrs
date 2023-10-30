@@ -8,16 +8,16 @@ pub struct Falcon {
 }
 
 impl Falcon {
-    pub fn new(can_id: i32) -> Self {
+    pub fn new(can_id: i32, can_loop: Option<String>) -> Self {
         let jvm = Jvm::attach_thread().unwrap();
 
         let instance = jvm
             .create_instance(
                 "com.ctre.phoenix.motorcontrol.can",
                 &[InvocationArg::try_from(can_id)
-                    .unwrap()
-                    .into_primitive()
-                    .unwrap()],
+                    .unwrap().into_primitive().unwrap(),
+                InvocationArg::try_from(can_loop.unwrap_or(String::new()))
+                    .unwrap().into_primitive().unwrap()],
             )
             .unwrap();
 
