@@ -53,4 +53,16 @@ impl<'a> SparkPIDController<'a> {
 
         jvm.invoke(&self.controller, "setD", &[InvocationArg::try_from(d).unwrap().into_primitive().unwrap()]).unwrap();
     }
+
+    pub fn get_p(&self) -> f64 {
+        self.p
+    }
+
+    pub fn get_i(&self) -> f64 {
+        self.i
+    }
+
+    pub fn get_d(&self) -> f64 {
+        self.d
+    }
 }
