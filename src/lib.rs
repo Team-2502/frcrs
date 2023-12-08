@@ -13,6 +13,9 @@ use crate::rev::ControlType::Position;
 use crate::rev::{IdleMode, MotorType, Spark, SparkPIDController};
 use j4rs::prelude::*;
 use std::convert::TryFrom;
+use std::thread::sleep;
+use std::time::Duration;
+use j4rs::InvocationArg;
 use uom::si::angle::degree;
 use uom::si::angle::revolution;
 use uom::si::f64::*;
@@ -23,6 +26,12 @@ use crate::rev::MotorType::Brushless;
 #[call_from_java("frc.robot.Main.rustentry")]
 fn entrypoint() {
     observe_user_program_starting();
+
+    if !init_hal() {
+        panic!("Failed to init HAL")
+    }
+
+    hal_report(2, 3, 0, "2023.3.1".to_string());
 
     // Drivetrain
     let fl_drive = Talon::new(3, None);
@@ -63,6 +72,8 @@ fn entrypoint() {
     let right_joystick = Joystick::new(0);
     let op_joystick = Joystick::new(2);
 
+    let mut shooting = false;
+
     loop {
         let teleop = is_teleop();
 
@@ -71,37 +82,50 @@ fn entrypoint() {
         match teleop {
             true => {
                 // Drive
-                fl_drive.set(left_joystick.get_y() * 0.25);
-                fr_drive.set(right_joystick.get_y() * 0.25);
+                fl_drive.set(-left_joystick.get_y());
+                fr_drive.set(right_joystick.get_y());
 
-                bl_drive.set(-(left_joystick.get_y() * 0.25));
-                br_drive.set(-(right_joystick.get_y() * 0.25));
+                bl_drive.set(-left_joystick.get_y());
+                br_drive.set(right_joystick.get_y());
+
 
                 // Intake
-                if right_joystick.get(2) { intake.set(0.85); }
-                if left_joystick.get(2) { intake.set(-1.); }
+                if right_joystick.get(1) { intake.set(0.85); }
+                else if left_joystick.get(1) { intake.set(-0.85); }
+                else { intake.stop(); }
+
+                //intake.set(op_joystick.get_y() / 2f64);
 
                 // Hopper
                 if op_joystick.get(3) {
                     hopper_left.set(1.);
                     hopper_right.set(0.25);
                     hopper_bottom.set(1.);
-                }
-
-                if op_joystick.get(4) {
+                } else if op_joystick.get(4) {
                     hopper_left.set(-1.);
                     hopper_right.set(-1.);
                     hopper_bottom.set(-1.);
+                } else {
+                    hopper_left.stop();
+                    hopper_right.stop();
+                    hopper_bottom.stop();
                 }
 
                 // Shooter
-                if op_joystick.get(2) {
+                if op_joystick.get(1) {
                     shooter_feed.set(1.);
+                } else {
+                    shooter_feed.stop();
                 }
 
-                if op_joystick.get(5) {
+                if op_joystick.get(2) { shooting = !shooting; }
+
+                if shooting {
                     shooter_right.set((op_joystick.get_throttle() + 1f64) / 2f64);
                     shooter_left.set(-((op_joystick.get_throttle() + 1f64) / 2f64));
+                } else {
+                    shooter_right.stop();
+                    shooter_left.stop();
                 }
             }
             false => {
@@ -143,6 +167,38 @@ pub fn refresh_data() {
         "edu.wpi.first.wpilibj.DriverStation",
         "refreshData",
         &Vec::new(),
+    ).unwrap();
+}
+
+pub fn init_hal() -> bool {
+    let jvm = Jvm::attach_thread().unwrap();
+
+    let value: bool = jvm
+        .to_rust(
+            jvm.invoke_static(
+                "edu.wpi.first.hal.HAL",
+                "initialize",
+                &[InvocationArg::try_from(500).unwrap().into_primitive().unwrap(),
+                    InvocationArg::try_from(0).unwrap().into_primitive().unwrap(),],
+            )
+                .unwrap(),
+        )
+        .unwrap();
+    value
+}
+
+pub fn hal_report(resource: i32, instance_number: i32, context: i32, feature: String) {
+    let jvm = Jvm::attach_thread().unwrap();
+
+    jvm.invoke_static(
+        "edu.wpi.first.hal.HAL",
+        "report",
+        &[
+            InvocationArg::try_from(resource).unwrap().into_primitive().unwrap(),
+            InvocationArg::try_from(instance_number).unwrap().into_primitive().unwrap(),
+            InvocationArg::try_from(context).unwrap().into_primitive().unwrap(),
+            InvocationArg::try_from(feature).unwrap(),
+        ],
     ).unwrap();
 }
 
