@@ -1,4 +1,4 @@
-use crate::rev::{ControlType, IdleMode, MotorType, SparkPIDController};
+use crate::rev::{ControlType, IdleMode, MotorType, Spark, SparkPIDController};
 use j4rs::{Instance, InvocationArg, Jvm};
 use uom::si::angle;
 use uom::si::f64::*;
@@ -17,6 +17,7 @@ pub trait SparkMax {
     fn set(&self, amount: f64);
     fn set_idle_mode(&self, idle_mode: IdleMode);
     fn get_pid(&self) -> SparkPIDController;
+    fn follow(&self, master: Spark);
     fn stop(&self);
     fn set_position(&self, position: Angle);
 }
@@ -119,6 +120,12 @@ impl SparkMax for JavaSpark {
             0.0,
             0.0,
         )
+    }
+
+    fn follow(&self, master: Spark) {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        jvm.invoke(&self.instance, "follow", &[InvocationArg::from(master.instance)]).unwrap();
     }
 
     /// Stop the motor

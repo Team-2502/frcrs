@@ -49,6 +49,15 @@ impl Joystick {
         value
     }
 
+    pub fn get_throttle(&self) -> f64 {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        let value: f64 = jvm
+            .to_rust(jvm.invoke(&self.instance, "getThrottle", &Vec::new()).unwrap())
+            .unwrap();
+        -value
+    }
+
     pub fn get(&self, id: i32) -> bool {
         let jvm = Jvm::attach_thread().unwrap();
 

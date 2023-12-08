@@ -54,6 +54,27 @@ impl<'a> SparkPIDController<'a> {
         jvm.invoke(&self.controller, "setD", &[InvocationArg::try_from(d).unwrap().into_primitive().unwrap()]).unwrap();
     }
 
+    pub fn set_i_zone(&self, iz: f64) {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        jvm.invoke(&self.controller, "setIZone", &[InvocationArg::try_from(iz).unwrap().into_primitive().unwrap()]).unwrap();
+    }
+
+    pub fn set_ff(&self, ff: f64) {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        jvm.invoke(&self.controller, "setFF", &[InvocationArg::try_from(ff).unwrap().into_primitive().unwrap()]).unwrap();
+    }
+
+    pub fn set_output_range(&self, min: f64, max: f64) {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        jvm.invoke(&self.controller, "setOutputRange", &[
+            InvocationArg::try_from(min).unwrap().into_primitive().unwrap(),
+            InvocationArg::try_from(max).unwrap().into_primitive().unwrap()
+        ]).unwrap();
+    }
+
     pub fn get_p(&self) -> f64 {
         self.p
     }

@@ -18,5 +18,5 @@ public class Wrapper {
 
     public static ControlType kPosition() { return ControlType.kPosition; }
 
-    public static String test() { return "hello"; }
+    //public static TalonFXInvertType TalonFXCounterClockwise() { return TalonFXInvertType.CounterClockwise; }
 }
