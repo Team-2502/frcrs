@@ -1,0 +1,21 @@
+[package]
+name = "example"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+frcrs = { path = "../frcrs" }
+revlib = { path = "../revlib" }
+ctre = { path = "../ctre" }
+futures = "0.3.28"
+anyhow = "1.0.75"
+cargo-frc = "0.4.0"
+tracing = "0.1.40"
+
+[package.metadata.frc]
+team-number = 2502
+rio-address = "10.25.2.2"
+target-dir = "../target"
+executable-name = "example"

@@ -1,0 +1,1 @@
+--team-number 2502 --executable ../target/arm-unknown-linux-gnueabi/release/example --libs ../target/arm-unknown-linux-gnueabi/release/build/hal-sys-f9100218b01fb672/out/lib

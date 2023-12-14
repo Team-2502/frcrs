@@ -1,0 +1,12 @@
+[workspace]
+
+resolver = "2"
+members = [
+  "hal-sys",
+  "frcrs",
+  "revlib",
+  "example",
+  "ctre",
+  "build-utils",
+  "deploy",
+]
