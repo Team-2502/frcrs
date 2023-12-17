@@ -13,6 +13,7 @@ use crate::rev::ControlType::Position;
 use crate::rev::{IdleMode, MotorType, Spark, SparkPIDController};
 use j4rs::prelude::*;
 use std::convert::TryFrom;
+use std::ops::Range;
 use std::thread::sleep;
 use std::time::Duration;
 use j4rs::InvocationArg;
@@ -73,6 +74,10 @@ fn entrypoint() {
     let op_joystick = Joystick::new(2);
 
     let mut shooting = false;
+    let mut op_2_last = false;
+
+    let dz = 0.08..1.0;
+    let mut speed = 0.0..1.0;
 
     loop {
         let teleop = is_teleop();
@@ -81,17 +86,26 @@ fn entrypoint() {
 
         match teleop {
             true => {
+
+                // speed control
+                if left_joystick.get(3) {
+                    speed = 0.0..0.3;
+                }
+                if left_joystick.get(4) {
+                    speed = 0.0..1.0;
+                }
+
+                //
                 // Drive
-                fl_drive.set(-left_joystick.get_y());
-                fr_drive.set(right_joystick.get_y());
+                fl_drive.set(deadzone(-left_joystick.get_y(), &dz, &speed));
+                fr_drive.set(deadzone(right_joystick.get_y(),&dz,&speed));
 
-                bl_drive.set(-left_joystick.get_y());
-                br_drive.set(right_joystick.get_y());
-
+                bl_drive.set(deadzone(-left_joystick.get_y(),&dz,&speed));
+                br_drive.set(deadzone(right_joystick.get_y(),&dz,&speed));
 
                 // Intake
-                if right_joystick.get(1) { intake.set(0.85); }
-                else if left_joystick.get(1) { intake.set(-0.85); }
+                if right_joystick.get(1) { intake.set(1.); }
+                else if left_joystick.get(1) { intake.set(-1.); }
                 else { intake.stop(); }
 
                 //intake.set(op_joystick.get_y() / 2f64);
@@ -113,12 +127,16 @@ fn entrypoint() {
 
                 // Shooter
                 if op_joystick.get(1) {
-                    shooter_feed.set(1.);
+                    shooter_feed.set(-1.);
                 } else {
                     shooter_feed.stop();
                 }
 
-                if op_joystick.get(2) { shooting = !shooting; }
+                let op_2_now = op_joystick.get(2);
+                if op_2_last != op_2_now && op_2_now { 
+                    shooting = !shooting; 
+                }
+                op_2_last = op_2_now;
 
                 if shooting {
                     shooter_right.set((op_joystick.get_throttle() + 1f64) / 2f64);
@@ -145,6 +163,50 @@ fn entrypoint() {
                 shooter_feed.stop();
             }
         };
+    }
+}
+
+/// Map x (within from) to the same relative spot in to
+fn deadzone(input: f64, from_range: &Range<f64>, to_range: &Range<f64>) -> f64 {
+    let neg = input < 0.0;
+    let input = input.abs();
+    let from_len = from_range.end - from_range.start;
+    let to_len = to_range.end - to_range.start;
+    let standard = (input - from_range.start) / from_len;
+    let mut out = (standard * to_len) + to_range.start;
+    if input < from_range.start { out = 0.0 };
+    if neg {
+        -out
+    } else {
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::deadzone;
+    #[test]
+    fn deadzone_test() {
+        let result = deadzone(0.5, &(0.0..1.0), &(0.0..2.0));
+        assert_eq!(result, 1.0);
+    }
+
+    #[test]
+    fn deadzone_reverse_test() {
+        let result = deadzone(-0.5, &(0.0..1.0), &(0.0..2.0));
+        assert_eq!(result, -1.0);
+    }
+
+    #[test]
+    fn deadzone_reverse_test_2() {
+        let result = deadzone(-0.75, &(0.5..1.0), &(0.0..2.0));
+        assert_eq!(result, -1.0);
+    }
+
+    #[test]
+    fn deadzone_test_2() {
+        let result = deadzone(0.75, &(0.5..1.0), &(0.0..2.0));
+        assert_eq!(result, 1.0);
     }
 }
 
