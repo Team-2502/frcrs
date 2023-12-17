@@ -76,8 +76,9 @@ fn entrypoint() {
     let mut shooting = false;
     let mut op_2_last = false;
 
-    let dz = 0.08..1.0;
-    let mut speed = 0.0..1.0;
+    const DRIVETRAIN_MIN_POWER: f64 = 0.09;
+    let dz = 0.06..1.0;
+    let mut speed = DRIVETRAIN_MIN_POWER..1.0;
 
     loop {
         let teleop = is_teleop();
@@ -89,10 +90,10 @@ fn entrypoint() {
 
                 // speed control
                 if left_joystick.get(3) {
-                    speed = 0.0..0.3;
+                    speed = DRIVETRAIN_MIN_POWER..0.3;
                 }
                 if left_joystick.get(4) {
-                    speed = 0.0..1.0;
+                    speed = DRIVETRAIN_MIN_POWER..1.0;
                 }
 
                 //
