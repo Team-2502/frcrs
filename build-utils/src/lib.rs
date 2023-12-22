@@ -4,6 +4,7 @@ use std::{
     path::{Path, PathBuf},
     sync::OnceLock,
 };
+use std::process::Command;
 
 use anyhow::bail;
 use artifact::Artifact;

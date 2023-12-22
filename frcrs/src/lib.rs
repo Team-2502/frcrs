@@ -8,9 +8,7 @@ use std::{
     task::{Poll, Waker},
 };
 
-use futures::Future;
-use hal_sys::HAL_SendConsoleLine;
-use pin_project::pin_project;
+use hal_sys::{HAL_ObserveUserProgramDisabled, HAL_ObserveUserProgramTeleop, HAL_SendConsoleLine};
 use tracing_subscriber::fmt::MakeWriter;
 
 use hal_sys::HAL_ObserveUserProgramStarting;
@@ -26,7 +24,7 @@ pub fn observe_user_program_starting() {
 
 pub mod ds;
 pub mod error;
-mod joystick;
+pub mod joystick;
 
 struct DsTracingWriter {}
 

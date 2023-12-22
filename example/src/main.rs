@@ -1,31 +1,34 @@
+use std::process::exit;
 use tracing::warn;
+use ctre::{Talon};
 use revlib::MotorType::Brushless;
 use revlib::SparkMax;
 use frcrs::ds;
 use frcrs::ds::{get_robot_state, RobotState};
 use frcrs::observe_user_program_starting;
 use frcrs::hal_initialize;
+use frcrs::joystick::Joystick;
 
 fn main() {
     if hal_initialize(500, 0) == 0 {
-        panic!("Could not start hal");
+        panic!("Could not start HAL");
     }
 
     observe_user_program_starting();
 
-    let mut spark = SparkMax::new(2, Brushless);
+    let mut talon = Talon::new(2, "".to_string());
 
     loop {
         let state = get_robot_state();
 
         match state {
             RobotState::Teleop => {
-                spark.set(0.05).unwrap()
+                talon.set(0.1);
             }
             RobotState::Auto => {}
             RobotState::Test => {}
             RobotState::Disabled => {
-                spark.stop().unwrap();
+                talon.set(0.0);
             }
         }
     }

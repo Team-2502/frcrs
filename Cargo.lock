@@ -548,6 +548,19 @@ dependencies = [
 [[package]]
 name = "ctre"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bindgen 0.66.1",
+ "build-utils",
+ "bytes",
+ "frcrs",
+ "reqwest",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "zip",
+]
 
 [[package]]
 name = "deploy"
