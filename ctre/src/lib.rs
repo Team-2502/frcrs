@@ -6,25 +6,22 @@ use std::ffi::{c_int, c_void, CString};
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 pub struct Talon {
-    handle: *mut c_void
+    handle: *mut ctre_phoenix6_hardware_core_CoreTalonFX
 }
 
 impl Talon {
-    pub fn new(can_id: i32, can_loop: String) -> Self {
-        let model = CString::new("Talon FX").unwrap();
+    pub fn new(can_id: u8, can_loop: String) -> Self {
         let can_bus = CString::new(can_loop).unwrap();
 
-        let model_ptr = model.as_ptr();
-        let can_bus_ptr = can_bus.as_ptr();
-
-        std::mem::forget(model);
-        std::mem::forget(can_bus);
-
-        let handle = unsafe { c_MotController_Create2(
+        /*let handle = unsafe { c_MotController_Create2(
             can_id,
             model_ptr,
             can_bus_ptr
-        ) };
+        ) };*/
+
+        let handle = unsafe {
+            CreateTalonFX(2, can_bus.as_ptr())
+        };
 
         Self {
             handle
@@ -33,13 +30,7 @@ impl Talon {
 
     pub fn set(&self, speed: f64) {
         unsafe {
-            c_MotController_Set_4(
-                self.handle,
-                 0,
-                 speed,
-                 0.0,
-                 0 // Demand type neutral
-                )
+
         };
     }
 

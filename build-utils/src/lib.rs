@@ -17,15 +17,18 @@ pub mod artifact;
 pub mod zip;
 
 static CLIENT: OnceLock<Client> = OnceLock::new();
-pub const WPI_VERSION: &str = "2023.4.3";
+//pub const WPI_VERSION: &str = "2023.4.3";
+//pub const WPI_VERSION: &str = "2023.3.1";
+pub const WPI_VERSION: &str = "2024.1.1-beta-4";
 
 pub fn get_client() -> &'static Client {
     CLIENT.get_or_init(|| Client::new())
 }
 
 pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path, ) -> anyhow::Result<()> {
-    let tempdir = TempDir::new()?;
-    let include_path = tempdir.path().join("include");
+    //let tempdir = TempDir::new()?;
+    let tempdir = Path::new("/Users/");
+    let include_path = tempdir.join("include");
 
     fs::create_dir_all(&include_path)?;
 
