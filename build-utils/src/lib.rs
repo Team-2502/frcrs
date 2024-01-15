@@ -19,16 +19,17 @@ pub mod zip;
 static CLIENT: OnceLock<Client> = OnceLock::new();
 //pub const WPI_VERSION: &str = "2023.4.3";
 //pub const WPI_VERSION: &str = "2023.3.1";
-pub const WPI_VERSION: &str = "2024.1.1-beta-4";
+pub const WPI_VERSION: &str = "2024.1.1";
 
 pub fn get_client() -> &'static Client {
     CLIENT.get_or_init(|| Client::new())
 }
 
-pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path, ) -> anyhow::Result<()> {
+pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path) -> anyhow::Result<()> {
     //let tempdir = TempDir::new()?;
-    let tempdir = Path::new("/Users/");
+    let tempdir = Path::new("/Users/64001830");
     let include_path = tempdir.join("include");
+    //let include_path = tempdir.path().join("include");
 
     fs::create_dir_all(&include_path)?;
 
@@ -39,6 +40,11 @@ pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path, ) -> anyhow
     if let Ok(host) = env::var("HOST") {
         env::set_var("TARGET", host);
     }
+
+    /*if include_path.join("ctre/phoenix6").exists() {
+        println!("building ctre, placing wrapper...");
+        fs::write(&include_path.join("ctre/phoenix6/TalonWrapper.h"), TALON_WRAPPER).expect("Failed to write wrapper");
+    }*/
 
     let result = bindgen::Builder::default()
         .clang_args([
@@ -105,3 +111,22 @@ pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path, ) -> anyhow
 
     Ok(())
 }
+
+
+const TALON_WRAPPER: &str = r#"#include "core/CoreTalonFX.hpp"
+#include <string>
+
+ctre::phoenix6::hardware::core::CoreTalonFX* CreateTalonFX(int id, const char* canbus) {
+  std::string _canbus = canbus;
+  auto talon = new ctre::phoenix6::hardware::core::CoreTalonFX(id, _canbus);
+
+  return talon;
+};
+/*
+clre::phoenix6::controls::VoltageOut CreateVoltageOut(int voltage) {
+  let voltage = units::voltage
+  auto _voltage = ctre::phoenix6::controls::VoltageOut(voltage, false, false, false, false);
+
+  return _voltage;
+}*/
+"#;

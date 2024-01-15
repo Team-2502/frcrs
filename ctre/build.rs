@@ -71,20 +71,20 @@ async fn main() -> Result<()> {
             .maven_url(CTRE_MAVEN.to_owned())
             .lib_name("CTRE_PhoenixTools".to_owned())
             .build()?,*/
-        /*Artifact::builder()
+        Artifact::builder()
             .group_id("com.ctre.phoenix6".to_owned())
             .artifact_id("tools".to_owned())
-            .version("24.0.0-beta-5".to_owned())
+            .version("24.1.0".to_owned())
             .maven_url(CTRE_MAVEN.to_owned())
             .lib_name("CTRE_PhoenixTools".to_owned())
             .build()?,
         Artifact::builder()
             .group_id("com.ctre.phoenix6".to_owned())
             .artifact_id("wpiapi-cpp".to_owned())
-            .version("24.0.0-beta-5".to_owned())
+            .version("24.1.0".to_owned())
             .maven_url(CTRE_MAVEN.to_owned())
-            .lib_name("CTRE_Phoenix_WPI".to_owned())
-            .build()?,*/
+            .lib_name("CTRE_Phoenix6_WPI".to_owned())
+            .build()?,
     ];
 
     //build(&headers, "Talon.*", &Path::new("ctre/phoenix/motorcontrol/can/TalonFX.h")).await

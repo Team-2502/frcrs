@@ -2,6 +2,7 @@ use std::{
     env,
     path::Path,
 };
+use std::string::ToString;
 
 use anyhow::Result;
 use build_utils::{
@@ -10,6 +11,7 @@ use build_utils::{
 };
 
 const MAVEN: &str = "https://frcmaven.wpi.edu/artifactory/release/";
+const VERSION: &str = "2024.2.1";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -17,7 +19,7 @@ async fn main() -> Result<()> {
         Artifact::builder()
             .group_id("edu.wpi.first.ni-libraries".to_owned())
             .artifact_id("runtime".to_owned())
-            .version("2023.3.0".to_owned())
+            .version(VERSION.to_owned())
             .maven_url(MAVEN.to_owned())
             .lib_name("embcanshim".to_owned())
             .no_headers()
@@ -25,7 +27,7 @@ async fn main() -> Result<()> {
         Artifact::builder()
             .group_id("edu.wpi.first.ni-libraries".to_owned())
             .artifact_id("runtime".to_owned())
-            .version("2023.3.0".to_owned())
+            .version(VERSION.to_owned())
             .maven_url(MAVEN.to_owned())
             .lib_name("fpgalvshim".to_owned())
             .no_headers()
@@ -33,7 +35,7 @@ async fn main() -> Result<()> {
         Artifact::builder()
             .group_id("edu.wpi.first.ni-libraries".to_owned())
             .artifact_id("chipobject".to_owned())
-            .version("2023.3.0".to_owned())
+            .version(VERSION.to_owned())
             .maven_url(MAVEN.to_owned())
             .lib_name("RoboRIO_FRC_ChipObject".to_owned())
             .no_headers()
@@ -41,7 +43,7 @@ async fn main() -> Result<()> {
         Artifact::builder()
             .group_id("edu.wpi.first.ni-libraries".to_owned())
             .artifact_id("netcomm".to_owned())
-            .version("2023.3.0".to_owned())
+            .version(VERSION.to_owned())
             .maven_url(MAVEN.to_owned())
             .lib_name("FRC_NetworkCommunication".to_owned())
             .no_headers()
@@ -49,7 +51,7 @@ async fn main() -> Result<()> {
         Artifact::builder()
             .group_id("edu.wpi.first.ni-libraries".to_owned())
             .artifact_id("visa".to_owned())
-            .version("2023.3.0".to_owned())
+            .version(VERSION.to_owned())
             .maven_url(MAVEN.to_owned())
             .lib_name("visa".to_owned())
             .no_headers()
