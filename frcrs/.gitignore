@@ -1,6 +1,0 @@
-debug/
-target/
-**/*.rs.bk
-*.pdb
-*.so
-*.dylib
