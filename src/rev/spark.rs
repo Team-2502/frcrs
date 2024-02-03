@@ -12,7 +12,7 @@ pub struct JavaSpark {
 pub struct SparkFlex {
     can_id: i32,
     motor_type: MotorType,
-    instance: Instance.
+    instance: Instance
 }
 
 pub trait SparkMax {
