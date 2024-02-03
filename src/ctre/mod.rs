@@ -1,6 +1,8 @@
 mod talon;
+mod cancoder;
 
 pub use talon::*;
+pub use cancoder::*;
 
 pub enum TalonInvertType {
     CounterClockwise,

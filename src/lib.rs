@@ -3,6 +3,8 @@ pub mod input;
 pub mod networktables;
 pub mod rev;
 pub mod robot;
+pub mod navx;
+pub mod drive;
 
 use input::Joystick;
 pub use j4rs_derive::call_from_java;
@@ -20,8 +22,10 @@ use j4rs::InvocationArg;
 use uom::si::angle::degree;
 use uom::si::angle::revolution;
 use uom::si::f64::*;
-use crate::ctre::Talon;
+use crate::ctre::{CanCoder, ControlMode, Talon};
 use crate::ctre::TalonInvertType::CounterClockwise;
+use crate::drive::{Swerve, ToTalonEncoder};
+use crate::navx::NavX;
 use crate::rev::MotorType::Brushless;
 
 #[call_from_java("frc.robot.Main.rustentry")]
@@ -34,136 +38,110 @@ fn entrypoint() {
 
     hal_report(2, 3, 0, "2023.3.1".to_string());
 
-    // Drivetrain
-    let fl_drive = Talon::new(3, None);
-    let fr_drive = Talon::new(1, None);
-    let bl_drive = Talon::new(4, None);
-    let br_drive = Talon::new(2, None);
+    SmartDashboard::init();
 
-    //&fl_drive.set_inverted(CounterClockwise);
-    //&fr_drive.set_inverted(CounterClockwise);
+    let navx = NavX::new();
 
-    //bl_drive.follow(fl_drive);
-    //br_drive.follow(fr_drive);
+    let encoder = CanCoder::new(9, Some("can0".to_owned()));
 
-    // Intake
-    let intake = Spark::new(8, Brushless);
+    let driver_right = Joystick::new(0);
+    let driver_left = Joystick::new(1);
 
-    // Hopper
-    let hopper_right = Spark::new(4, Brushless);
-    let hopper_left = Spark::new(3, Brushless);
-    let hopper_bottom = Spark::new(5, Brushless);
+    let fl_drive = Talon::new(1,  Some("can0".to_owned()));
+    let fl_turn = Talon::new(2,  Some("can0".to_owned()));
 
-    // Shooter
-    let shooter_feed = Spark::new(6, Brushless);
-    let shooter_left = Spark::new(12, Brushless);
-    let shooter_right = Spark::new(2, Brushless);
+    let fr_drive = Talon::new(4,  Some("can0".to_owned()));
+    let fr_turn = Talon::new(5,  Some("can0".to_owned()));
 
-    //shooter_left.follow(shooter_right);
+    let bl_drive = Talon::new(7,  Some("can0".to_owned()));
+    let bl_turn = Talon::new(8,  Some("can0".to_owned()));
 
-    /*let pid = shooter_right.get_pid();
-    pid.set_p(0.0008);
-    pid.set_i(0.0);
-    pid.set_d(0.0);
-    pid.set_i_zone(0.);
-    pid.set_ff(0.00019);
-    pid.set_output_range(-0.1, 1.);*/
+    let br_drive = Talon::new(10,  Some("can0".to_owned()));
+    let br_turn = Talon::new(11,  Some("can0".to_owned()));
 
-    let left_joystick = Joystick::new(1);
-    let right_joystick = Joystick::new(0);
-    let op_joystick = Joystick::new(2);
+        loop {
+            refresh_data();
 
-    let mut shooting = false;
-    let mut op_2_last = false;
+            match is_teleop() {
+                true => {
+                    SmartDashboard::put_number("angle".to_owned(), navx.get_angle());
+                    SmartDashboard::put_number("br angle".to_owned(), encoder.get());
 
-    const DRIVETRAIN_MIN_POWER: f64 = 0.09;
-    let dz = 0.06..1.0;
-    let mut speed = DRIVETRAIN_MIN_POWER..1.0;
+                    let wheel_speeds = Swerve::calculate(
+                        driver_left.get_y(), driver_left.get_x(), driver_right.get_z(), navx.get_angle());
 
-    loop {
-        let teleop = is_teleop();
+                    let fr_speeds = Swerve::optimize(
+                        wheel_speeds.ws1, wheel_speeds.wa1, fr_drive.get().from_talon_encoder_ticks()
+                    );
 
-        refresh_data();
+                    let fl_speeds = Swerve::optimize(
+                        wheel_speeds.ws2, wheel_speeds.wa2, fl_drive.get().from_talon_encoder_ticks()
+                    );
 
-        match teleop {
-            true => {
+                    let bl_speeds = Swerve::optimize(
+                        wheel_speeds.ws3, wheel_speeds.wa3, bl_drive.get().from_talon_encoder_ticks()
+                    );
 
-                // speed control
-                if left_joystick.get(3) {
-                    speed = DRIVETRAIN_MIN_POWER..0.3;
+                    let br_speeds = Swerve::optimize(
+                        wheel_speeds.ws4, wheel_speeds.wa4, br_drive.get().from_talon_encoder_ticks()
+                    );
+
+                    /*SmartDashboard::put_number("fl spd".to_owned(), fl_speeds.0);
+                    SmartDashboard::put_number("fr spd".to_owned(), fr_speeds.0);
+                    SmartDashboard::put_number("bl spd".to_owned(), bl_speeds.0);
+                    SmartDashboard::put_number("br spd".to_owned(), br_speeds.0);*/
+
+                    /*let fr_turn_pos =  Swerve::place_in_appropriate_0_to_360_scope(
+                        fr_turn.get(), fr_speeds.1) / ((360.) / (2048. * 12.8));
+
+                    let fl_turn_pos = Swerve::place_in_appropriate_0_to_360_scope(
+                        fl_turn.get(), fl_speeds.1) / ((360.) / (2048. * 12.8));
+
+                    let bl_turn_pos = Swerve::place_in_appropriate_0_to_360_scope(
+                        bl_turn.get(), bl_speeds.1) / ((360.) / (2048. * 12.8));
+
+                    let br_turn_pos = Swerve::place_in_appropriate_0_to_360_scope(
+                        br_turn.get(), br_speeds.1) / ((360.) / (2048. * 12.8));*/
+
+                    /*SmartDashboard::put_number("fl opt".to_owned(), fl_turn_pos);
+                    SmartDashboard::put_number("fr opt".to_owned(), fr_turn_pos);
+                    SmartDashboard::put_number("bl opt".to_owned(), bl_turn_pos);
+                    SmartDashboard::put_number("br opt".to_owned(), br_turn_pos);*/
+
+                    fr_drive.set(ControlMode::Percent, fr_speeds.0);
+                    fl_drive.set(ControlMode::Percent, fl_speeds.0);
+                    bl_drive.set(ControlMode::Percent, bl_speeds.0);
+                    br_drive.set(ControlMode::Percent, br_speeds.0);
+
+                    fr_turn.set(ControlMode::Position, fr_speeds.1.talon_encoder_ticks());
+                    fl_turn.set(ControlMode::Position, fl_speeds.1.talon_encoder_ticks());
+                    bl_turn.set(ControlMode::Position, bl_speeds.1.talon_encoder_ticks());
+                    br_turn.set(ControlMode::Position, br_speeds.1.talon_encoder_ticks());
+
+                    /*fr_drive.set(ControlMode::Percent, wheel_speeds.ws2);
+                    fl_drive.set(ControlMode::Percent, wheel_speeds.ws1);
+                    bl_drive.set(ControlMode::Percent, wheel_speeds.ws4);
+                    br_drive.set(ControlMode::Percent, wheel_speeds.ws3);
+
+                    fr_turn.set(ControlMode::Position, wheel_speeds.wa2 / ((360.) / (2048. * 12.8)));
+                    fl_turn.set(ControlMode::Position, wheel_speeds.wa1 / ((360.) / (2048. * 12.8)));
+                    bl_turn.set(ControlMode::Position, wheel_speeds.wa4 / ((360.) / (2048. * 12.8)));
+                    br_turn.set(ControlMode::Position, wheel_speeds.wa3 / ((360.) / (2048. * 12.8)));*/
+                },
+                false => {
+                    fl_turn.stop();
+                    fl_drive.stop();
+
+                    fr_turn.stop();
+                    fr_drive.stop();
+
+                    bl_turn.stop();
+                    bl_drive.stop();
+
+                    br_turn.stop();
+                    br_drive.stop();
                 }
-                if left_joystick.get(4) {
-                    speed = DRIVETRAIN_MIN_POWER..1.0;
-                }
-
-                //
-                // Drive
-                fl_drive.set(deadzone(-left_joystick.get_y(), &dz, &speed));
-                fr_drive.set(deadzone(right_joystick.get_y(),&dz,&speed));
-
-                bl_drive.set(deadzone(-left_joystick.get_y(),&dz,&speed));
-                br_drive.set(deadzone(right_joystick.get_y(),&dz,&speed));
-
-                // Intake
-                if right_joystick.get(1) { intake.set(1.); }
-                else if left_joystick.get(1) { intake.set(-1.); }
-                else { intake.stop(); }
-
-                //intake.set(op_joystick.get_y() / 2f64);
-
-                // Hopper
-                if op_joystick.get(3) {
-                    hopper_left.set(1.);
-                    hopper_right.set(0.25);
-                    hopper_bottom.set(1.);
-                } else if op_joystick.get(4) {
-                    hopper_left.set(-1.);
-                    hopper_right.set(-1.);
-                    hopper_bottom.set(-1.);
-                } else {
-                    hopper_left.stop();
-                    hopper_right.stop();
-                    hopper_bottom.stop();
-                }
-
-                // Shooter
-                if op_joystick.get(1) {
-                    shooter_feed.set(-1.);
-                } else {
-                    shooter_feed.stop();
-                }
-
-                let op_2_now = op_joystick.get(2);
-                if op_2_last != op_2_now && op_2_now { 
-                    shooting = !shooting; 
-                }
-                op_2_last = op_2_now;
-
-                if shooting {
-                    shooter_right.set((op_joystick.get_throttle() + 1f64) / 2f64);
-                    shooter_left.set(-((op_joystick.get_throttle() + 1f64) / 2f64));
-                } else {
-                    shooter_right.stop();
-                    shooter_left.stop();
-                }
-            }
-            false => {
-                fl_drive.stop();
-                fr_drive.stop();
-                bl_drive.stop();
-                br_drive.stop();
-
-                intake.stop();
-
-                hopper_bottom.stop();
-                hopper_right.stop();
-                hopper_left.stop();
-
-                shooter_right.stop();
-                shooter_left.stop();
-                shooter_feed.stop();
-            }
-        };
+        }
     }
 }
 
@@ -280,4 +258,13 @@ pub fn is_teleop() -> bool {
         .unwrap();
 
     teleop
+}
+
+pub trait Motor {
+    fn set(&self, value: f64);
+    fn stop(&self);
+}
+
+pub trait Encoder {
+    fn get(&self) -> f64;
 }

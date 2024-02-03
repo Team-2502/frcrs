@@ -1,9 +1,16 @@
 use j4rs::{Instance, InvocationArg, Jvm};
 use crate::ctre::TalonInvertType;
+use crate::Motor;
 
 pub struct Talon {
     can_id: i32,
     pub(crate) instance: Instance
+}
+
+pub enum ControlMode {
+    Percent,
+    Velocity,
+    Position
 }
 
 impl Talon {
@@ -15,23 +22,64 @@ impl Talon {
                 "com.ctre.phoenix.motorcontrol.can.WPI_TalonFX",
                 &[InvocationArg::try_from(can_id)
                     .unwrap().into_primitive().unwrap(),
+                    InvocationArg::try_from(can_loop.unwrap_or("rio".to_owned())).unwrap()
                 ],
             ).unwrap();
 
         Self { can_id, instance }
     }
 
-    pub fn set(&self, amount: f64) {
+    pub fn set(&self, control_mode: ControlMode, amount: f64) {
         let jvm = Jvm::attach_thread().unwrap();
 
-        jvm.invoke(
-            &self.instance,
-            "set",
-            &[InvocationArg::try_from(amount)
-                .unwrap()
-                .into_primitive()
-                .unwrap()],
-        ).unwrap();
+        match control_mode {
+            ControlMode::Percent => {
+                jvm.invoke(
+                    &self.instance,
+                    "set",
+                    &[InvocationArg::try_from(amount)
+                        .unwrap()
+                        .into_primitive()
+                        .unwrap()],
+                ).unwrap();
+            }
+            ControlMode::Velocity => {
+                let control = jvm.invoke_static(
+                    "frc.robot.Wrapper",
+                    "ctreVelocity",
+                    &Vec::new()
+                ).unwrap();
+
+                jvm.invoke(
+                    &self.instance,
+                    "set",
+                    &[
+                        InvocationArg::from(control),
+                        InvocationArg::try_from(amount)
+                        .unwrap()
+                        .into_primitive()
+                        .unwrap()],
+                ).unwrap();
+            }
+            ControlMode::Position => {
+                let control = jvm.invoke_static(
+                    "frc.robot.Wrapper",
+                    "ctrePosition",
+                    &Vec::new()
+                ).unwrap();
+
+                jvm.invoke(
+                    &self.instance,
+                    "set",
+                    &[
+                        InvocationArg::from(control),
+                        InvocationArg::try_from(amount)
+                            .unwrap()
+                            .into_primitive()
+                            .unwrap()],
+                ).unwrap();
+            }
+        }
     }
 
     pub fn follow(&self, master: Talon) {
@@ -72,4 +120,26 @@ impl Talon {
             &Vec::new(),
         ).unwrap();
     }
+
+    pub fn get(&self) -> f64 {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        let returned: f64 = jvm.to_rust(jvm.invoke(
+            &self.instance,
+            "getSelectedSensorPosition",
+            &Vec::new(),
+        ).unwrap()).unwrap();
+
+        returned
+    }
 }
+
+/*impl Motor for Talon {
+    fn set(&self, value: f64) {
+        self.set(value);
+    }
+
+    fn stop(&self) {
+        self.stop();
+    }
+}*/
