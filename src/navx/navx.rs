@@ -36,4 +36,14 @@ impl NavX {
 
         angle
     }
+
+    pub fn reset_angle(&self) {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        jvm.invoke(
+            &self.instance,
+            "reset",
+            &Vec::new(),
+        ).unwrap();
+    }
 }

@@ -104,10 +104,10 @@ impl Swerve {
         let mut ws3 = f64::sqrt(a.pow(2) + d.pow(2));
         let mut ws4 = f64::sqrt(a.pow(2) + c.pow(2));
 
-        let wa1 = b.atan2(c) * 180. / PI;
-        let wa2 = b.atan2(d) * 180. / PI;
-        let wa3 = a.atan2(d) * 180. / PI;
-        let wa4 = a.atan2(c) * 180. / PI;
+        let wa1 = b.atan2(c) * (180. / PI);
+        let wa2 = b.atan2(d) * (180. / PI);
+        let wa3 = a.atan2(d) * (180. / PI);
+        let wa4 = a.atan2(c) * (180. / PI);
 
         let mut max = ws1;
         if ws2 > max { max = ws2; } else if ws3 > max { max = ws3; } else if ws4 > max { max = ws4 }

@@ -27,7 +27,7 @@ use crate::ctre::TalonInvertType::CounterClockwise;
 use crate::drive::{Swerve, ToTalonEncoder};
 use crate::navx::NavX;
 use crate::rev::MotorType::Brushless;
-
+/*
 #[call_from_java("frc.robot.Main.rustentry")]
 fn entrypoint() {
     observe_user_program_starting();
@@ -144,7 +144,7 @@ fn entrypoint() {
         }
     }
 }
-
+*/
 /// Map x (within from) to the same relative spot in to
 fn deadzone(input: f64, from_range: &Range<f64>, to_range: &Range<f64>) -> f64 {
     let neg = input < 0.0;
@@ -259,6 +259,17 @@ pub fn is_teleop() -> bool {
 
     teleop
 }
+
+/*pub enum Keyword {
+    Auto,
+    Teleop,
+    Practice,
+    Test
+}
+
+pub fn get_keyword() -> Keyword {
+
+}*/
 
 pub trait Motor {
     fn set(&self, value: f64);
