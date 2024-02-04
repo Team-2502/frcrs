@@ -23,7 +23,7 @@ pub trait SparkMax {
     fn set(&self, amount: f64);
     fn set_idle_mode(&self, idle_mode: IdleMode);
     fn get_pid(&self) -> SparkPIDController;
-    fn follow(&self, master: Spark);
+    fn follow(&self, master: Spark, invert: bool);
     fn stop(&self);
     fn set_position(&self, position: Angle);
 }
@@ -128,10 +128,13 @@ impl SparkMax for JavaSpark {
         )
     }
 
-    fn follow(&self, master: Spark) {
+    fn follow(&self, master: Spark, invert: bool) {
         let jvm = Jvm::attach_thread().unwrap();
 
-        jvm.invoke(&self.instance, "follow", &[InvocationArg::from(master.instance)]).unwrap();
+        jvm.invoke(&self.instance, "follow", &[
+            InvocationArg::from(master.instance),
+            InvocationArg::try_from(invert).unwrap().into_primitive().unwrap()
+        ]).unwrap();
     }
 
     /// Stop the motor
@@ -181,7 +184,7 @@ impl SparkMax for SparkFlex {
             .invoke_static("frc.robot.Wrapper", motor_type.as_str(), &Vec::new())
             .unwrap();
 
-        let instance = jvm
+        /*let instance = jvm
             .create_instance(
                 "com.revrobotics.CANSparkFlex",
                 &[
@@ -192,7 +195,11 @@ impl SparkMax for SparkFlex {
                     InvocationArg::try_from(motortype).unwrap(),
                 ],
             )
-            .unwrap();
+            .unwrap();*/
+
+        let instance = jvm.invoke_static("frc.robot.Wrapper", "createSparkFlex", &[
+            InvocationArg::try_from(can_id).unwrap().into_primitive().unwrap()
+        ]).unwrap();
 
         Self {
             can_id,
@@ -246,10 +253,13 @@ impl SparkMax for SparkFlex {
         )
     }
 
-    fn follow(&self, master: Spark) {
+    fn follow(&self, master: Spark, invert: bool) {
         let jvm = Jvm::attach_thread().unwrap();
 
-        jvm.invoke(&self.instance, "follow", &[InvocationArg::from(master.instance)]).unwrap();
+        jvm.invoke(&self.instance, "follow", &[
+            InvocationArg::from(master.instance),
+            InvocationArg::try_from(invert).unwrap().into_primitive().unwrap()
+        ]).unwrap();
     }
 
     /// Stop the motor

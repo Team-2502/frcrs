@@ -22,7 +22,7 @@ use j4rs::InvocationArg;
 use uom::si::angle::degree;
 use uom::si::angle::revolution;
 use uom::si::f64::*;
-use crate::ctre::{CanCoder, ControlMode, Talon};
+use crate::ctre::{CanCoder, ControlMode, Kraken};
 use crate::ctre::TalonInvertType::CounterClockwise;
 use crate::drive::{Swerve, ToTalonEncoder};
 use crate::navx::NavX;
