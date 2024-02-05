@@ -1,6 +1,9 @@
 use j4rs::{Instance, InvocationArg, Jvm};
+use uom::si::f64::Angle;
 use crate::ctre::TalonInvertType;
 use crate::Motor;
+
+use super::talon_encoder_tick;
 
 pub struct Kraken {
     can_id: i32,
@@ -271,7 +274,7 @@ impl Falcon {
         ).unwrap();
     }
 
-    pub fn get(&self) -> f64 {
+    pub fn get(&self) -> Angle {
         let jvm = Jvm::attach_thread().unwrap();
 
         let returned: f64 = jvm.to_rust(jvm.invoke(
@@ -280,6 +283,8 @@ impl Falcon {
             &Vec::new(),
         ).unwrap()).unwrap();
 
-        returned
+        let angle = Angle::new::<talon_encoder_tick>(returned);
+
+        angle
     }
 }

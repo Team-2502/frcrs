@@ -11,6 +11,9 @@ pub use j4rs_derive::call_from_java;
 use networktables::SmartDashboard;
 use rev::SparkMax;
 
+#[macro_use]
+extern crate uom;
+
 use crate::rev::ControlType::Position;
 use crate::rev::{IdleMode, MotorType, Spark, SparkPIDController};
 use j4rs::prelude::*;
