@@ -26,8 +26,14 @@ impl Kraken {
         Self { can_id, instance }
     }
 
-    pub fn set(&self, control_mode: ControlMode, amount: f64) {
-        set(&self.instance, control_mode, amount)
+    pub fn set(&self, amount: f64) {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        jvm.invoke(
+            &self.instance,
+            "set",&[InvocationArg::try_from(amount).unwrap().into_primitive().unwrap()]
+        ).unwrap();
+
     }
 
     pub fn follow(&self, master: Kraken) {
@@ -92,10 +98,17 @@ fn set(instance: &Instance, control_mode: ControlMode, amount: f64) {
 
     match control_mode {
         ControlMode::Percent => {
+            let control = jvm.invoke_static(
+                "frc.robot.Wrapper",
+                "ctrePercent",
+                &Vec::new()).unwrap();
+
             jvm.invoke(
                 instance,
                 "set",
-                &[InvocationArg::try_from(amount)
+                &[
+                    InvocationArg::from(control),
+                    InvocationArg::try_from(amount)
                     .unwrap()
                     .into_primitive()
                     .unwrap()],
