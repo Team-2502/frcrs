@@ -23,7 +23,7 @@ use uom::si::f64::*;
 use uom::si::length::meter;
 
 
-const TICKS_TO_ROTATIONS: f32 = (360.) / (2048. * 12.8);
+const TICKS_TO_ROTATIONS: f32 = (1.) / (2048. * 12.8);
 
 unit! {
     system: uom::si;
@@ -57,10 +57,23 @@ mod tests {
 
     #[test]
     fn uom_equivalent() {
-        let rotations = 42.;
-        let tics = rotations.talon_encoder_ticks();
+        let degrees = 42.;
+        let tics = degrees.talon_encoder_ticks();
 
-        let tics_uom = Angle::new::<revolution>(rotations).get::<talon_encoder_tick>();
+        let tics_uom = Angle::new::<degree>(degrees).get::<talon_encoder_tick>();
+
+        let diff = tics - tics_uom;
+
+        assert!(diff < 0.01);
+    }
+
+    #[test]
+    fn uom_decode() {
+        let angle = Angle::new::<degree>(42.);
+
+        let tics = angle.get::<degree>().talon_encoder_ticks();
+
+        let tics_uom = angle.get::<talon_encoder_tick>();
 
         let diff = tics - tics_uom;
 
