@@ -149,7 +149,7 @@ fn entrypoint() {
 }
 */
 /// Map x (within from) to the same relative spot in to
-fn deadzone(input: f64, from_range: &Range<f64>, to_range: &Range<f64>) -> f64 {
+pub fn deadzone(input: f64, from_range: &Range<f64>, to_range: &Range<f64>) -> f64 {
     let neg = input < 0.0;
     let input = input.abs();
     let from_len = from_range.end - from_range.start;
