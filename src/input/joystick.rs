@@ -1,8 +1,15 @@
+use std::time::Instant;
+
 use j4rs::{Instance, InvocationArg, Jvm};
+
+use bitvec::prelude::*;
+
 
 pub struct Joystick {
     id: i32,
     instance: Instance,
+    buttons: BitVec,
+    last_updated: Instant,
 }
 
 impl Joystick {
@@ -19,7 +26,10 @@ impl Joystick {
             )
             .unwrap();
 
-        Self { id, instance }
+        let buttons = bitvec![0; 32];
+        let last_updated = Instant::now();
+
+        Self { id, instance, buttons, last_updated }
     }
 
     pub fn get_x(&self) -> f64 {
@@ -58,28 +68,31 @@ impl Joystick {
         -value
     }
 
-    pub fn get(&self, id: i32) -> bool {
+    pub fn get(&mut self, id: usize) -> bool {
+
+        if self.last_updated.elapsed().as_millis() < 15 {
+            return self.buttons[id - 1];
+        }
+
         let jvm = Jvm::attach_thread().unwrap();
 
-        let value: bool = jvm
+        let value: i32 = jvm
             .to_rust(
                 jvm.invoke_static(
                     "edu.wpi.first.wpilibj.DriverStation",
-                    "getStickButton",
+                    "getStickButtons",
                     &[
                     InvocationArg::try_from(self.id)
                         .unwrap()
                         .into_primitive()
                         .unwrap(),
-                    InvocationArg::try_from(id)
-                        .unwrap()
-                        .into_primitive()
-                        .unwrap()
                     ],
                 )
                 .unwrap(),
             )
             .unwrap();
-        value
+        self.buttons[..].store(value);
+        self.last_updated = Instant::now();
+        self.buttons[id-1]
     }
 }
