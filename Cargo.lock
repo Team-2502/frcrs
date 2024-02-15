@@ -659,6 +659,7 @@ dependencies = [
  "ctre",
  "frcrs",
  "futures",
+ "navx",
  "revlib",
  "tracing",
 ]
@@ -1231,6 +1232,15 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "tempfile",
+]
+
+[[package]]
+name = "navx"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "build-utils",
+ "tokio",
 ]
 
 [[package]]

@@ -41,10 +41,15 @@ pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path) -> anyhow::
         env::set_var("TARGET", host);
     }
 
-    /*if include_path.join("ctre/phoenix6").exists() {
+    if include_path.join("ctre/phoenix6").exists() {
         println!("building ctre, placing wrapper...");
-        fs::write(&include_path.join("ctre/phoenix6/TalonWrapper.h"), TALON_WRAPPER).expect("Failed to write wrapper");
-    }*/
+        //fs::write(&include_path.join("ctre/phoenix6/TalonWrapper.h"), TALON_WRAPPER).expect("Failed to write wrapper");
+        let base = fs::read_to_string(&include_path.join("ctre/phoenix6/core/CoreTalonFX.hpp")).unwrap();
+        if !base.contains(TALON_WRAPPER) {
+            fs::write(&include_path.join("ctre/phoenix6/core/CoreTalonFX.hpp"), format!("{} {}", base, TALON_WRAPPER))
+                .expect("Failed to write wrapper");
+        }
+    }
 
     let result = bindgen::Builder::default()
         .clang_args([
@@ -113,15 +118,16 @@ pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path) -> anyhow::
 }
 
 
-const TALON_WRAPPER: &str = r#"#include "core/CoreTalonFX.hpp"
+const TALON_WRAPPER: &str = r#"//#include "core/CoreTalonFX.hpp"
 #include <string>
 
-ctre::phoenix6::hardware::core::CoreTalonFX* CreateTalonFX(int id, const char* canbus) {
-  std::string _canbus = canbus;
-  auto talon = new ctre::phoenix6::hardware::core::CoreTalonFX(id, _canbus);
+ctre::phoenix6::hardware::core::CoreTalonFX* CreateTalonFX(int id/*, const char* canbus*/) {
+  //std::string _canbus = canbus;
+  auto talon = new ctre::phoenix6::hardware::core::CoreTalonFX(id);
 
   return talon;
 };
+
 /*
 clre::phoenix6::controls::VoltageOut CreateVoltageOut(int voltage) {
   let voltage = units::voltage

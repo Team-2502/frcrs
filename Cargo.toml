@@ -9,4 +9,5 @@ members = [
   "ctre",
   "build-utils",
   "deploy",
+  "navx",
 ]
