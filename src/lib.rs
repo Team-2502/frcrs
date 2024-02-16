@@ -5,6 +5,7 @@ pub mod rev;
 pub mod robot;
 pub mod navx;
 pub mod drive;
+pub mod dio;
 
 use input::Joystick;
 pub use j4rs_derive::call_from_java;
