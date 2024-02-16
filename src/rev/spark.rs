@@ -13,7 +13,8 @@ pub struct JavaSpark {
 pub struct SparkFlex {
     can_id: i32,
     motor_type: MotorType,
-    instance: Instance
+    instance: Instance,
+    encoder: Option<Instance>,
 }
 
 pub trait SparkMax {
@@ -215,6 +216,32 @@ impl SparkFlex {
         )
             .unwrap();
     }
+
+    fn get_encoder(&mut self) -> &Instance {
+        if self.encoder.is_some() {
+            return &self.encoder.as_ref().unwrap();
+        }
+
+        let jvm = Jvm::attach_thread().unwrap();
+
+        self.encoder = Some(
+            jvm.invoke(&self.instance, "getEncoder", &Vec::new()).unwrap(),
+        );
+
+        &self.encoder.as_ref().unwrap()
+
+    }
+
+    pub fn get_velocity(&mut self) -> f64 {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        jvm.to_rust(jvm.invoke(
+            self.get_encoder(),
+            "getVelocity",
+            &[
+            ],
+        ).unwrap()).unwrap()
+    }
 }
 
 impl SparkMax for SparkFlex {
@@ -246,6 +273,7 @@ impl SparkMax for SparkFlex {
             can_id,
             motor_type,
             instance,
+            encoder: None
         }
     }
 
