@@ -54,6 +54,24 @@ impl Kraken {
     pub fn stop(&self) {
         stop(&self.instance)
     }
+
+    pub fn get_velocity(&self) -> f64 {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        let status_signal = jvm.invoke(
+            &self.instance,
+            "getVelocity",
+            &Vec::new(),
+        ).unwrap();
+
+        let returned: f64 = jvm.to_rust(jvm.invoke(
+            &status_signal,
+            "getValue",
+            &Vec::new(),
+        ).unwrap()).unwrap();
+
+        returned
+    }
 }
 
 pub struct Falcon {
