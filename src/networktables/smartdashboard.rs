@@ -56,10 +56,10 @@ impl<T> Chooser<T> {
         let options = Vec::new();
         let jvm = Jvm::attach_thread().unwrap();
 
-        let instance = jvm.create_instance(
-            "edu.wpi.first.wpilibj.smartdashboard.SendableChooser",
-            &[ ]
-        ).unwrap();
+            let instance = jvm.invoke_static(
+                "frc.robot.Wrapper",
+                "autoChooser",
+                &Vec::new()).unwrap();
 
         Self { options, instance }
     }
@@ -79,7 +79,7 @@ impl<T> Chooser<T> {
         ).unwrap();
     }
 
-    pub fn get(&self) -> &T {
+    pub fn get(&self) -> i32 {
         let jvm = Jvm::attach_thread().unwrap();
         let idx: i32 = jvm.to_rust(jvm.invoke(
             &self.instance,
@@ -87,6 +87,7 @@ impl<T> Chooser<T> {
             &Vec::new(),
         ).unwrap()).unwrap();
 
-        &self.options[idx as usize]
+        idx
     }
+
 }
