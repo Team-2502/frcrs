@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
 use j4rs::{Instance, InvocationArg, Jvm};
+use uom::si::{f64::Angle, angle::radian};
+use nalgebra::Vector2;
 
 pub struct SmartDashboard;
 
@@ -90,4 +92,21 @@ impl<T> Chooser<T> {
         idx
     }
 
+}
+
+pub fn set_position(position: Vector2<f64>, angle: Angle) {
+    let jvm = Jvm::attach_thread().unwrap();
+
+    let angle = angle.get::<radian>();
+
+    jvm.invoke_static(
+        "frc.robot.Wrapper",
+        "setPosition",
+        &[
+            InvocationArg::try_from(position.x).unwrap().into_primitive().unwrap(),
+            InvocationArg::try_from(position.y).unwrap().into_primitive().unwrap(),
+            InvocationArg::try_from(angle).unwrap().into_primitive().unwrap(),
+        ]
+    )
+    .unwrap();
 }
