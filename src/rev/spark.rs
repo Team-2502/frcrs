@@ -1,6 +1,7 @@
 use crate::rev::{ControlType, IdleMode, MotorType, Spark, SparkPIDController};
 use j4rs::{Instance, InvocationArg, Jvm};
 use uom::si::angle;
+use uom::si::angle::revolution;
 use uom::si::f64::*;
 
 pub struct JavaSpark {
@@ -93,6 +94,20 @@ impl JavaSpark {
             ],
         )
         .unwrap()).unwrap()
+    }
+
+    pub fn get_position(&mut self) -> Angle {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        let rots: f64 = jvm.to_rust(jvm.invoke(
+            self.get_encoder(),
+            "getPosition",
+            &[
+            ],
+        )
+        .unwrap()).unwrap();
+
+        Angle::new::<revolution>(rots)
     }
 }
 
