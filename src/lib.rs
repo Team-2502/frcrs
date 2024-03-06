@@ -287,8 +287,8 @@ pub fn alliance_station() -> AllianceStation {
     let station: i32 = jvm
         .to_rust(
             jvm.invoke_static(
-                "edu.wpi.first.hal.DriverStationJNI",
-                "nativeGetAllianceStation",
+                "frc.robot.Wrapper",
+                "getAllianceStation",
                 &Vec::new(),
             )
                 .unwrap(),
