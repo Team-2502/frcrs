@@ -264,6 +264,40 @@ pub fn is_teleop() -> bool {
     teleop
 }
 
+pub struct AllianceStation(u8);
+
+impl AllianceStation {
+   pub fn red(&self) -> bool {
+       match self.0 {
+           1 | 2 | 3 => true,
+           _ => false,
+       }
+   }
+   pub fn blue(&self) -> bool {
+       match self.0 {
+           4 | 5 | 6 => true,
+           _ => false,
+       }
+   }
+}
+
+pub fn alliance_station() -> AllianceStation {
+    let jvm = Jvm::attach_thread().unwrap();
+
+    let station: i32 = jvm
+        .to_rust(
+            jvm.invoke_static(
+                "edu.wpi.first.hal.DriverStationJNI",
+                "nativeGetAllianceStation",
+                &Vec::new(),
+            )
+                .unwrap(),
+        )
+        .unwrap();
+
+    AllianceStation(station as u8)
+}
+
 /*pub enum Keyword {
     Auto,
     Teleop,
