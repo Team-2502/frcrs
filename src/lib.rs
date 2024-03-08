@@ -9,6 +9,8 @@ pub mod dio;
 
 use input::Joystick;
 pub use j4rs_derive::call_from_java;
+use jni::JavaVM;
+use lazy_static::lazy_static;
 use networktables::SmartDashboard;
 use rev::SparkMax;
 
@@ -31,6 +33,9 @@ use crate::ctre::TalonInvertType::CounterClockwise;
 use crate::drive::{Swerve, ToTalonEncoder};
 use crate::navx::NavX;
 use crate::rev::MotorType::Brushless;
+
+
+
 /*
 #[call_from_java("frc.robot.Main.rustentry")]
 fn entrypoint() {
@@ -194,12 +199,13 @@ mod tests {
 }
 
 pub fn observe_user_program_starting() {
-    let jvm = Jvm::attach_thread().unwrap();
+    let jvm = JavaVM::attach_current_thread_as_daemon().unwrap();
 
     // Show "robot code" on driver's station
-    jvm.invoke_static(
+    jvm.call_static_method(
         "edu.wpi.first.hal.DriverStationJNI",
         "observeUserProgramStarting",
+        "()V",
         &Vec::new(),
     )
         .unwrap();
