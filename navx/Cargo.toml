@@ -1,0 +1,11 @@
+[package]
+name = "navx"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+anyhow = "1.0.75"
+tokio = { version = "1.32.0", features = ["full"] }
+build-utils = { path = "../build-utils" }
