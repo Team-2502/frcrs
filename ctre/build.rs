@@ -11,7 +11,6 @@ const CTRE_MAVEN: &str = "https://maven.ctr-electronics.com/release/";
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Always rerun
     println!("cargo:rerun-if-changed=NULL");
 
     let headers = vec![
@@ -97,6 +96,6 @@ async fn main() -> Result<()> {
     //build(&headers, ".*Talon.*", &Path::new("ctre/phoenix/motorcontrol/can/TalonFX.h")).await
     //build(&headers, ".*Talon.*", &Path::new("ctre/phoenix6/TalonWrapper.h")).await
 
-    //build(&headers, "CreateTalonFX", &Path::new("ctre/phoenix6/TalonWrapper.cpp")).await
-    build(&headers, "CreateTalonFX", &Path::new("ctre/phoenix6/core/CoreTalonFX.hpp")).await
+    build(&headers, "CreateTalonFX", &Path::new("ctre/phoenix6/TalonWrapper.cpp")).await
+    //build(&headers, "CreateTalonFX", &Path::new("ctre/phoenix6/TalonFX.hpp")).await
 }

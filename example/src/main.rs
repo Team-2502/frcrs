@@ -8,7 +8,6 @@ use frcrs::ds::{get_robot_state, RobotState};
 use frcrs::observe_user_program_starting;
 use frcrs::hal_initialize;
 use frcrs::joystick::Joystick;
-use navx::NavX;
 
 fn main() {
     if hal_initialize(500, 0) == 0 {
@@ -17,7 +16,6 @@ fn main() {
 
     observe_user_program_starting();
 
-    let navx = NavX::new();
     let talon = Talon::new(0, "".to_owned());
 
     loop {
@@ -25,7 +23,7 @@ fn main() {
 
         match state {
             RobotState::Teleop => {
-                println!("{}", navx.get_angle());
+                talon.set(0.15);
             }
             RobotState::Auto => {}
             RobotState::Test => {}

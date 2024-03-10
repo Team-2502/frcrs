@@ -659,7 +659,6 @@ dependencies = [
  "ctre",
  "frcrs",
  "futures",
- "navx",
  "revlib",
  "tracing",
 ]

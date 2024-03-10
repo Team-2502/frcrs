@@ -7,8 +7,8 @@ use std::os::raw::c_void;
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 pub struct Talon {
-    //handle: *mut ctre_phoenix6_hardware_core_CoreTalonFX
-    handle: i32
+    handle: *mut ctre_phoenix6_hardware_core_CoreTalonFX
+    //handle: i32
 }
 
 impl Talon {
@@ -16,11 +16,11 @@ impl Talon {
         let can_bus = CString::new(can_loop).unwrap();
 
         let handle = unsafe {
-            
+            CreateTalonFX(can_id as c_int)
         };
 
         Self {
-            handle: 0
+            handle
         }
     }
 

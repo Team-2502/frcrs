@@ -26,10 +26,8 @@ pub fn get_client() -> &'static Client {
 }
 
 pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path) -> anyhow::Result<()> {
-    //let tempdir = TempDir::new()?;
-    let tempdir = Path::new("/Users/64001830");
-    let include_path = tempdir.join("include");
-    //let include_path = tempdir.path().join("include");
+    let tempdir = TempDir::new()?;
+    let include_path = tempdir.path().join("include");
 
     fs::create_dir_all(&include_path)?;
 
@@ -41,7 +39,7 @@ pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path) -> anyhow::
         env::set_var("TARGET", host);
     }
 
-    if include_path.join("ctre/phoenix6").exists() {
+    /*if include_path.join("ctre/phoenix6").exists() {
         println!("building ctre, placing wrapper...");
         //fs::write(&include_path.join("ctre/phoenix6/TalonWrapper.h"), TALON_WRAPPER).expect("Failed to write wrapper");
         let base = fs::read_to_string(&include_path.join("ctre/phoenix6/core/CoreTalonFX.hpp")).unwrap();
@@ -49,7 +47,7 @@ pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path) -> anyhow::
             fs::write(&include_path.join("ctre/phoenix6/core/CoreTalonFX.hpp"), format!("{} {}", base, TALON_WRAPPER))
                 .expect("Failed to write wrapper");
         }
-    }
+    }*/
 
     let result = bindgen::Builder::default()
         .clang_args([
@@ -58,6 +56,14 @@ pub async fn build(artifacts: &[Artifact], allow: &str, path: &Path) -> anyhow::
             &format!("--include-directory={}", include_path.to_str().unwrap()),
         ])
         .header(include_path.join(path).to_str().unwrap())
+        .blocklist_type(".*ParentDevice.*")
+        .blocklist_item(".*ParentDevice.*")
+        .blocklist_function(".*ParentDevice.*")
+        .blocklist_item(".*ParentDevice.*")
+        .blocklist_type(".*BaseStatusSignal.*")
+        .blocklist_item(".*BaseStatusSignal.*")
+        .blocklist_function(".*BaseStatusSignal.*")
+        .blocklist_item(".*BaseStatusSignal.*")
         .allowlist_type(allow)
         .allowlist_function(allow)
         .allowlist_var(allow)
