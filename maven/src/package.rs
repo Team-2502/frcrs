@@ -18,13 +18,14 @@ impl<'a> Package<'a> {
         format!("https://{}/{}/{}/{}", self.maven_url, self.path.replace(".", "/"), self.name, self.version)
     }
 
-    fn artifact(&'a self, name: &'a str) -> Artifact<'a> {
+   pub fn artifact(&'a self, name: &'a str) -> Artifact<'a> {
         Artifact { package: &self, name }
     }
 
-    fn download_headers(&self) -> anyhow::Result<()> {
+    pub fn download_headers(&self) -> anyhow::Result<()> {
 
-        let path = PathBuf::from_str(std::env::var("OUT_DIR")?.as_str())?;
+        let mut path = PathBuf::from_str(std::env::var("OUT_DIR")?.as_str())?;
+        path.push("include");
         self.artifact("headers").download(&path)?;
 
         Ok(())
@@ -38,8 +39,6 @@ impl<'a> Artifact<'a> {
 
     pub fn download(&self, path: &Path) -> anyhow::Result<()> {
         let data = reqwest::blocking::get(self.url())?.bytes()?;
-        let out = std::env::var("OUT_DIR")?;
-        let path = Path::new(&out);
         zip_extract::extract(Cursor::new(data), &path, true)?;
 
         Ok(())

@@ -2,9 +2,15 @@ use package::Package;
 
 pub mod package;
 
-const WPI_MAVEN: Package<'static> = Package {
+pub const WPI_MAVEN: Package<'static> = Package {
     maven_url: "frcmaven.wpi.edu/artifactory/release",
     version: "2024.2.1",
-    path: "edu.wpi.first",
+    ..EMPTY
+};
+
+pub const EMPTY: Package<'static> = Package {
+    maven_url: "",
+    version: "",
+    path: "",
     name: ""
 };
