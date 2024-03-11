@@ -1,14 +1,6 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+#![allow(warnings)]
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+use std::ffi::{c_int, CString};
+use std::os::raw::c_void;
+include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
