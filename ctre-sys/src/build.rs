@@ -61,11 +61,16 @@ fn main() -> anyhow::Result<()> {
         .allowlist_file("wrapper.hpp")
         .allowlist_item("test")
         .allowlist_item("CreateTalonFX")
+        .allowlist_item("SetSpeed")
         .opaque_type(".*strong_ordering.*")
         .opaque_type(".*Rb_tree.*")
         .opaque_type(".*Temporary_value.*")
         .generate()?
         .write_to_file(format!("{}/bindings.rs", out))?;
 
+    println!("cargo:rustc-link-search=native={}{}", out, "libs");
+
+    println!("cargo:rerun-if-changed=src/lib.rs");
+    println!("cargo:rerun-if-changed=src/wrapper.hpp");
     Ok(())
 }

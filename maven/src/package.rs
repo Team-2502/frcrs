@@ -39,6 +39,8 @@ impl<'a> Package<'a> {
         path.push("libs");
         self.artifact("linuxathena").download(&path)?;
 
+        println!("cargo:rustc-link-lib=dylib={}", lib);
+
         Ok(())
     }
 }

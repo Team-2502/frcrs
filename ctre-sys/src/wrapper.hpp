@@ -5,8 +5,14 @@ int test() {
     return 45;
 }
 
+using namespace ctre::phoenix6::hardware;
+using namespace ctre::phoenix6;
 
-ctre::phoenix6::hardware::TalonFX* CreateTalonFX(int id) {
-    auto talon = new ctre::phoenix6::hardware::TalonFX(id);
+TalonFX* CreateTalonFX(int id) {
+    auto talon = new TalonFX(id);
     return talon;
+};
+
+void SetSpeed(TalonFX* talon, double speed) {
+    talon->SetControl(controls::DutyCycleOut{speed});
 };
