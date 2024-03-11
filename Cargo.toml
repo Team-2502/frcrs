@@ -1,3 +1,8 @@
+[workspace]
+members = [
+    "maven",
+]
+
 [package]
 name = "frcrs"
 version = "0.1.0"
