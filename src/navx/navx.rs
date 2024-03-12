@@ -1,49 +1,25 @@
 use j4rs::{Instance, Jvm};
+use navx_sys::AHRS;
 
 pub struct NavX {
-    instance: Instance,
+    navx: *mut AHRS,
 }
 
 impl NavX {
     pub fn new() -> Self {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        /*let instance = jvm.create_instance(
-            "com.kauailabs.navx.frc.AHRS",
-            &Vec::new(),
-        ).unwrap();*/
-
-        let instance = jvm.invoke_static(
-            "frc.robot.Wrapper",
-            "createAHRS",
-            &Vec::new(),
-        ).unwrap();
+        let navx = unsafe {navx_sys::navx_wrapper_bind_navx_mxp()};
 
         Self {
-            instance
+            navx
         }
     }
 
     pub fn get_angle(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let angle: f64 = jvm.to_rust(
-        jvm.invoke(
-             &self.instance,
-            "getAngle",
-            &Vec::new(),
-        ).unwrap()).unwrap();
-
-        angle
+        unsafe {navx_sys::AHRS_GetAngle(self.navx)}
     }
 
     pub fn reset_angle(&self) {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        jvm.invoke(
-            &self.instance,
-            "reset",
-            &Vec::new(),
-        ).unwrap();
+        unsafe {navx_sys::AHRS_Reset(self.navx)}
+        
     }
 }
