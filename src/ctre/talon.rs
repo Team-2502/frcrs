@@ -6,7 +6,7 @@ use crate::ctre::TalonInvertType;
 
 use super::talon_encoder_tick;
 
-use ctre_sys::{self, std_basic_string};
+use ctre_sys::{self, std_basic_string, talonfx_wrapper_follow, talonfx_wrapper_invert, talonfx_wrapper_get_velocity, talonfx_wrapper_stop, talonfx_wrapper_get_position, talonfx_wrapper_play_tone};
 
 pub struct Kraken {
     can_id: i32,
@@ -40,56 +40,49 @@ impl Kraken {
         }
     }
 
-    pub fn follow(&self, master: Kraken) {
-        follow(&self.instance, master.instance)
+    pub fn follow(&self, master: Kraken, reverse: bool) {
+        unsafe { 
+            talonfx_wrapper_follow(self.motor, master.can_id, reverse) 
+        }
     }
 
-    pub fn set_inverted(&self, talon_invert_type: TalonInvertType) {
-        set_inverted(&self.instance, talon_invert_type)
+    pub fn set_inverted(&self, inverted: bool) {
+        unsafe {
+            talonfx_wrapper_invert(self.motor, inverted);
+        }
     }
 
+    /// rotations per second
     pub fn get_speed(&self) -> f64 {
-        get_speed(&self.instance)
+        unsafe {
+            talonfx_wrapper_get_velocity(self.motor)
+        }
     }
 
     pub fn stop(&self) {
-        stop(&self.instance)
+        unsafe {
+            talonfx_wrapper_stop(self.motor);
+        }
     }
 
+    /// rotations
     pub fn get_position(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let status_signal = jvm.invoke(
-            &self.instance,
-            "getPosition",
-            &Vec::new(),
-        ).unwrap();
-
-        let returned: f64 = jvm.to_rust(jvm.invoke(
-            &status_signal,
-            "getValue",
-            &Vec::new(),
-        ).unwrap()).unwrap();
-
-        returned
+        unsafe {
+            talonfx_wrapper_get_position(self.motor)
+        }
     }
 
+    /// rotations per second
     pub fn get_velocity(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
+        unsafe {
+            talonfx_wrapper_get_velocity(self.motor)
+        }
+    }
 
-        let status_signal = jvm.invoke(
-            &self.instance,
-            "getVelocity",
-            &Vec::new(),
-        ).unwrap();
-
-        let returned: f64 = jvm.to_rust(jvm.invoke(
-            &status_signal,
-            "getValue",
-            &Vec::new(),
-        ).unwrap()).unwrap();
-
-        returned
+    pub fn play_tone(&self, hertz: f64) {
+        unsafe {
+            talonfx_wrapper_play_tone(self.motor, hertz)
+        }
     }
 }
 

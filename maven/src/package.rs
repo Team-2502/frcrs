@@ -1,4 +1,4 @@
-use std::{env, path::{Path, PathBuf}, io::{Cursor, Write}, str::FromStr, fs::{self, OpenOptions}};
+use std::{path::{Path, PathBuf}, io::{Cursor, Write}, str::FromStr, fs::{self, OpenOptions}};
 
 use anyhow::Ok;
 
@@ -86,6 +86,7 @@ fn downloaded(url: &str) -> bool {
 }
 
 
+#[cfg(test)]
 mod tests {
     use crate::WPI_MAVEN;
 
