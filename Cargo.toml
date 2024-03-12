@@ -1,7 +1,9 @@
 [workspace]
 members = [ 
     "ctre-sys",
-    "maven", "navx-sys",
+    "hal-sys",
+    "maven",
+    "navx-sys",
 ]
 
 [package]
