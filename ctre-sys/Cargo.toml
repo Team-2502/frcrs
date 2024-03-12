@@ -10,5 +10,6 @@ build = "src/build.rs"
 maven = {path = "../maven"}
 bindgen = "0.69.4"
 anyhow = "1.0.80"
+cc = "1.0.90"
 
 [dependencies]
