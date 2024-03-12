@@ -4,9 +4,12 @@ use crate::ctre::TalonInvertType;
 
 use super::talon_encoder_tick;
 
+use ctre_sys;
+
 pub struct Kraken {
     can_id: i32,
-    pub(crate) instance: Instance
+    pub(crate) instance: Instance,
+    motor: *mut ctre_sys::ctre_phoenix6_hardware_TalonFX,
 }
 
 pub enum ControlMode {
@@ -17,26 +20,18 @@ pub enum ControlMode {
 
 impl Kraken {
     pub fn new(can_id: i32, can_loop: Option<String>) -> Self {
-        let jvm = Jvm::attach_thread().unwrap();
 
-        let instance = jvm.create_instance(
-            "com.ctre.phoenix6.hardware.TalonFX",
-            &[InvocationArg::try_from(can_id)
-                .unwrap().into_primitive().unwrap(),
-                InvocationArg::try_from(can_loop.unwrap_or("rio".to_owned())).unwrap()
-            ]).unwrap();
+        let motor = unsafe {ctre_sys::CreateTalonFX(can_id)};
 
-        Self { can_id, instance }
+        let instance = unimplemented!();
+
+
+        Self { can_id, instance, motor }
     }
 
     pub fn set(&self, amount: f64) {
-        let jvm = Jvm::attach_thread().unwrap();
 
-        jvm.invoke(
-            &self.instance,
-            "set",&[InvocationArg::try_from(amount).unwrap().into_primitive().unwrap()]
-        ).unwrap();
-
+        unsafe{ctre_sys::SetSpeed(self.motor, amount)}
     }
 
     pub fn follow(&self, master: Kraken) {

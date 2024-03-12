@@ -199,13 +199,12 @@ mod tests {
 }
 
 pub fn observe_user_program_starting() {
-    let jvm = JavaVM::attach_current_thread_as_daemon().unwrap();
+    let jvm = Jvm::attach_thread().unwrap();
 
     // Show "robot code" on driver's station
-    jvm.call_static_method(
+    jvm.invoke_static(
         "edu.wpi.first.hal.DriverStationJNI",
         "observeUserProgramStarting",
-        "()V",
         &Vec::new(),
     )
         .unwrap();

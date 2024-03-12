@@ -1,4 +1,0 @@
-[toolchain]
-channel = "stable"
-profile = "complete"
-targets = ["arm-unknown-linux-gnueabi"]
