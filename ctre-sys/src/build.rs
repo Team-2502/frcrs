@@ -62,11 +62,11 @@ fn main() -> anyhow::Result<()> {
         .clang_arg(format!("-I{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include", env!("HOME")))
         .clang_arg(format!("-I{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12", env!("HOME")))
         .clang_arg(format!("-I{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12/arm-nilrt-linux-gnueabi", env!("HOME")))
-        .header("src/wrapper.hpp")
-        .allowlist_file("wrapper.hpp")
-        .allowlist_item("test")
-        .allowlist_item("CreateTalonFX")
-        .allowlist_item("SetSpeed")
+        .header("src/wrapper.cpp")
+        .allowlist_file("wrapper.cpp")
+        .allowlist_item("talonfx_wrapper.*")
+        .allowlist_item("bind_talon.*")
+        .allowlist_item("play_tone")
         .opaque_type(".*strong_ordering.*")
         .opaque_type(".*Rb_tree.*")
         .opaque_type(".*Temporary_value.*")
@@ -82,13 +82,13 @@ fn main() -> anyhow::Result<()> {
         //.include(format!("{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include", env!("HOME")))
         //.include(format!("{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12", env!("HOME")))
         .include(format!("{}/include", out))
-        .file("src/wrapper.hpp")
+        .file("src/wrapper.cpp")
         .compile("ctre-wrapper");
 
     //println!("cargo:rustc-link-search=native={}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include", env!("HOME"));
     println!("cargo:rustc-link-search=native={}/{}", out, "libs");
 
     println!("cargo:rerun-if-changed=src/lib.rs");
-    println!("cargo:rerun-if-changed=src/wrapper.hpp");
+    println!("cargo:rerun-if-changed=src/wrapper.cpp");
     Ok(())
 }
