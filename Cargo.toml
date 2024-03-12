@@ -4,6 +4,7 @@ members = [
     "hal-sys",
     "maven",
     "navx-sys",
+    "rev-sys",
 ]
 
 [package]
