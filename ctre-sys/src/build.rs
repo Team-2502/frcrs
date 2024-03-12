@@ -73,21 +73,18 @@ fn main() -> anyhow::Result<()> {
         .generate()?
         .write_to_file(format!("{}/bindings.rs", out))?;
 
-/*
     cc::Build::new()
         .cpp(true)
         .std("c++20")
-        .compiler("arm-frc2024-linux-gnueabi-c++")
         .cpp_link_stdlib("stdc++")
-        .flag(&format!("--isysroot={}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot", env!("HOME")))
-        .flag(&format!("--with-native-headers={}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12", env!("HOME")))
-        .include(format!("{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include", env!("HOME")))
-        .include(format!("{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12", env!("HOME")))
+        .flag(&format!("--sysroot={}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot", env!("HOME")))
+        //.flag(&format!("--with-native-headers={}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12", env!("HOME")))
+        //.include(format!("{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include", env!("HOME")))
+        //.include(format!("{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12", env!("HOME")))
         .include(format!("{}/include", out))
         .file("src/wrapper.hpp")
         .compile("ctre-wrapper");
 
-        */
     //println!("cargo:rustc-link-search=native={}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include", env!("HOME"));
     println!("cargo:rustc-link-search=native={}/{}", out, "libs");
 
