@@ -7,6 +7,7 @@
 
 
 use ctre_sys::{self, talonfx_wrapper_follow, talonfx_wrapper_invert, talonfx_wrapper_get_velocity, talonfx_wrapper_stop, talonfx_wrapper_get_position, talonfx_wrapper_play_tone};
+use uom::si::{f64::Angle, angle::revolution};
 
 pub struct Kraken {
     can_id: i32,
@@ -34,9 +35,15 @@ impl Kraken {
         Self { can_id, motor }
     }
 
-    pub fn set(&mut self, amount: f64) {
-        unsafe {
-            ctre_sys::talonfx_wrapper_set_speed(self.motor,amount);
+    pub fn set(&mut self, mode: ControlMode, amount: f64) {
+        match mode {
+            ControlMode::Percent => {
+                unsafe {
+                    ctre_sys::talonfx_wrapper_set_speed(self.motor,amount);
+                }
+            }
+            _ => {unimplemented!()},
+            
         }
     }
 
@@ -66,10 +73,10 @@ impl Kraken {
     }
 
     /// rotations
-    pub fn get_position(&self) -> f64 {
-        unsafe {
+    pub fn get_position(&self) -> Angle {
+        Angle::new::<revolution>(unsafe {
             talonfx_wrapper_get_position(self.motor)
-        }
+        })
     }
 
     /// rotations per second

@@ -31,7 +31,7 @@ impl Spark {
         Self { can_id, motor }
     }
 
-    fn get_temperature(&self) -> f32 {
+    pub fn get_temperature(&self) -> f32 {
         let mut temp = 0.;
         let ret = unsafe {
             c_SparkMax_GetMotorTemperature(self.motor, &mut temp)
@@ -44,7 +44,7 @@ impl Spark {
         temp
     }
 
-    fn set_reference(&self, value: f32, control_type: ControlType) {
+   pub fn set_reference(&self, value: f32, control_type: ControlType) {
         let control_type = match control_type {
             ControlType::Position => c_SparkMax_ControlType_c_SparkMax_kPosition,
             ControlType::Speed => c_SparkMax_ControlType_c_SparkMax_kDutyCycle,
@@ -100,11 +100,11 @@ impl Spark {
     /// Set the speed of the motor
     ///
     /// `amount` is from -1, 1
-    fn set(&self, amount: f32) {
+    pub fn set(&self, amount: f32) {
         self.set_reference(amount, ControlType::Speed)
     }
 
-    fn set_idle_mode(&self, idle_mode: IdleMode) {
+    pub fn set_idle_mode(&self, idle_mode: IdleMode) {
 
         let idle_mode = match idle_mode {
             IdleMode::Brake => c_SparkMax_IdleMode_c_SparkMax_kBrake,
@@ -118,7 +118,7 @@ impl Spark {
         }
     }
 
-    fn set_p(&self, p: f32) {
+    pub fn set_p(&self, p: f32) {
         let ret = unsafe{c_SparkMax_SetP(self.motor, 0, p)};
 
         if ret != 0 {
@@ -126,7 +126,7 @@ impl Spark {
         }
     }
 
-    fn set_i(&self, i: f32) {
+    pub fn set_i(&self, i: f32) {
         let ret = unsafe{c_SparkMax_SetI(self.motor, 0, i)};
 
         if ret != 0 {
@@ -134,7 +134,7 @@ impl Spark {
         }
     }
 
-    fn set_d(&self, d: f32) {
+    pub fn set_d(&self, d: f32) {
         let ret = unsafe{c_SparkMax_SetD(self.motor, 0, d)};
 
         if ret != 0 {
@@ -142,7 +142,7 @@ impl Spark {
         }
     }
 
-    fn set_ff(&self, ff: f32) {
+    pub fn set_ff(&self, ff: f32) {
         let ret = unsafe{c_SparkMax_SetFF(self.motor, 0, ff)};
 
         if ret != 0 {
@@ -150,7 +150,7 @@ impl Spark {
         }
     }
 
-    fn follow(&self, _master: Spark, _invert: bool) {
+    pub fn follow(&self, _master: Spark, _invert: bool) {
         unimplemented!(); // c_SparkMax_Follow did not get wrapped
         //let ret = unsafe{c_SparkMax_SetFollow(master.motor, followerArbId, followerCfg)};
 
@@ -160,11 +160,11 @@ impl Spark {
     }
 
     /// Stop the motor
-    fn stop(&self) {
+    pub fn stop(&self) {
         unimplemented!(); // c_SparkMax_StopMotor did not get wrapped
     }
 
-    fn set_position(&self, position: Angle) {
+    pub fn set_position(&self, position: Angle) {
         self.set_reference(position.get::<angle::revolution>() as f32, ControlType::Position);
     }
 }

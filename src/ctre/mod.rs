@@ -4,6 +4,7 @@ mod cancoder;
 
 
 pub use talon::*;
+pub use talon::Kraken as Falcon;
 pub use cancoder::*;
 
 pub enum TalonInvertType {
