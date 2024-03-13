@@ -38,8 +38,11 @@ impl<'a> Package<'a> {
         let mut path = PathBuf::from_str(std::env::var("OUT_DIR")?.as_str())?;
         path.push("libs");
         self.artifact("linuxathena").download(&path)?;
+        path.push("athena");
+        path.push("shared");
 
-        println!("cargo:rustc-link-lib=dylib={}", lib);
+        println!("cargo:rustc-link-search=native=lib{}.so", path.to_string_lossy());
+        println!("cargo:rustc-link-lib=dylib={}", lib); // TODO: multi file pushes
 
         Ok(())
     }
