@@ -3,7 +3,7 @@ mod joystick;
 use hal_sys::{HAL_ControlWord, __BindgenBitfieldUnit};
 pub use joystick::*;
 
-use j4rs::{Jvm};
+
 use bitvec::prelude::*;
 
 pub struct RobotState {

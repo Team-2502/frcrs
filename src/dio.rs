@@ -1,5 +1,5 @@
-use hal_sys::{HAL_GetDIO, HAL_InitializeDIOPort, HAL_PortHandle, HAL_Handle, HAL_FreeDIOPort};
-use j4rs::{Jvm, InvocationArg, Instance};
+use hal_sys::{HAL_GetDIO, HAL_InitializeDIOPort, HAL_FreeDIOPort};
+
 
 pub struct DIO {
     handle: i32,

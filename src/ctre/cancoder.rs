@@ -1,7 +1,7 @@
 use std::ffi::CString;
 
 use ctre_sys::{cancoder_wrapper_get_position, cancoder_wrapper_get_absolute_position};
-use j4rs::{Instance, InvocationArg, Jvm};
+
 
 pub struct CanCoder {
     sensor: *mut ctre_sys::ctre_phoenix6_hardware_CANcoder,
