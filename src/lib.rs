@@ -8,6 +8,7 @@ pub mod drive;
 pub mod dio;
 
 
+use hal_sys::HAL_Bool;
 pub use j4rs_derive::call_from_java;
 
 
@@ -20,6 +21,7 @@ extern crate uom;
 
 use j4rs::prelude::*;
 use std::convert::TryFrom;
+use std::ffi::{CStr, CString};
 use std::ops::Range;
 
 
@@ -198,74 +200,21 @@ mod tests {
 }
 
 pub fn observe_user_program_starting() {
-    let jvm = Jvm::attach_thread().unwrap();
-
-    // Show "robot code" on driver's station
-    jvm.invoke_static(
-        "edu.wpi.first.hal.DriverStationJNI",
-        "observeUserProgramStarting",
-        &Vec::new(),
-    )
-        .unwrap();
+    unsafe {hal_sys::HAL_ObserveUserProgramStarting()}
 }
 
 pub fn refresh_data() {
-    let jvm = Jvm::attach_thread().unwrap();
-
-    jvm.invoke_static(
-        "edu.wpi.first.wpilibj.DriverStation",
-        "refreshData",
-        &Vec::new(),
-    ).unwrap();
+    unsafe {hal_sys::HAL_RefreshDSData()};
 }
 
 pub fn init_hal() -> bool {
-    let jvm = Jvm::attach_thread().unwrap();
-
-    let value: bool = jvm
-        .to_rust(
-            jvm.invoke_static(
-                "edu.wpi.first.hal.HAL",
-                "initialize",
-                &[InvocationArg::try_from(500).unwrap().into_primitive().unwrap(),
-                    InvocationArg::try_from(0).unwrap().into_primitive().unwrap(),],
-            )
-                .unwrap(),
-        )
-        .unwrap();
-    value
+   let ret =  unsafe{hal_sys::HAL_Initialize(500, 1)}; // force kill
+   0 == ret
 }
 
 pub fn hal_report(resource: i32, instance_number: i32, context: i32, feature: String) {
-    let jvm = Jvm::attach_thread().unwrap();
-
-    jvm.invoke_static(
-        "edu.wpi.first.hal.HAL",
-        "report",
-        &[
-            InvocationArg::try_from(resource).unwrap().into_primitive().unwrap(),
-            InvocationArg::try_from(instance_number).unwrap().into_primitive().unwrap(),
-            InvocationArg::try_from(context).unwrap().into_primitive().unwrap(),
-            InvocationArg::try_from(feature).unwrap(),
-        ],
-    ).unwrap();
-}
-
-pub fn is_teleop() -> bool {
-    let jvm = Jvm::attach_thread().unwrap();
-
-    let teleop: bool = jvm
-        .to_rust(
-            jvm.invoke_static(
-                "edu.wpi.first.wpilibj.DriverStation",
-                "isTeleop",
-                &Vec::new(),
-            )
-                .unwrap(),
-        )
-        .unwrap();
-
-    teleop
+    let feature = CString::new(feature).unwrap();
+    unsafe{hal_sys::HAL_Report(resource, instance_number, context, feature.as_ptr())};
 }
 
 pub struct AllianceStation(u8);
@@ -286,18 +235,9 @@ impl AllianceStation {
 }
 
 pub fn alliance_station() -> AllianceStation {
-    let jvm = Jvm::attach_thread().unwrap();
+    let mut station = 0;
 
-    let station: i32 = jvm
-        .to_rust(
-            jvm.invoke_static(
-                "frc.robot.Wrapper",
-                "getAllianceStation",
-                &Vec::new(),
-            )
-                .unwrap(),
-        )
-        .unwrap();
+    let _ret = unsafe{hal_sys::HAL_GetAllianceStation(&mut station)};
 
     AllianceStation(station as u8)
 }

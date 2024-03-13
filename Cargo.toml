@@ -30,3 +30,4 @@ uom = "0.35.0"
 ctre-sys = {path="ctre-sys"}
 navx-sys = {path="navx-sys"}
 rev-sys = {path="rev-sys"}
+hal-sys = {path="hal-sys"}

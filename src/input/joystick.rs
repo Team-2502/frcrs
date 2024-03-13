@@ -1,98 +1,83 @@
 use std::time::Instant;
 
+use hal_sys::{HAL_JoystickAxes, HAL_JoystickButtons};
 use j4rs::{Instance, InvocationArg, Jvm};
 
 use bitvec::prelude::*;
 
+enum AxisType { X, Y, Z, Rx, Ry, Rz, Slider, POV, None }
+
 
 pub struct Joystick {
     id: i32,
-    instance: Instance,
     buttons: BitVec,
+    axes: HAL_JoystickAxes,
     last_updated: Instant,
 }
 
 impl Joystick {
     pub fn new(id: i32) -> Self {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let instance = jvm
-            .create_instance(
-                "edu.wpi.first.wpilibj.Joystick",
-                &[InvocationArg::try_from(id)
-                    .unwrap()
-                    .into_primitive()
-                    .unwrap()],
-            )
-            .unwrap();
-
         let buttons = bitvec![0; 32];
         let last_updated = Instant::now();
 
-        Self { id, instance, buttons, last_updated }
+        let axes = HAL_JoystickAxes {
+            count: 0,
+            axes: [0.;12],
+            raw: [0;12],
+        };
+
+        Self { id, buttons, axes, last_updated }
     }
 
-    pub fn get_x(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
+    fn refresh(&mut self) {
+        if self.last_updated.elapsed().as_millis() < 10 {
+            return;
+        }
 
-        let value: f64 = jvm
-            .to_rust(jvm.invoke(&self.instance, "getX", &Vec::new()).unwrap())
-            .unwrap();
-        value
+        let mut buttons = HAL_JoystickButtons {
+            buttons: 0,
+            count: 0,
+        };
+
+        let _ret = unsafe {
+            hal_sys::HAL_GetJoystickButtons(self.id, &mut buttons)
+        };
+
+        let _ret = unsafe {
+            hal_sys::HAL_GetJoystickAxes(self.id, &mut self.axes);
+        };
+
+        self.buttons[..].store(buttons.buttons);
+        self.last_updated = Instant::now();
     }
 
-    pub fn get_y(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
+    pub fn get_x(&mut self) -> f32 {
+        self.refresh();
 
-        let value: f64 = jvm
-            .to_rust(jvm.invoke(&self.instance, "getY", &Vec::new()).unwrap())
-            .unwrap();
-        value
+        self.axes.axes[AxisType::X as usize]
     }
 
-    pub fn get_z(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
+    pub fn get_y(&mut self) -> f32 {
+        self.refresh();
 
-        let value: f64 = jvm
-            .to_rust(jvm.invoke(&self.instance, "getZ", &Vec::new()).unwrap())
-            .unwrap();
-        value
+        self.axes.axes[AxisType::Y as usize]
     }
 
-    pub fn get_throttle(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
+    pub fn get_z(&mut self) -> f32 {
+        self.refresh();
 
-        let value: f64 = jvm
-            .to_rust(jvm.invoke(&self.instance, "getThrottle", &Vec::new()).unwrap())
-            .unwrap();
-        -value
+        self.axes.axes[AxisType::Z as usize]
+    }
+
+    pub fn get_throttle(&mut self) -> f32 {
+        self.refresh();
+
+        -self.axes.axes[AxisType::Slider as usize]
     }
 
     pub fn get(&mut self, id: usize) -> bool {
+        self.refresh();
 
-        if self.last_updated.elapsed().as_millis() < 15 {
-            return self.buttons[id - 1];
-        }
-
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let value: i32 = jvm
-            .to_rust(
-                jvm.invoke_static(
-                    "edu.wpi.first.wpilibj.DriverStation",
-                    "getStickButtons",
-                    &[
-                    InvocationArg::try_from(self.id)
-                        .unwrap()
-                        .into_primitive()
-                        .unwrap(),
-                    ],
-                )
-                .unwrap(),
-            )
-            .unwrap();
-        self.buttons[..].store(value);
-        self.last_updated = Instant::now();
-        self.buttons[id-1]
+        self.buttons[id - 1]
     }
 }
