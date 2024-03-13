@@ -1,7 +1,7 @@
 mod talon;
 mod cancoder;
 
-use std::f32::consts::{FRAC_2_PI, PI};
+
 
 pub use talon::*;
 pub use cancoder::*;
@@ -18,9 +18,9 @@ impl TalonInvertType {
     }
 }
 
-use uom::fmt::DisplayStyle::*;
-use uom::si::f64::*;
-use uom::si::length::meter;
+
+
+
 
 
 const TICKS_TO_ROTATIONS: f32 = (1.) / (2048. * 12.8);
@@ -51,7 +51,7 @@ impl ToTalonEncoder for f64 {
 
 #[cfg(test)]
 mod tests {
-    use uom::si::{f64::Angle, angle::{degree, revolution}};
+    use uom::si::{f64::Angle, angle::{degree}};
 
     use super::{ToTalonEncoder, talon_encoder_tick};
 

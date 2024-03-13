@@ -1,4 +1,4 @@
-use std::ffi::CString;
+
 
 use j4rs::{Instance, InvocationArg, Jvm};
 use uom::si::f64::Angle;
@@ -6,7 +6,7 @@ use crate::ctre::TalonInvertType;
 
 use super::talon_encoder_tick;
 
-use ctre_sys::{self, std_basic_string, talonfx_wrapper_follow, talonfx_wrapper_invert, talonfx_wrapper_get_velocity, talonfx_wrapper_stop, talonfx_wrapper_get_position, talonfx_wrapper_play_tone};
+use ctre_sys::{self, talonfx_wrapper_follow, talonfx_wrapper_invert, talonfx_wrapper_get_velocity, talonfx_wrapper_stop, talonfx_wrapper_get_position, talonfx_wrapper_play_tone};
 
 pub struct Kraken {
     can_id: i32,

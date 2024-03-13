@@ -1,6 +1,6 @@
-use crate::rev::{ControlType, IdleMode, MotorType};
-use j4rs::{Instance, InvocationArg, Jvm};
-use rev_sys::{c_SparkMax_Obj, c_SparkMax_ControlType_c_SparkMax_kPosition, c_SIM_SparkMax_SetSetpoint, c_SIM_SparkMax_GetMotorTemperature, c_SparkMax_SetpointCommand, c_SparkMax_ControlType_c_SparkMax_kDutyCycle, c_SparkMax_ControlType_c_SparkMax_kVelocity, c_SparkMax_GetMotorTemperature, c_SparkMax_GetAltEncoderPosition, c_SparkMax_GetEncoderVelocity, c_SparkMax_GetEncoderPosition, c_SparkMax_IdleMode_c_SparkMax_kBrake, c_SparkMax_IdleMode_c_SparkMax_kCoast, c_SparkMax_SetIdleMode, c_SparkMax_SetP, c_SparkMax_SetFF, c_SparkMax_SetD, c_SparkMax_SetI, c_SparkMax_SetFollow, c_SparkMax_handle, c_SparkMax_GetOutputCurrent};
+use crate::rev::{ControlType, IdleMode};
+
+use rev_sys::{c_SparkMax_ControlType_c_SparkMax_kPosition, c_SparkMax_SetpointCommand, c_SparkMax_ControlType_c_SparkMax_kDutyCycle, c_SparkMax_ControlType_c_SparkMax_kVelocity, c_SparkMax_GetMotorTemperature, c_SparkMax_GetEncoderVelocity, c_SparkMax_GetEncoderPosition, c_SparkMax_IdleMode_c_SparkMax_kBrake, c_SparkMax_IdleMode_c_SparkMax_kCoast, c_SparkMax_SetIdleMode, c_SparkMax_SetP, c_SparkMax_SetFF, c_SparkMax_SetD, c_SparkMax_SetI, c_SparkMax_handle, c_SparkMax_GetOutputCurrent};
 use uom::si::angle;
 use uom::si::angle::revolution;
 use uom::si::f64::*;
@@ -150,7 +150,7 @@ impl Spark {
         }
     }
 
-    fn follow(&self, master: Spark, invert: bool) {
+    fn follow(&self, _master: Spark, _invert: bool) {
         unimplemented!(); // c_SparkMax_Follow did not get wrapped
         //let ret = unsafe{c_SparkMax_SetFollow(master.motor, followerArbId, followerCfg)};
 

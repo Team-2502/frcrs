@@ -2,7 +2,7 @@ mod joystick;
 
 pub use joystick::*;
 
-use j4rs::{Instance, InvocationArg, Jvm};
+use j4rs::{Jvm};
 use bitvec::prelude::*;
 
 pub struct RobotState {

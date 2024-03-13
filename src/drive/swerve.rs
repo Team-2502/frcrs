@@ -68,7 +68,7 @@ impl SwerveBuilder {
 
 use std::f64::consts::PI;
 use uom::num_traits::{Pow, PrimInt};
-use crate::networktables::SmartDashboard;
+
 
 pub struct WheelSpeeds {
     pub ws1: f64,
@@ -137,7 +137,7 @@ impl Swerve {
     }
 
     pub fn optimize(target_speed: f64, target_angle: f64, current_angle: f64) -> (f64, f64) {
-        let mut target_angle = Self::place_in_appropriate_0_to_360_scope(current_angle, target_angle);
+        let target_angle = Self::place_in_appropriate_0_to_360_scope(current_angle, target_angle);
         //println!("{}", target_angle);
 
         let delta = target_angle - current_angle;
@@ -198,8 +198,8 @@ impl ToTalonEncoder for f64 {
 
 #[cfg(test)]
 mod tests {
-    use std::time::Instant;
-    use crate::drive::{Swerve, ToTalonEncoder};
+    
+    use crate::drive::{Swerve};
 
     #[test]
     fn place_in_scope() {

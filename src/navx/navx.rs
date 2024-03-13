@@ -1,4 +1,4 @@
-use j4rs::{Instance, Jvm};
+
 use navx_sys::AHRS;
 
 pub struct NavX {
