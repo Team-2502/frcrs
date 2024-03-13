@@ -12,13 +12,12 @@ pub use j4rs_derive::call_from_java;
 use jni::JavaVM;
 use lazy_static::lazy_static;
 use networktables::SmartDashboard;
-use rev::SparkMax;
 
 #[macro_use]
 extern crate uom;
 
 use crate::rev::ControlType::Position;
-use crate::rev::{IdleMode, MotorType, Spark, SparkPIDController};
+use crate::rev::{IdleMode, MotorType, Spark};
 use j4rs::prelude::*;
 use std::convert::TryFrom;
 use std::ops::Range;

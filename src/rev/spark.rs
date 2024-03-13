@@ -1,359 +1,170 @@
-use crate::rev::{ControlType, IdleMode, MotorType, Spark, SparkPIDController};
+use crate::rev::{ControlType, IdleMode, MotorType};
 use j4rs::{Instance, InvocationArg, Jvm};
+use rev_sys::{c_SparkMax_Obj, c_SparkMax_ControlType_c_SparkMax_kPosition, c_SIM_SparkMax_SetSetpoint, c_SIM_SparkMax_GetMotorTemperature, c_SparkMax_SetpointCommand, c_SparkMax_ControlType_c_SparkMax_kDutyCycle, c_SparkMax_ControlType_c_SparkMax_kVelocity, c_SparkMax_GetMotorTemperature, c_SparkMax_GetAltEncoderPosition, c_SparkMax_GetEncoderVelocity, c_SparkMax_GetEncoderPosition, c_SparkMax_IdleMode_c_SparkMax_kBrake, c_SparkMax_IdleMode_c_SparkMax_kCoast, c_SparkMax_SetIdleMode, c_SparkMax_SetP, c_SparkMax_SetFF, c_SparkMax_SetD, c_SparkMax_SetI, c_SparkMax_SetFollow, c_SparkMax_handle, c_SparkMax_GetOutputCurrent};
 use uom::si::angle;
 use uom::si::angle::revolution;
 use uom::si::f64::*;
 
-pub struct JavaSpark {
+pub struct Spark {
     can_id: i32,
-    motor_type: MotorType,
-    instance: Instance,
-    encoder: Option<Instance>,
+    motor: c_SparkMax_handle,
 }
 
-pub struct SparkFlex {
-    can_id: i32,
-    motor_type: MotorType,
-    instance: Instance,
-    encoder: Option<Instance>,
-}
+impl Spark {
+    pub fn new(can_id: i32) -> Self {
+        let brushless = rev_sys::c_SparkMax_MotorType_c_SparkMax_kBrushless;
+        let motor = unsafe {
+            rev_sys::c_SparkMax_RegisterId(can_id);
+            rev_sys::c_SparkMax_Create(can_id, brushless)
+        };
 
-pub trait SparkMax {
-    fn new(can_id: i32, motor_type: MotorType) -> Self;
-    /// Set the speed of the motor
-    ///
-    /// `amount` is from -1, 1
-    fn set(&self, amount: f64);
-    fn set_idle_mode(&self, idle_mode: IdleMode);
-    fn get_pid(&self) -> SparkPIDController;
-    fn follow(&self, master: Spark, invert: bool);
-    fn stop(&self);
-    fn set_position(&self, position: Angle);
-}
-
-impl JavaSpark {
-    pub(crate) fn instance(&self) -> &Instance {
-        &self.instance
+        Self { can_id, motor }
     }
 
-    fn set_reference(&self, value: f64, control_type: ControlType) {
-        let jvm = Jvm::attach_thread().unwrap();
+    pub fn brushed(can_id: i32) -> Self {
+        let brush = rev_sys::c_SparkMax_MotorType_c_SparkMax_kBrushed;
+        let motor = unsafe {
+            rev_sys::c_SparkMax_RegisterId(can_id);
+            rev_sys::c_SparkMax_Create(can_id, brush)
+        };
 
-        let _control_type = jvm
-            .invoke_static("frc.robot.Wrapper", control_type.as_str(), &Vec::new())
-            .unwrap();
-
-        jvm.invoke(
-            &self.get_pid().instance(),
-            "setReference",
-            &[
-                InvocationArg::try_from(value)
-                    .unwrap()
-                    .into_primitive()
-                    .unwrap(),
-                InvocationArg::try_from(_control_type).unwrap(),
-            ],
-        )
-        .unwrap();
+        Self { can_id, motor }
     }
 
-    pub fn get_current(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
+    fn get_temperature(&self) -> f32 {
+        let mut temp = 0.;
+        let ret = unsafe {
+            c_SparkMax_GetMotorTemperature(self.motor, &mut temp)
+        };
 
-        jvm.to_rust(jvm.invoke(
-            &self.instance,
-            "getOutputCurrent",
-            &[
-            ],
-        )
-        .unwrap()).unwrap()
-    }
-
-    fn get_encoder(&mut self) -> &Instance {
-        if self.encoder.is_some() {
-            return &self.encoder.as_ref().unwrap();
+        if ret != 0{
+            println!("error on spark {}: {ret}", self.can_id);
         }
 
-        let jvm = Jvm::attach_thread().unwrap();
-
-        self.encoder = Some(
-            jvm.invoke(&self.instance, "getEncoder", &Vec::new()).unwrap(),
-        );
-
-        &self.encoder.as_ref().unwrap()
-
+        temp
     }
 
-    pub fn get_velocity(&mut self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
+    fn set_reference(&self, value: f32, control_type: ControlType) {
+        let control_type = match control_type {
+            ControlType::Position => c_SparkMax_ControlType_c_SparkMax_kPosition,
+            ControlType::Speed => c_SparkMax_ControlType_c_SparkMax_kDutyCycle,
+            ControlType::Velocity => c_SparkMax_ControlType_c_SparkMax_kVelocity,
+        };
 
-        jvm.to_rust(jvm.invoke(
-            self.get_encoder(),
-            "getVelocity",
-            &[
-            ],
-        )
-        .unwrap()).unwrap()
+        let ret = unsafe {
+            c_SparkMax_SetpointCommand(self.motor, value, control_type, 0, 0., 0)
+        };
+
+        if ret != 0{
+            println!("error on spark {}: {ret}", self.can_id);
+        }
+    }
+
+    pub fn get_current(&self) -> f32 {
+        let mut current = 0.;
+        let ret = unsafe {
+            c_SparkMax_GetOutputCurrent(self.motor, &mut current)
+        };
+
+        if ret != 0{
+            println!("error on spark {}: {ret}", self.can_id);
+        }
+
+        current
+    }
+
+    pub fn get_velocity(&mut self) -> f32 {
+        let mut vel = 0.;
+
+        let ret = unsafe {c_SparkMax_GetEncoderVelocity(self.motor, &mut vel)};
+
+        if ret != 0{
+            println!("error on spark {}: {ret}", self.can_id);
+        }
+
+        vel
     }
 
     pub fn get_position(&mut self) -> Angle {
-        let jvm = Jvm::attach_thread().unwrap();
+        let mut vel = 0.;
 
-        let rots: f64 = jvm.to_rust(jvm.invoke(
-            self.get_encoder(),
-            "getPosition",
-            &[
-            ],
-        )
-        .unwrap()).unwrap();
+        let ret = unsafe {c_SparkMax_GetEncoderPosition(self.motor, &mut vel)};
 
-        Angle::new::<revolution>(rots)
-    }
-}
-
-impl SparkMax for JavaSpark {
-    fn new(can_id: i32, motor_type: MotorType) -> Self {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let motortype = jvm
-            .invoke_static("frc.robot.Wrapper", motor_type.as_str(), &Vec::new())
-            .unwrap();
-
-        let instance = jvm
-            .create_instance(
-                "com.revrobotics.CANSparkMax",
-                &[
-                    InvocationArg::try_from(can_id)
-                        .unwrap()
-                        .into_primitive()
-                        .unwrap(),
-                    InvocationArg::try_from(motortype).unwrap(),
-                ],
-            )
-            .unwrap();
-
-        Self {
-            can_id,
-            motor_type,
-            instance,
-            encoder: None,
+        if ret != 0{
+            println!("error on spark {}: {ret}", self.can_id);
         }
+
+        Angle::new::<revolution>(vel as f64)
     }
 
     /// Set the speed of the motor
     ///
     /// `amount` is from -1, 1
-    fn set(&self, amount: f64) {
-        let jvm = Jvm::attach_thread().unwrap();
-        jvm.invoke(
-            &self.instance,
-            "set",
-            &[InvocationArg::try_from(amount)
-                .unwrap()
-                .into_primitive()
-                .unwrap()],
-        )
-        .unwrap(); //.expect("Failed to call `set` on motor");
+    fn set(&self, amount: f32) {
+        self.set_reference(amount, ControlType::Speed)
     }
 
     fn set_idle_mode(&self, idle_mode: IdleMode) {
-        let jvm = Jvm::attach_thread().unwrap();
 
-        let mode = jvm
-            .invoke_static("frc.robot.Wrapper", idle_mode.as_str(), &Vec::new())
-            .unwrap();
+        let idle_mode = match idle_mode {
+            IdleMode::Brake => c_SparkMax_IdleMode_c_SparkMax_kBrake,
+            IdleMode::Coast => c_SparkMax_IdleMode_c_SparkMax_kCoast,
+        };
 
-        jvm.invoke(
-            &self.instance,
-            "setIdleMode",
-            &[InvocationArg::try_from(mode).unwrap()],
-        )
-        .unwrap();
+        let ret = unsafe{c_SparkMax_SetIdleMode(self.motor, idle_mode)};
+
+        if ret != 0 {
+            println!("error on spark {}: {ret}", self.can_id);
+        }
     }
 
-    fn get_pid(&self) -> SparkPIDController {
-        let jvm = Jvm::attach_thread().unwrap();
+    fn set_p(&self, p: f32) {
+        let ret = unsafe{c_SparkMax_SetP(self.motor, 0, p)};
 
-        // TODO: get values from spark
-        SparkPIDController::from(
-            &self.instance,
-            jvm.invoke(&self.instance, "getPIDController", &Vec::new())
-                .unwrap(),
-            0.0,
-            0.0,
-            0.0,
-        )
+        if ret != 0 {
+            println!("error on spark {}: {ret}", self.can_id);
+        }
+    }
+
+    fn set_i(&self, i: f32) {
+        let ret = unsafe{c_SparkMax_SetI(self.motor, 0, i)};
+
+        if ret != 0 {
+            println!("error on spark {}: {ret}", self.can_id);
+        }
+    }
+
+    fn set_d(&self, d: f32) {
+        let ret = unsafe{c_SparkMax_SetD(self.motor, 0, d)};
+
+        if ret != 0 {
+            println!("error on spark {}: {ret}", self.can_id);
+        }
+    }
+
+    fn set_ff(&self, ff: f32) {
+        let ret = unsafe{c_SparkMax_SetFF(self.motor, 0, ff)};
+
+        if ret != 0 {
+            println!("error on spark {}: {ret}", self.can_id);
+        }
     }
 
     fn follow(&self, master: Spark, invert: bool) {
-        let jvm = Jvm::attach_thread().unwrap();
+        unimplemented!(); // c_SparkMax_Follow did not get wrapped
+        //let ret = unsafe{c_SparkMax_SetFollow(master.motor, followerArbId, followerCfg)};
 
-        jvm.invoke(&self.instance, "follow", &[
-            InvocationArg::from(master.instance),
-            InvocationArg::try_from(invert).unwrap().into_primitive().unwrap()
-        ]).unwrap();
+        //if ret != 0 {
+        //    println!("error on spark {}: {ret}", self.can_id);
+        //}
     }
 
     /// Stop the motor
     fn stop(&self) {
-        let jvm = Jvm::attach_thread().unwrap();
-        jvm.invoke(&self.instance, "stopMotor", &Vec::new())
-            .unwrap();
+        unimplemented!(); // c_SparkMax_StopMotor did not get wrapped
     }
 
     fn set_position(&self, position: Angle) {
-        self.set_reference(position.get::<angle::revolution>(), ControlType::Position);
-    }
-}
-
-impl SparkFlex {
-    pub(crate) fn instance(&self) -> &Instance {
-        &self.instance
-    }
-
-    fn set_reference(&self, value: f64, control_type: ControlType) {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let _control_type = jvm
-            .invoke_static("frc.robot.Wrapper", control_type.as_str(), &Vec::new())
-            .unwrap();
-
-        jvm.invoke(
-            &self.get_pid().instance(),
-            "setReference",
-            &[
-                InvocationArg::try_from(value)
-                    .unwrap()
-                    .into_primitive()
-                    .unwrap(),
-                InvocationArg::try_from(_control_type).unwrap(),
-            ],
-        )
-            .unwrap();
-    }
-
-    fn get_encoder(&mut self) -> &Instance {
-        if self.encoder.is_some() {
-            return &self.encoder.as_ref().unwrap();
-        }
-
-        let jvm = Jvm::attach_thread().unwrap();
-
-        self.encoder = Some(
-            jvm.invoke(&self.instance, "getEncoder", &Vec::new()).unwrap(),
-        );
-
-        &self.encoder.as_ref().unwrap()
-
-    }
-
-    pub fn get_velocity(&mut self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        jvm.to_rust(jvm.invoke(
-            self.get_encoder(),
-            "getVelocity",
-            &[
-            ],
-        ).unwrap()).unwrap()
-    }
-}
-
-impl SparkMax for SparkFlex {
-    fn new(can_id: i32, motor_type: MotorType) -> Self {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let motortype = jvm
-            .invoke_static("frc.robot.Wrapper", motor_type.as_str(), &Vec::new())
-            .unwrap();
-
-        /*let instance = jvm
-            .create_instance(
-                "com.revrobotics.CANSparkFlex",
-                &[
-                    InvocationArg::try_from(can_id)
-                        .unwrap()
-                        .into_primitive()
-                        .unwrap(),
-                    InvocationArg::try_from(motortype).unwrap(),
-                ],
-            )
-            .unwrap();*/
-
-        let instance = jvm.invoke_static("frc.robot.Wrapper", "createSparkFlex", &[
-            InvocationArg::try_from(can_id).unwrap().into_primitive().unwrap()
-        ]).unwrap();
-
-        Self {
-            can_id,
-            motor_type,
-            instance,
-            encoder: None
-        }
-    }
-
-    /// Set the speed of the motor
-    ///
-    /// `amount` is from -1, 1
-    fn set(&self, amount: f64) {
-        let jvm = Jvm::attach_thread().unwrap();
-        jvm.invoke(
-            &self.instance,
-            "set",
-            &[InvocationArg::try_from(amount)
-                .unwrap()
-                .into_primitive()
-                .unwrap()],
-        )
-            .unwrap(); //.expect("Failed to call `set` on motor");
-    }
-
-    fn set_idle_mode(&self, idle_mode: IdleMode) {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let mode = jvm
-            .invoke_static("frc.robot.Wrapper", idle_mode.as_str(), &Vec::new())
-            .unwrap();
-
-        jvm.invoke(
-            &self.instance,
-            "setIdleMode",
-            &[InvocationArg::try_from(mode).unwrap()],
-        )
-            .unwrap();
-    }
-
-    fn get_pid(&self) -> SparkPIDController {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        // TODO: get values from spark
-        SparkPIDController::from(
-            &self.instance,
-            jvm.invoke(&self.instance, "getPIDController", &Vec::new())
-                .unwrap(),
-            0.0,
-            0.0,
-            0.0,
-        )
-    }
-
-    fn follow(&self, master: Spark, invert: bool) {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        jvm.invoke(&self.instance, "follow", &[
-            InvocationArg::from(master.instance),
-            InvocationArg::try_from(invert).unwrap().into_primitive().unwrap()
-        ]).unwrap();
-    }
-
-    /// Stop the motor
-    fn stop(&self) {
-        let jvm = Jvm::attach_thread().unwrap();
-        jvm.invoke(&self.instance, "stopMotor", &Vec::new())
-            .unwrap();
-    }
-
-    fn set_position(&self, position: Angle) {
-        self.set_reference(position.get::<angle::revolution>(), ControlType::Position);
+        self.set_reference(position.get::<angle::revolution>() as f32, ControlType::Position);
     }
 }

@@ -1,9 +1,8 @@
 mod spark;
-mod pid;
 
-pub use pid::*;
 pub use spark::*;
-pub use spark::JavaSpark as Spark;
+pub use spark::Spark as SparkFlex;
+pub use spark::Spark as SparkMax;
 
 pub enum MotorType {
     Brushed,
@@ -17,6 +16,8 @@ pub enum IdleMode {
 
 pub enum ControlType {
     Position,
+    Velocity,
+    Speed,
 }
 
 impl MotorType {
@@ -33,14 +34,6 @@ impl IdleMode {
         match &self {
             IdleMode::Brake => "kBrake",
             IdleMode::Coast => "kCoast"
-        }
-    }
-}
-
-impl ControlType {
-    pub fn as_str(&self)-> &str {
-        match &self {
-            ControlType::Position => "kPosition"
         }
     }
 }
