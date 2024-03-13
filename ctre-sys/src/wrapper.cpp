@@ -1,5 +1,6 @@
 #include "ctre/phoenix6/core/CoreTalonFX.hpp"
 #include "ctre/phoenix6/TalonFX.hpp"
+#include "ctre/phoenix6/CANcoder.hpp"
 
 int test() {
     return 45;
@@ -66,5 +67,26 @@ namespace talonfx_wrapper {
         std::string bus_str = bus;
         auto talon = new TalonFX(id, bus);
         return talon;
+    }
+}
+
+namespace cancoder_wrapper {
+    double get_absolute_position(CANcoder* cancoder) {
+        return cancoder->GetAbsolutePosition().GetValue().value();
+    }
+
+    double get_position(CANcoder* cancoder) {
+        return cancoder->GetPosition().GetValue().value();
+    }
+
+    CANcoder* bind_cancoder(int id) {
+        auto cancoder = new CANcoder(id);
+        return cancoder;
+    }
+
+    CANcoder* bind_cancoder_with_bus(int id, char* bus) {
+        std::string bus_str = bus;
+        auto cancoder = new CANcoder(id, bus);
+        return cancoder;
     }
 }

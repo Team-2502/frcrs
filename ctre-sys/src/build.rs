@@ -65,6 +65,7 @@ fn main() -> anyhow::Result<()> {
         .header("src/wrapper.cpp")
         .allowlist_file("wrapper.cpp")
         .allowlist_item("talonfx_wrapper.*")
+        .allowlist_item("cancoder_wrapper.*")
         .opaque_type(".*strong_ordering.*")
         .opaque_type(".*Rb_tree.*")
         .opaque_type(".*Temporary_value.*")

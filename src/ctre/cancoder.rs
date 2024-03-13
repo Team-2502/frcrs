@@ -1,47 +1,34 @@
+use std::ffi::CString;
+
+use ctre_sys::{cancoder_wrapper_get_position, cancoder_wrapper_get_absolute_position};
 use j4rs::{Instance, InvocationArg, Jvm};
 
 pub struct CanCoder {
-    instance: Instance
+    sensor: *mut ctre_sys::ctre_phoenix6_hardware_CANcoder,
 }
 
 impl CanCoder {
     pub fn new(id: i32, can_loop: Option<String>) -> Self {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let instance = jvm.create_instance(
-            "com.ctre.phoenix.sensors.CANCoder",
-            &[
-                InvocationArg::try_from(id).unwrap().into_primitive().unwrap(),
-                InvocationArg::try_from(can_loop.unwrap_or("rio".to_owned())).unwrap()
-            ]
-        ).unwrap();
+        let sensor = if let Some(can_loop) = can_loop {
+            unsafe{ctre_sys::cancoder_wrapper_bind_cancoder_with_bus(id, CString::new(can_loop).unwrap().into_raw())}
+        } else {
+            unsafe{ctre_sys::cancoder_wrapper_bind_cancoder(id)}
+        };
 
         Self {
-            instance
+            sensor
         }
     }
 
     pub fn get(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let result: f64 = jvm.to_rust(jvm.invoke(
-            &self.instance,
-            "getPosition",
-            &Vec::new(),
-        ).unwrap()).unwrap();
-
-        result
+        unsafe {
+            cancoder_wrapper_get_position(self.sensor)
+        }
     }
 
     pub fn get_absolute(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let result: f64 = jvm.to_rust(jvm.invoke(
-            &self.instance,
-            "getAbsolutePosition",
-            &Vec::new(),
-        ).unwrap()).unwrap();
-
-        result
+        unsafe {
+            cancoder_wrapper_get_absolute_position(self.sensor)
+        }
     }
 }
