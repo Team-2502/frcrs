@@ -1,6 +1,5 @@
 pub mod ctre;
 pub mod input;
-pub mod networktables;
 pub mod rev;
 pub mod robot;
 pub mod navx;
