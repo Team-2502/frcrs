@@ -32,7 +32,18 @@ fn main() -> anyhow::Result<()> {
             name: "wpilibc-cpp",
             ..WPI_MAVEN
         },
+        Package {
+            path: "edu.wpi.first.wpinet",
+            name: "wpinet-cpp",
+            ..WPI_MAVEN
+        },
     ];
+
+    dependencies[0].download_lib("wpiHal")?;
+    dependencies[1].download_lib("wpiutil")?;
+    dependencies[2].download_lib("wpimath")?;
+    dependencies[3].download_lib("wpilibc")?;
+    dependencies[4].download_lib("wpinet")?;
 
     let navx_frc = Package {
         name: "navx-frc-cpp",

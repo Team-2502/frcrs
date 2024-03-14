@@ -32,6 +32,11 @@ fn main() -> anyhow::Result<()> {
         },
     ];
 
+    headers[0].download_lib("wpiHal")?;
+    headers[1].download_lib("wpiutil")?;
+    headers[2].download_lib("wpimath")?;
+    headers[3].download_lib("wpilibc")?;
+
     let runtime = Package {
         name: "runtime",
         ..NI_MAVEN

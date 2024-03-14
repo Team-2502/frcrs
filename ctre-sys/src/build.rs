@@ -34,6 +34,12 @@ fn main() -> anyhow::Result<()> {
         },
     ];
 
+    dependencies[0].download_lib("wpiHal")?;
+    dependencies[1].download_lib("wpiutil")?;
+    dependencies[2].download_lib("wpimath")?;
+    dependencies[3].download_lib("wpilibc")?;
+
+
     let ctre_tools = Package {
         name: "tools",
         ..CTRE_MAVEN

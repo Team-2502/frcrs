@@ -29,6 +29,10 @@ fn main() -> anyhow::Result<()> {
         },
     ];
 
+    dependencies[0].download_lib("wpiHal")?;
+    dependencies[1].download_lib("wpiutil")?;
+    dependencies[2].download_lib("wpimath")?;
+
     let revlib = Package {
         name: "REVLib-driver",
         ..REV_MAVEN
