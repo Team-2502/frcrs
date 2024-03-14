@@ -1,3 +1,4 @@
+#include "bits/predefined_ops.h"
 #include "ctre/phoenix6/core/CoreTalonFX.hpp"
 #include "ctre/phoenix6/TalonFX.hpp"
 #include "ctre/phoenix6/CANcoder.hpp"
@@ -64,7 +65,6 @@ namespace talonfx_wrapper {
     }
 
     TalonFX* bind_talon_with_bus(int id, char* bus) {
-        std::string bus_str = bus;
         auto talon = new TalonFX(id, bus);
         return talon;
     }
@@ -85,7 +85,6 @@ namespace cancoder_wrapper {
     }
 
     CANcoder* bind_cancoder_with_bus(int id, char* bus) {
-        std::string bus_str = bus;
         auto cancoder = new CANcoder(id, bus);
         return cancoder;
     }
