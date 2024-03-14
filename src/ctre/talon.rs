@@ -41,7 +41,17 @@ impl Kraken {
                 unsafe {
                     ctre_sys::talonfx_wrapper_set_speed(self.motor,amount);
                 }
-            }
+            },
+            ControlMode::Position => {
+                unsafe {
+                    ctre_sys::talonfx_wrapper_set_position(self.motor, amount)
+                }
+            },
+            ControlMode::Velocity => {
+                unsafe {
+                    ctre_sys::talonfx_wrapper_set_velocity(self.motor, amount)
+                }
+            },
             _ => {unimplemented!()},
             
         }
