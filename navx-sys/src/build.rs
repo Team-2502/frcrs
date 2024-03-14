@@ -1,6 +1,6 @@
 use std::env;
 
-use maven::{package::Package, EMPTY, WPI_MAVEN};
+use maven::{package::Package, EMPTY, WPI_MAVEN, get_wpilib_toolchain_location};
 
 const KAUAI_MAVEN: Package<'static> = Package {
     maven_url: "dev.studica.com/maven/release/2024",
@@ -66,14 +66,16 @@ fn main() -> anyhow::Result<()> {
 
     let out = env::var("OUT_DIR").unwrap();
 
+    let toolchain = get_wpilib_toolchain_location()?;
+
     bindgen::Builder::default()
         .clang_arg("-xc++")
         .clang_arg("-std=c++20")
         .clang_arg(format!("-I{}/include", out))
-        .clang_arg(format!("--sysroot={}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot", env!("HOME")))
-        .clang_arg(format!("-I{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include", env!("HOME")))
-        .clang_arg(format!("-I{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12", env!("HOME")))
-        .clang_arg(format!("-I{}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12/arm-nilrt-linux-gnueabi", env!("HOME")))
+        .clang_arg(format!("--sysroot={toolchain}/roborio/arm-nilrt-linux-gnueabi/sysroot"))
+        .clang_arg(format!("-I{toolchain}/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include"))
+        .clang_arg(format!("-I{toolchain}/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12"))
+        .clang_arg(format!("-I{toolchain}/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include/c++/12/arm-nilrt-linux-gnueabi"))
         .header("src/wrapper.cpp")
         .allowlist_file("wrapper.cpp")
         .allowlist_file("AHRS.h")
@@ -88,7 +90,7 @@ fn main() -> anyhow::Result<()> {
         .cpp(true)
         .std("c++20")
         .cpp_link_stdlib("stdc++")
-        .flag(&format!("--sysroot={}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot", env!("HOME")))
+        .flag(&format!("--sysroot={toolchain}/roborio/arm-nilrt-linux-gnueabi/sysroot"))
         .include(format!("{}/include", out))
         .file("src/wrapper.cpp")
         .compile("navx-wrapper");
