@@ -1,6 +1,6 @@
 use std::{path::{Path, PathBuf}, io::{Cursor, Write}, str::FromStr, fs::{self, OpenOptions}};
 
-use anyhow::Ok;
+use anyhow::{Ok, Context};
 
 #[derive(Default)]
 pub struct Package<'a> {
@@ -34,14 +34,26 @@ impl<'a> Package<'a> {
     }
 
     pub fn download_lib(&self, lib: &str) -> anyhow::Result<()> {
-
         let mut path = PathBuf::from_str(std::env::var("OUT_DIR")?.as_str())?;
         path.push("libs");
         self.artifact("linuxathena").download(&path)?;
-        path.push("athena");
-        path.push("shared");
 
-        println!("cargo:rustc-link-search=native=lib{}.so", path.to_string_lossy());
+        // rename all so.version files to just so, to make arm-frc2023-linux-gnueabi-gcc happy
+        // i'm making the assumption that files will be listed alphabetically 
+        // (and that that matches so version order exactly)
+        for file in glob::glob(&format!("{}/**/*.so*", path.to_string_lossy()))? { 
+            let file = file?;
+            let trimmed = file.clone().file_name().unwrap()
+                .to_string_lossy()
+                .split_once('.').unwrap().0.to_owned();
+            let trimmed = format!("{trimmed}.so");
+
+            let mut normalized = path.clone();
+            normalized.push(trimmed);
+            fs::rename(file,normalized)?;
+        }
+
+        println!("cargo:rustc-link-search=native={}", path.to_string_lossy());
         println!("cargo:rustc-link-lib=dylib={}", lib); // TODO: multi file pushes
 
         Ok(())

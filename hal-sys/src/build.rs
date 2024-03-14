@@ -53,7 +53,7 @@ fn main() -> anyhow::Result<()> {
     };
 
     runtime.download_lib("embcanshim")?;
-    runtime.download_lib("fpgalvshim")?;
+    println!("cargo:rustc-link-lib=dylib=fpgalvshim");
     chip_object.download_lib("RoboRIO_FRC_ChipObject")?;
     net_comm.download_lib("FRC_NetworkCommunication")?;
     visa.download_lib("visa")?;
@@ -81,7 +81,7 @@ fn main() -> anyhow::Result<()> {
         .generate()?
         .write_to_file(format!("{}/bindings.rs", out))?;
 
-    println!("cargo:rustc-link-search=native={}/{}", out, "libs");
+    //println!("cargo:rustc-link-search=native={}/{}", out, "libs");
 
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/wrapper.cpp");

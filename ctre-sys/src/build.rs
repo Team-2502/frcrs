@@ -85,7 +85,7 @@ fn main() -> anyhow::Result<()> {
         .compile("ctre-wrapper");
 
     //println!("cargo:rustc-link-search=native={}/.gradle/toolchains/frc/2024/roborio/arm-nilrt-linux-gnueabi/sysroot/usr/include", env!("HOME"));
-    println!("cargo:rustc-link-search=native={}/{}", out, "libs");
+    //println!("cargo:rustc-link-search=native={}/{}", out, "libs");
 
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/wrapper.cpp");

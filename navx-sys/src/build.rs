@@ -82,7 +82,7 @@ fn main() -> anyhow::Result<()> {
         .file("src/wrapper.cpp")
         .compile("navx-wrapper");
 
-    println!("cargo:rustc-link-search=native={}/{}", out, "libs");
+    //println!("cargo:rustc-link-search=native={}/{}", out, "libs");
 
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/wrapper.cpp");

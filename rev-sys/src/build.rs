@@ -59,7 +59,7 @@ fn main() -> anyhow::Result<()> {
         .generate()?
         .write_to_file(format!("{}/bindings.rs", out))?;
 
-    println!("cargo:rustc-link-search=native={}/{}", out, "libs");
+    //println!("cargo:rustc-link-search=native={}/{}", out, "libs");
 
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/wrapper.cpp");
