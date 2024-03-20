@@ -26,7 +26,7 @@ impl JavaSpark {
         &self.instance
     }
 
-    fn set_reference(&self, value: f64, control_type: ControlType) {
+    pub fn set_reference(&self, value: f64, control_type: ControlType) {
         let jvm = Jvm::attach_thread().unwrap();
 
         let _control_type = jvm
