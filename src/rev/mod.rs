@@ -17,6 +17,7 @@ pub enum IdleMode {
 
 pub enum ControlType {
     Position,
+    Velocity,
 }
 
 impl MotorType {
@@ -40,7 +41,8 @@ impl IdleMode {
 impl ControlType {
     pub fn as_str(&self)-> &str {
         match &self {
-            ControlType::Position => "kPosition"
+            ControlType::Position => "kPosition",
+            ControlType::Velocity => "kVelocity"
         }
     }
 }
