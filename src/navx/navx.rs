@@ -1,23 +1,21 @@
 use j4rs::{Instance, Jvm};
+use jni::{objects::JObject, signature::{Primitive, ReturnType}};
 
-pub struct NavX {
-    instance: Instance,
+use crate::call::{call, call_static};
+
+pub struct NavX<'local> {
+    instance: JObject<'local>,
 }
 
-impl NavX {
+impl<'local> NavX<'local> {
     pub fn new() -> Self {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        /*let instance = jvm.create_instance(
-            "com.kauailabs.navx.frc.AHRS",
-            &Vec::new(),
-        ).unwrap();*/
-
-        let instance = jvm.invoke_static(
-            "frc.robot.Wrapper",
+        let instance = call_static!(
+            "frc/robot/Wrapper",
             "createAHRS",
+            "()Lcom/kauailabs/navx/frc/AHRS;",
             &Vec::new(),
-        ).unwrap();
+            ReturnType::Object
+        ).l().unwrap();
 
         Self {
             instance
@@ -25,25 +23,24 @@ impl NavX {
     }
 
     pub fn get_angle(&self) -> f64 {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        let angle: f64 = jvm.to_rust(
-        jvm.invoke(
-             &self.instance,
+        call!(
+            &self.instance,
+            "com/kauailabs/navx/frc/AHRS",
             "getAngle",
+            "()D",
             &Vec::new(),
-        ).unwrap()).unwrap();
-
-        angle
+            ReturnType::Primitive(Primitive::Double)
+        ).d().unwrap()
     }
 
     pub fn reset_angle(&self) {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        jvm.invoke(
+        call!(
             &self.instance,
+            "com/kauailabs/navx/frc/AHRS",
             "reset",
+            "()V",
             &Vec::new(),
-        ).unwrap();
+            ReturnType::Primitive(Primitive::Void)
+        ).v().unwrap()
     }
 }
