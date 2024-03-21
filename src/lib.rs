@@ -6,10 +6,16 @@ pub mod robot;
 pub mod navx;
 pub mod drive;
 pub mod dio;
+#[macro_use]
+pub mod call;
 
 use input::Joystick;
 pub use j4rs_derive::call_from_java;
-use jni::JavaVM;
+use jni::objects::{JObject, JString, JValue, JValueGen};
+use jni::signature::Primitive;
+use jni::strings::JNIString;
+use jni::sys::jint;
+use jni::{InitArgsBuilder, JNIEnv, JNIVersion, JavaVM};
 use lazy_static::lazy_static;
 use networktables::SmartDashboard;
 use rev::SparkMax;
@@ -35,125 +41,29 @@ use crate::navx::NavX;
 use crate::rev::MotorType::Brushless;
 
 
+fn create_jvm() -> JavaVM{
+    // set JAVA_HOME to /usr/local/frc/JRE/bin/
+    let jvm_args = InitArgsBuilder::new()
+        .version(JNIVersion::V8)
+        .option("-XX:+UseSerialGC")
+        .option("-Djava.lang.invoke.stringConcat=BC_SB")
+        .option("-Djava.library.path=/usr/local/frc/third-party/lib")
+        .option("-Djava.class.path=/home/lvuser/classes")
+        .build().unwrap();
 
-/*
-#[call_from_java("frc.robot.Main.rustentry")]
-fn entrypoint() {
-    observe_user_program_starting();
-
-    if !init_hal() {
-        panic!("Failed to init HAL")
-    }
-
-    hal_report(2, 3, 0, "2023.3.1".to_string());
-
-    SmartDashboard::init();
-
-    let navx = NavX::new();
-
-    let encoder = CanCoder::new(9, Some("can0".to_owned()));
-
-    let driver_right = Joystick::new(0);
-    let driver_left = Joystick::new(1);
-
-    let fl_drive = Talon::new(1,  Some("can0".to_owned()));
-    let fl_turn = Talon::new(2,  Some("can0".to_owned()));
-
-    let fr_drive = Talon::new(4,  Some("can0".to_owned()));
-    let fr_turn = Talon::new(5,  Some("can0".to_owned()));
-
-    let bl_drive = Talon::new(7,  Some("can0".to_owned()));
-    let bl_turn = Talon::new(8,  Some("can0".to_owned()));
-
-    let br_drive = Talon::new(10,  Some("can0".to_owned()));
-    let br_turn = Talon::new(11,  Some("can0".to_owned()));
-
-        loop {
-            refresh_data();
-
-            match is_teleop() {
-                true => {
-                    SmartDashboard::put_number("angle".to_owned(), navx.get_angle());
-                    SmartDashboard::put_number("br angle".to_owned(), encoder.get());
-
-                    let wheel_speeds = Swerve::calculate(
-                        driver_left.get_y(), driver_left.get_x(), driver_right.get_z(), navx.get_angle());
-
-                    let fr_speeds = Swerve::optimize(
-                        wheel_speeds.ws1, wheel_speeds.wa1, fr_drive.get().from_talon_encoder_ticks()
-                    );
-
-                    let fl_speeds = Swerve::optimize(
-                        wheel_speeds.ws2, wheel_speeds.wa2, fl_drive.get().from_talon_encoder_ticks()
-                    );
-
-                    let bl_speeds = Swerve::optimize(
-                        wheel_speeds.ws3, wheel_speeds.wa3, bl_drive.get().from_talon_encoder_ticks()
-                    );
-
-                    let br_speeds = Swerve::optimize(
-                        wheel_speeds.ws4, wheel_speeds.wa4, br_drive.get().from_talon_encoder_ticks()
-                    );
-
-                    /*SmartDashboard::put_number("fl spd".to_owned(), fl_speeds.0);
-                    SmartDashboard::put_number("fr spd".to_owned(), fr_speeds.0);
-                    SmartDashboard::put_number("bl spd".to_owned(), bl_speeds.0);
-                    SmartDashboard::put_number("br spd".to_owned(), br_speeds.0);*/
-
-                    /*let fr_turn_pos =  Swerve::place_in_appropriate_0_to_360_scope(
-                        fr_turn.get(), fr_speeds.1) / ((360.) / (2048. * 12.8));
-
-                    let fl_turn_pos = Swerve::place_in_appropriate_0_to_360_scope(
-                        fl_turn.get(), fl_speeds.1) / ((360.) / (2048. * 12.8));
-
-                    let bl_turn_pos = Swerve::place_in_appropriate_0_to_360_scope(
-                        bl_turn.get(), bl_speeds.1) / ((360.) / (2048. * 12.8));
-
-                    let br_turn_pos = Swerve::place_in_appropriate_0_to_360_scope(
-                        br_turn.get(), br_speeds.1) / ((360.) / (2048. * 12.8));*/
-
-                    /*SmartDashboard::put_number("fl opt".to_owned(), fl_turn_pos);
-                    SmartDashboard::put_number("fr opt".to_owned(), fr_turn_pos);
-                    SmartDashboard::put_number("bl opt".to_owned(), bl_turn_pos);
-                    SmartDashboard::put_number("br opt".to_owned(), br_turn_pos);*/
-
-                    fr_drive.set(ControlMode::Percent, fr_speeds.0);
-                    fl_drive.set(ControlMode::Percent, fl_speeds.0);
-                    bl_drive.set(ControlMode::Percent, bl_speeds.0);
-                    br_drive.set(ControlMode::Percent, br_speeds.0);
-
-                    fr_turn.set(ControlMode::Position, fr_speeds.1.talon_encoder_ticks());
-                    fl_turn.set(ControlMode::Position, fl_speeds.1.talon_encoder_ticks());
-                    bl_turn.set(ControlMode::Position, bl_speeds.1.talon_encoder_ticks());
-                    br_turn.set(ControlMode::Position, br_speeds.1.talon_encoder_ticks());
-
-                    /*fr_drive.set(ControlMode::Percent, wheel_speeds.ws2);
-                    fl_drive.set(ControlMode::Percent, wheel_speeds.ws1);
-                    bl_drive.set(ControlMode::Percent, wheel_speeds.ws4);
-                    br_drive.set(ControlMode::Percent, wheel_speeds.ws3);
-
-                    fr_turn.set(ControlMode::Position, wheel_speeds.wa2 / ((360.) / (2048. * 12.8)));
-                    fl_turn.set(ControlMode::Position, wheel_speeds.wa1 / ((360.) / (2048. * 12.8)));
-                    bl_turn.set(ControlMode::Position, wheel_speeds.wa4 / ((360.) / (2048. * 12.8)));
-                    br_turn.set(ControlMode::Position, wheel_speeds.wa3 / ((360.) / (2048. * 12.8)));*/
-                },
-                false => {
-                    fl_turn.stop();
-                    fl_drive.stop();
-
-                    fr_turn.stop();
-                    fr_drive.stop();
-
-                    bl_turn.stop();
-                    bl_drive.stop();
-
-                    br_turn.stop();
-                    br_drive.stop();
-                }
-        }
-    }
+    let jvm = JavaVM::with_libjvm(jvm_args, || Ok("/usr/local/frc/JRE/lib/client/libjvm.so")).unwrap();
+    jvm.attach_current_thread_permanently().unwrap();
+    jvm
 }
-*/
+
+lazy_static!{
+    static ref  JAVA: JavaVM = create_jvm();
+}
+
+fn java() -> JNIEnv<'static> {
+    JAVA.get_env().unwrap()
+}
+
 /// Map x (within from) to the same relative spot in to
 pub fn deadzone(input: f64, from_range: &Range<f64>, to_range: &Range<f64>) -> f64 {
     let neg = input < 0.0;
@@ -199,75 +109,50 @@ mod tests {
 }
 
 pub fn observe_user_program_starting() {
-    let jvm = JavaVM::attach_current_thread_as_daemon().unwrap();
-
     // Show "robot code" on driver's station
-    jvm.call_static_method(
-        "edu.wpi.first.hal.DriverStationJNI",
+    call_static!(
+        "edu/wpi/first/hal/DriverStationJNI",
         "observeUserProgramStarting",
         "()V",
         &Vec::new(),
-    )
-        .unwrap();
+        jni::signature::ReturnType::Primitive(Primitive::Void)
+    );
 }
 
 pub fn refresh_data() {
-    let jvm = Jvm::attach_thread().unwrap();
-
-    jvm.invoke_static(
-        "edu.wpi.first.wpilibj.DriverStation",
+    call_static!(
+        "edu/wpi/first/wpilibj/DriverStation",
         "refreshData",
+        "()V",
         &Vec::new(),
-    ).unwrap();
+        jni::signature::ReturnType::Primitive(Primitive::Void)
+    );
 }
 
 pub fn init_hal() -> bool {
-    let jvm = Jvm::attach_thread().unwrap();
-
-    let value: bool = jvm
-        .to_rust(
-            jvm.invoke_static(
-                "edu.wpi.first.hal.HAL",
-                "initialize",
-                &[InvocationArg::try_from(500).unwrap().into_primitive().unwrap(),
-                    InvocationArg::try_from(0).unwrap().into_primitive().unwrap(),],
-            )
-                .unwrap(),
-        )
-        .unwrap();
-    value
+    call_static!(
+		"edu/wpi/first/hal/HAL",
+		"initialize",
+		"(II)Z",
+		&[JValue::Int(500).as_jni(),
+          JValue::Int(1).as_jni()],
+        jni::signature::ReturnType::Primitive(Primitive::Boolean)
+    ).z().unwrap()
 }
 
 pub fn hal_report(resource: i32, instance_number: i32, context: i32, feature: String) {
-    let jvm = Jvm::attach_thread().unwrap();
-
-    jvm.invoke_static(
-        "edu.wpi.first.hal.HAL",
-        "report",
-        &[
-            InvocationArg::try_from(resource).unwrap().into_primitive().unwrap(),
-            InvocationArg::try_from(instance_number).unwrap().into_primitive().unwrap(),
-            InvocationArg::try_from(context).unwrap().into_primitive().unwrap(),
-            InvocationArg::try_from(feature).unwrap(),
+    let string = java().new_string(feature).unwrap();
+    call_static!(
+		"edu/wpi/first/hal/HAL",
+		"report",
+		"(IIILjava/lang/String;)I",
+		&[JValue::Int(resource).as_jni(),
+		  JValue::Int(instance_number).as_jni(),
+          JValue::Int(context).as_jni(),
+          JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()
         ],
-    ).unwrap();
-}
-
-pub fn is_teleop() -> bool {
-    let jvm = Jvm::attach_thread().unwrap();
-
-    let teleop: bool = jvm
-        .to_rust(
-            jvm.invoke_static(
-                "edu.wpi.first.wpilibj.DriverStation",
-                "isTeleop",
-                &Vec::new(),
-            )
-                .unwrap(),
-        )
-        .unwrap();
-
-    teleop
+        jni::signature::ReturnType::Primitive(Primitive::Int)
+    ).i().unwrap();
 }
 
 pub struct AllianceStation(u8);
@@ -288,18 +173,13 @@ impl AllianceStation {
 }
 
 pub fn alliance_station() -> AllianceStation {
-    let jvm = Jvm::attach_thread().unwrap();
-
-    let station: i32 = jvm
-        .to_rust(
-            jvm.invoke_static(
-                "frc.robot.Wrapper",
-                "getAllianceStation",
-                &Vec::new(),
-            )
-                .unwrap(),
-        )
-        .unwrap();
+    let station = call_static!(
+		"frc/robot/Wrapper",
+		"getAllianceStation",
+		"()I",
+        &Vec::new(),
+        jni::signature::ReturnType::Primitive(Primitive::Int)
+    ).i().unwrap();
 
     AllianceStation(station as u8)
 }

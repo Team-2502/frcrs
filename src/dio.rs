@@ -1,32 +1,31 @@
 use j4rs::{Jvm, InvocationArg, Instance};
+use jni::{objects::{JObject, JValue}, signature::{Primitive, ReturnType}};
 
-pub struct DIO {
-    instance: Instance,
+use crate::call::*;
+
+pub struct DIO<'local> {
+    instance: JObject<'local>,
 }
 
-impl DIO {
+impl<'local> DIO<'local> {
     pub fn new(port: i32) -> Self { 
-        let jvm = Jvm::attach_thread().unwrap();
+        let instance = create!(
+            "edu/wpi/first/wpilibj/DigitalInput",
+            "(I)V",
+            &[JValue::Int(port).as_jni()]
+        );
 
-        let instance = jvm
-            .create_instance(
-                "edu.wpi.first.wpilibj.DigitalInput",
-                &[
-                    InvocationArg::try_from(port)
-                        .unwrap()
-                        .into_primitive()
-                        .unwrap(),
-                ],
-            )
-            .unwrap();
         Self { instance } 
     }
 
     pub fn get(&self) -> bool {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        jvm
-            .to_rust(jvm.invoke(&self.instance, "get", &Vec::new()).unwrap())
-            .unwrap()
+        call!(
+            &self.instance,
+            "edu/wpi/first/wpilibj/DigitalInput",
+            "get",
+            "()Z",
+            &Vec::new(),
+            ReturnType::Primitive(Primitive::Boolean)
+        ).z().unwrap()
     }
 }
