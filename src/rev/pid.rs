@@ -1,31 +1,18 @@
 use j4rs::{Instance, InvocationArg, Jvm};
+use jni::objects::JObject;
 use crate::rev::Spark;
 
 pub struct SparkPIDController<'a> {
-    motor: &'a Instance,
-    controller: Instance,
+    motor: &'a Spark<'a>,
     p: f64,
     i: f64,
     d:  f64
 }
 
 impl<'a> SparkPIDController<'a> {
-    pub fn new(motor: &'a Spark) -> Self {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        Self {
-            motor: motor.instance(),
-            controller: jvm.invoke(&motor.instance(), "getPIDController", &Vec::new()).unwrap(),
-            p: 0.0,
-            i: 0.0,
-            d: 0.0
-        }
-    }
-
-    pub(crate) fn from(motor: &'a Instance, controller: Instance, p: f64, i: f64, d: f64) -> Self {
+    pub(crate) fn from(motor: &'a Spark<'a>, p: f64, i: f64, d: f64) -> Self {
         Self {
             motor,
-            controller,
             p,
             i,
             d

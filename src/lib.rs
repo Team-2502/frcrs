@@ -48,7 +48,7 @@ fn create_jvm() -> JavaVM{
         .option("-XX:+UseSerialGC")
         .option("-Djava.lang.invoke.stringConcat=BC_SB")
         .option("-Djava.library.path=/usr/local/frc/third-party/lib")
-        .option("-Djava.class.path=/home/lvuser/classes")
+        .option("-Djava.class.path=/home/lvuser/javastub.jar")
         .build().unwrap();
 
     let jvm = JavaVM::with_libjvm(jvm_args, || Ok("/usr/local/frc/JRE/lib/client/libjvm.so")).unwrap();
