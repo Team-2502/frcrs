@@ -24,7 +24,7 @@ use rev::SparkMax;
 extern crate uom;
 
 use crate::rev::ControlType::Position;
-use crate::rev::{IdleMode, MotorType, Spark, SparkPIDController};
+use crate::rev::{IdleMode, MotorType, Spark, };
 use j4rs::prelude::*;
 use std::convert::TryFrom;
 use std::ops::Range;
@@ -48,7 +48,7 @@ fn create_jvm() -> JavaVM{
         .option("-XX:+UseSerialGC")
         .option("-Djava.lang.invoke.stringConcat=BC_SB")
         .option("-Djava.library.path=/usr/local/frc/third-party/lib")
-        .option("-Djava.class.path=/home/lvuser/javastub.jar")
+        .option("-Djava.class.path=/home/lvuser/ext")
         .build().unwrap();
 
     let jvm = JavaVM::with_libjvm(jvm_args, || Ok("/usr/local/frc/JRE/lib/client/libjvm.so")).unwrap();
