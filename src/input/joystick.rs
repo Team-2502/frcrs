@@ -1,19 +1,19 @@
 use std::time::Instant;
 
 use bitvec::prelude::*;
-use jni::{objects::{JObject, JValue}, signature::{Primitive, ReturnType}};
+use jni::{objects::{GlobalRef, JObject, JValue}, signature::{Primitive, ReturnType}};
 
-use crate::call::{call, call_static, create};
+use crate::{call::{call, call_static, create}, java};
 
 
-pub struct Joystick<'local> {
+pub struct Joystick {
     id: i32,
-    instance: JObject<'local>,
+    instance: GlobalRef,
     buttons: BitVec,
     last_updated: Instant,
 }
 
-impl<'local> Joystick<'local> {
+impl Joystick {
     pub fn new(id: i32) -> Self {
         let instance = create!(
             "edu/wpi/first/wpilibj/Joystick",
@@ -23,6 +23,8 @@ impl<'local> Joystick<'local> {
 
         let buttons = bitvec![0; 32];
         let last_updated = Instant::now();
+
+        let instance = java().new_global_ref(instance).unwrap();
 
         Self { id, instance, buttons, last_updated }
     }

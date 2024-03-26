@@ -59,9 +59,10 @@ macro_rules! create {
             java.get_method_id(class, "<init>", $sig).unwrap()
         });
 
-        unsafe {
+        let obj = unsafe {
             java.new_object_unchecked(class, *fnptr, $args).unwrap()
-        }
+        };
+        java.new_global_ref(obj).unwrap()
         }
     };
 }

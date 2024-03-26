@@ -1,13 +1,13 @@
 use j4rs::{Jvm, InvocationArg, Instance};
-use jni::{objects::{JObject, JValue}, signature::{Primitive, ReturnType}};
+use jni::{objects::{GlobalRef, JObject, JValue}, signature::{Primitive, ReturnType}};
 
 use crate::call::*;
 
-pub struct DIO<'local> {
-    instance: JObject<'local>,
+pub struct DIO {
+    instance: GlobalRef,
 }
 
-impl<'local> DIO<'local> {
+impl DIO {
     pub fn new(port: i32) -> Self { 
         let instance = create!(
             "edu/wpi/first/wpilibj/DigitalInput",

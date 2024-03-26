@@ -1,13 +1,13 @@
 use j4rs::{Instance, Jvm};
-use jni::{objects::JObject, signature::{Primitive, ReturnType}};
+use jni::{objects::{GlobalRef, JObject}, signature::{Primitive, ReturnType}};
 
-use crate::call::{call, call_static};
+use crate::{call::{call, call_static}, java};
 
-pub struct NavX<'local> {
-    instance: JObject<'local>,
+pub struct NavX {
+    instance: GlobalRef,
 }
 
-impl<'local> NavX<'local> {
+impl NavX {
     pub fn new() -> Self {
         let instance = call_static!(
             "frc/robot/Wrapper",
@@ -17,6 +17,8 @@ impl<'local> NavX<'local> {
             ReturnType::Object
         ).l().unwrap();
 
+        let instance = java().new_global_ref(instance).unwrap();
+
         Self {
             instance
         }
@@ -24,7 +26,7 @@ impl<'local> NavX<'local> {
 
     pub fn get_angle(&self) -> f64 {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "com/kauailabs/navx/frc/AHRS",
             "getAngle",
             "()D",
@@ -35,7 +37,7 @@ impl<'local> NavX<'local> {
 
     pub fn reset_angle(&self) {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "com/kauailabs/navx/frc/AHRS",
             "reset",
             "()V",

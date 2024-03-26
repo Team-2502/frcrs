@@ -2,21 +2,21 @@ use crate::call::{self, call, call_static, create, once};
 use crate::java;
 use crate::rev::{ControlType, IdleMode, MotorType, };
 use j4rs::{Instance, InvocationArg, Jvm};
-use jni::objects::{JObject, JValue};
+use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
 use once_cell::sync::OnceCell;
 use uom::si::angle;
 use uom::si::angle::revolution;
 use uom::si::f64::*;
 
-pub struct Spark<'local> {
+pub struct Spark {
     can_id: i32,
-    instance: JObject<'local>,
-    encoder: Option<JObject<'local>>,
-    pid: Option<JObject<'local>>,
+    instance: GlobalRef,
+    encoder: Option<GlobalRef>,
+    pid: Option<GlobalRef>,
 }
 
-impl<'local> Spark<'local> {
+impl Spark {
 
     pub fn set_reference(&mut self,value: f64,control_type: ControlType) {
         self.set_reference_ff(value, control_type, 0.)
@@ -56,7 +56,7 @@ impl<'local> Spark<'local> {
 
     pub fn get_current(&self) -> f64 {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "com/revrobotics/CANSparkBase",
             "getOutputCurrent",
             "()D",
@@ -70,14 +70,14 @@ impl<'local> Spark<'local> {
             return &self.encoder.as_ref().unwrap();
         }
 
-        self.pid = Some(call!(
-            &self.instance,
+        self.pid = Some(java().new_global_ref(call!(
+            self.instance.as_obj(),
             "com/revrobotics/CANSparkBase",
             "getPIDController",
             "()Lcom/revrobotics/SparkPIDController;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap());
+        ).l().unwrap()).unwrap());
 
         &self.pid.as_ref().unwrap()
     }
@@ -87,14 +87,14 @@ impl<'local> Spark<'local> {
             return &self.encoder.as_ref().unwrap();
         }
 
-        self.encoder = Some(call!(
-            &self.instance,
+        self.encoder = Some(java().new_global_ref(call!(
+            self.instance.as_obj(),
             "com/revrobotics/CANSparkBase",
             "getEncoder",
             "()Lcom/revrobotics/RelativeEncoder;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap());
+        ).l().unwrap()).unwrap());
 
         &self.encoder.as_ref().unwrap()
 
@@ -127,7 +127,7 @@ impl<'local> Spark<'local> {
     }
 
     pub(crate) fn instance(&self) -> &JObject {
-        &self.instance
+        self.instance.as_obj()
     }
 
     pub fn new(can_id: i32, motor_type: MotorType) -> Self {
@@ -141,7 +141,7 @@ impl<'local> Spark<'local> {
             &[JValue::Int(can_id).as_jni(),
               JValue::Object(&JObject::from_raw(motortype.into_raw())).as_jni()]
         );
-
+        
         Self {
             can_id,
             instance,
@@ -168,9 +168,9 @@ impl<'local> Spark<'local> {
     /// Set the speed of the motor
     ///
     /// `amount` is from -1, 1
-    fn set(&self, amount: f64) {
+    pub fn set(&self, amount: f64) {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "com/revrobotics/CANSparkBase",
             "set",
             "(D)V",
@@ -185,7 +185,7 @@ impl<'local> Spark<'local> {
         let mode = jvm.call_static_method("frc/robot/Wrapper", idle_mode.as_str(), "()Lcom/revrobotics/CANSparkBase$IdleMode;", &Vec::new()).unwrap().l().unwrap();
 
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "com/revrobotics/CANSparkBase",
             "setIdleMode",
             "(Lcom/revrobotics/CANSparkBase$IdleMode;)Lcom/revrobotics/REVLibError",
@@ -196,7 +196,7 @@ impl<'local> Spark<'local> {
 
     pub fn follow(&self, master: Spark, invert: bool) {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "com/revrobotics/CANSparkBase",
             "follow",
             "Lcom/revrobotics/CANSparkBase;Z)Lcom/revrobotics/REVLibError;",
@@ -211,7 +211,7 @@ impl<'local> Spark<'local> {
     /// Stop the motor
     pub fn stop(&self) {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "com/revrobotics/CANSparkBase",
             "stopMotor",
             "()V",
