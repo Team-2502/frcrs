@@ -18,7 +18,6 @@ use jni::sys::jint;
 use jni::{InitArgsBuilder, JNIEnv, JNIVersion, JavaVM};
 use lazy_static::lazy_static;
 use networktables::SmartDashboard;
-use rev::SparkMax;
 
 #[macro_use]
 extern crate uom;

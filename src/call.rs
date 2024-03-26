@@ -66,4 +66,15 @@ macro_rules! create {
     };
 }
 
-pub(crate) use {call, create, call_static};
+macro_rules! once {
+    ($code:expr) => {
+        {
+            static ONCE: OnceCell<JObject> = OnceCell::new();
+
+            ONCE.get_or_init(|| {$code})
+        }
+        
+    };
+}
+
+pub(crate) use {call, create, call_static, once};
