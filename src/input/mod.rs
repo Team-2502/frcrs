@@ -31,7 +31,7 @@ impl RobotState {
             "(I)V",
             &[],
             ReturnType::Primitive(Primitive::Int)
-        ).v().unwrap();
+        );
     
         let mut buttons = bitvec![0; 32];
         buttons[..].store(value);
