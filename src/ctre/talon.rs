@@ -1,23 +1,19 @@
-use jni::objects::{JClass, JMethodID, JObject, JValue};
+use jni::objects::{GlobalRef, JClass, JMethodID, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
 use once_cell::sync::OnceCell;
 use crate::call::{call, create};
 use crate::java;
-
-pub struct Kraken<'local> {
-    pub(crate) instance: JObject<'local>
-}
 
 pub enum ControlMode {
     Percent,
     Position
 }
 
-pub struct Talon<'local> {
-    pub(crate) instance: JObject<'local>
+pub struct Talon {
+    pub(crate) instance: GlobalRef
 }
 
-impl<'local> Talon<'local> {
+impl Talon {
     /// Constructs a new Talon FX motor controller object.
     /// # Parameters:
     /// - id - ID of the device, as configured in Phoenix Tuner.
@@ -33,6 +29,8 @@ impl<'local> Talon<'local> {
                 JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()
             ]
         );
+
+        let instance = java().new_global_ref(instance).unwrap();
 
         Self {
             instance
@@ -53,11 +51,11 @@ impl<'local> Talon<'local> {
                 );
 
                 call!(
-                    &self.instance,
+                    self.instance.as_obj(),
                     "com/ctre/phoenix6/hardware/core/CoreTalonFX",
                     "setControl",
                     "(Lcom/ctre/phoenix6/controls/DutyCycleOut;)Lcom/ctre/phoenix6/StatusCode;",
-                    &[JValue::Object(&JObject::from_raw(control.into_raw())).as_jni()],
+                    &[JValue::Object(&control.as_obj()).as_jni()],
                     ReturnType::Object
                 ).l().unwrap();
             }
@@ -69,11 +67,11 @@ impl<'local> Talon<'local> {
                 );
 
                 call!(
-                    &self.instance,
+                    self.instance.as_obj(),
                     "com/ctre/phoenix6/hardware/core/CoreTalonFX",
                     "setControl",
                     "(Lcom/ctre/phoenix6/controls/PositionDutyCycle;)Lcom/ctre/phoenix6/StatusCode;",
-                    &[JValue::Object(&JObject::from_raw(control.into_raw())).as_jni()],
+                    &[JValue::Object(&control.as_obj()).as_jni()],
                     ReturnType::Object
                 ).l().unwrap();
             }
@@ -83,7 +81,7 @@ impl<'local> Talon<'local> {
     /// Stop the motor
     pub fn stop(&self) {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "com/ctre/phoenix6/hardware/TalonFX",
             "stopMotor",
             "()V",
@@ -95,7 +93,7 @@ impl<'local> Talon<'local> {
     /// Get the current velocity of the motor
     pub fn get_velocity(&self) -> f64 {
         let status_signal = call!(
-            &self.instance,
+            self.instance.as_obj(),
             "com/ctre/phoenix6/hardware/core/CoreTalonFX",
             "getVelocity",
             "()Lcom/ctre/phoenix6/StatusSignal;",
@@ -116,7 +114,7 @@ impl<'local> Talon<'local> {
     /// Get the current position of the motor
     pub fn get_position(&self) -> f64 {
         let status_signal = call!(
-            &self.instance,
+            self.instance.as_obj(),
             "com/ctre/phoenix6/hardware/core/CoreTalonFX",
             "getPosition",
             "()Lcom/ctre/phoenix6/StatusSignal;",
