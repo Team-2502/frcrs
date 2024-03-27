@@ -1,6 +1,8 @@
 mod joystick;
+mod gamepad;
 
 pub use joystick::*;
+pub use gamepad::*;
 
 use j4rs::{Instance, InvocationArg, Jvm};
 use bitvec::prelude::*;
