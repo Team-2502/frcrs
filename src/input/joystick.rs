@@ -31,7 +31,7 @@ impl Joystick {
 
     pub fn get_x(&self) -> f64 {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "edu/wpi/first/wpilibj/Joystick",
             "getX",
             "()D",
@@ -42,7 +42,7 @@ impl Joystick {
 
     pub fn get_y(&self) -> f64 {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "edu/wpi/first/wpilibj/Joystick",
             "getY",
             "()D",
@@ -53,7 +53,7 @@ impl Joystick {
 
     pub fn get_z(&self) -> f64 {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "edu/wpi/first/wpilibj/Joystick",
             "getZ",
             "()D",
@@ -64,7 +64,7 @@ impl Joystick {
 
     pub fn get_throttle(&self) -> f64 {
         call!(
-            &self.instance,
+            self.instance.as_obj(),
             "edu/wpi/first/wpilibj/Joystick",
             "getThrottle",
             "()D",
