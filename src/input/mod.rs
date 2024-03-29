@@ -1,11 +1,13 @@
 mod joystick;
 mod gamepad;
 
+use jni::signature::{Primitive, ReturnType};
 pub use joystick::*;
 pub use gamepad::*;
 
-use j4rs::{Instance, InvocationArg, Jvm};
 use bitvec::prelude::*;
+
+use crate::call::call_static;
 
 pub struct RobotState {
     buttons: BitVec,
@@ -13,18 +15,14 @@ pub struct RobotState {
 
 impl RobotState {
     pub fn get() -> Self { 
-        let jvm = Jvm::attach_thread().unwrap();
-        let value: i32 = jvm
-            .to_rust(
-                jvm.invoke_static(
-                    "edu.wpi.first.hal.DriverStationJNI",
-                    "nativeGetControlWord",
-                    &[],
-                )
-                .unwrap(),
-            )
-            .unwrap();
-
+        let value = call_static!(
+            "edu/wpi/first/hal/DriverStationJNI",
+            "nativeGetControlWord",
+            "()I",
+            &[],
+            ReturnType::Primitive(Primitive::Int)
+        ).i().unwrap();
+    
         let mut buttons = bitvec![0; 32];
         buttons[..].store(value);
         Self { buttons } 

@@ -51,7 +51,7 @@ fn create_jvm() -> JavaVM{
         .build().unwrap();
 
     let jvm = JavaVM::with_libjvm(jvm_args, || Ok("/usr/local/frc/JRE/lib/client/libjvm.so")).unwrap();
-    jvm.attach_current_thread_permanently().unwrap();
+    jvm.attach_current_thread_as_daemon().unwrap();
     jvm
 }
 
@@ -60,7 +60,7 @@ lazy_static!{
 }
 
 fn java() -> JNIEnv<'static> {
-    JAVA.get_env().unwrap()
+    JAVA.attach_current_thread_permanently().unwrap()
 }
 
 /// Map x (within from) to the same relative spot in to

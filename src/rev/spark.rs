@@ -67,7 +67,7 @@ impl Spark {
 
     pub(crate) fn get_controller(&mut self) -> &JObject {
         if self.pid.is_some() {
-            return &self.encoder.as_ref().unwrap();
+            return &self.pid.as_ref().unwrap();
         }
 
         self.pid = Some(java().new_global_ref(call!(
@@ -151,18 +151,7 @@ impl Spark {
     }
 
     pub fn flex(can_id: i32) -> Self {
-        let instance = create!(
-            "frc/robot/Wrapper",
-            "(I)Lcom/revrobotics/CANSparkFlex;",
-            &[JValue::Int(can_id).as_jni()]
-        );
-
-        Self {
-            can_id,
-            instance,
-            encoder: None,
-            pid: None,
-        }
+        Self::new(can_id, MotorType::Brushless)
     }
 
     /// Set the speed of the motor

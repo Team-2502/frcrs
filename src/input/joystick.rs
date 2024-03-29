@@ -3,7 +3,7 @@ use std::time::Instant;
 use bitvec::prelude::*;
 use jni::{objects::{GlobalRef, JObject, JValue}, signature::{Primitive, ReturnType}};
 
-use crate::{call::{call, call_static, create}, java};
+use crate::{call::{call, call_static, create}, java, JAVA};
 
 
 pub struct Joystick {
@@ -15,6 +15,7 @@ pub struct Joystick {
 
 impl Joystick {
     pub fn new(id: i32) -> Self {
+        JAVA.attach_current_thread_as_daemon().unwrap();
         let instance = create!(
             "edu/wpi/first/wpilibj/Joystick",
             "(I)V",
