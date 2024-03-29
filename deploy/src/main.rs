@@ -33,6 +33,12 @@ fn main() -> anyhow::Result<()> {
 
     println!("Target set to {}", addr);
 
+    let mut channel = ssh.channel_session().unwrap();
+
+    channel.exec("/usr/local/frc/bin/frcKillRobot.sh").unwrap();
+
+    channel.send_eof().unwrap();
+
     println!("Deploying executable");
     send_file(Path::new(&args.executable), Path::new("/home/lvuser"), &ssh).unwrap();
 
@@ -42,7 +48,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     println!("Writing to robotCommand");
-    send_string(format!("JAVA_HOME=/usr/local/frc/JRE /home/lvuser/{}",
+    send_string(format!("JAVA_HOME=/usr/local/frc/JRE /home/lvuser/{}\n",
                         Path::new(&args.executable).file_name().unwrap().to_str().unwrap()),
                 Path::new("/home/lvuser/robotCommand"),
                 &ssh).unwrap();
