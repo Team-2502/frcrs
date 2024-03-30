@@ -23,7 +23,7 @@ use uom::si::f64::*;
 use uom::si::length::meter;
 
 
-const TICKS_TO_ROTATIONS: f32 = (1.) / (2048. * 12.8);
+const TICKS_TO_ROTATIONS: f32 = (1.) / (1. * 12.8);
 
 unit! {
     system: uom::si;

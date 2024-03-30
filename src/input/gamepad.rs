@@ -28,6 +28,29 @@ enum Axis {
     RightTrigger = 3,
 }
 
+pub enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+    Other,
+    None,
+}
+
+impl Direction {
+    fn from_degrees(degrees: i32) -> Self {
+        match degrees {
+            0 => Self::Up,
+            90 => Self::Right,
+            180 => Self::Down,
+            270 => Self::Left,
+            -1 => Self::None,
+            _  => Self::Other,
+
+        }
+    }
+}
+
 pub struct Gamepad {
     id: i32,
     instance: GlobalRef,
@@ -142,6 +165,10 @@ impl Gamepad {
         self.button(Buttons::RightBumper as usize)
     }
 
+    pub fn left_stick(&mut self) -> bool {
+        self.button(Buttons::LeftStick as usize)
+    }
+
     pub fn right_stick(&mut self) -> bool {
         self.button(Buttons::RightStick as usize)
     }
@@ -212,5 +239,29 @@ impl Gamepad {
             ],
             ReturnType::Primitive(Primitive::Void)
         );
+    }
+
+    pub fn get_dpad(&self) -> i32 {
+        call!(
+            &self.instance,
+            "edu/wpi/first/wpilibj/GenericHID",
+            "getPOV",
+            "()I",
+            &Vec::new(),
+            ReturnType::Primitive(Primitive::Int)
+        ).i().unwrap()
+    }
+
+    pub fn get_dpad_direction(&self) -> Direction {
+        Direction::from_degrees(
+            call!(
+                &self.instance,
+                "edu/wpi/first/wpilibj/GenericHID",
+                "getPOV",
+                "()I",
+                &Vec::new(),
+                ReturnType::Primitive(Primitive::Int)
+            ).i().unwrap()
+        )
     }
 }

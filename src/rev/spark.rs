@@ -47,7 +47,7 @@ impl Spark {
             "(DLcom/revrobotics/CANSparkBase$ControlType;ID)Lcom/revrobotics/REVLibError;",
             &[JValue::Double(value).as_jni(),
               JValue::Object(&JObject::from_raw(control_type.as_raw())).as_jni(),
-              JValue::Int(1).as_jni(), // PID 0, TODO: handle multiple
+              JValue::Int(0).as_jni(), // PID 0, TODO: handle multiple
               JValue::Double(feed_forward).as_jni(),
             ],
             ReturnType::Object

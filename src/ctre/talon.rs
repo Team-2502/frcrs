@@ -1,7 +1,7 @@
 use jni::objects::{GlobalRef, JClass, JMethodID, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
 use once_cell::sync::OnceCell;
-use crate::call::{call, create};
+use crate::call::{call, call_static, create};
 use crate::java;
 
 pub enum ControlMode {
@@ -122,12 +122,11 @@ impl Talon {
             ReturnType::Object
         ).l().unwrap();
 
-        call!(
-            &status_signal,
-            "com/ctre/phoenix6/StatusSignal",
+        call_static!(
+            "frc/robot/Wrapper",
             "getValue",
-            "()Ljava/lang/Object;",
-            &Vec::new(),
+            "(Lcom/ctre/phoenix6/StatusSignal;)D",
+            &[JValue::Object(&status_signal).as_jni()],
             ReturnType::Primitive(Primitive::Double)
         ).d().unwrap()
     }
