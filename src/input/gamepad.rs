@@ -209,8 +209,8 @@ impl Gamepad {
 
         call!(
             self.instance.as_obj(),
-            "com/revrobotics/CANSparkBase",
-            "setIdleMode",
+            "edu/wpi/first/wpilibj/GenericHID",
+            "setRumble",
             "(Ledu/wpi/first/wpilibj/GenericHID$RumbleType;D)V",
             &[JValue::Object(&left).as_jni(),
             JValue::Double(strength).as_jni(),
@@ -231,8 +231,8 @@ impl Gamepad {
 
         call!(
             self.instance.as_obj(),
-            "com/revrobotics/CANSparkBase",
-            "setIdleMode",
+            "edu/wpi/first/wpilibj/GenericHID",
+            "setRumble",
             "(Ledu/wpi/first/wpilibj/GenericHID$RumbleType;D)V",
             &[JValue::Object(&left).as_jni(),
             JValue::Double(strength).as_jni(),
