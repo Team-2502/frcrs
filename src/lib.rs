@@ -8,6 +8,7 @@ pub mod drive;
 pub mod dio;
 #[macro_use]
 pub mod call;
+pub mod led;
 
 use input::Joystick;
 pub use j4rs_derive::call_from_java;
