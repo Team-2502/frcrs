@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     println!("Writing to robotCommand");
-    send_string(format!("JAVA_HOME=/usr/local/frc/JRE /home/lvuser/{}\n",
+    send_string(format!(    "JAVA_HOME=/usr/local/frc/JRE /home/lvuser/{}\n",
                         Path::new(&args.executable).file_name().unwrap().to_str().unwrap()),
                 Path::new("/home/lvuser/robotCommand"),
                 &ssh).unwrap();

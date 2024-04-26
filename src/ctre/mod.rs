@@ -1,10 +1,12 @@
 mod talon;
 mod cancoder;
+mod srx;
 
 use std::f32::consts::{FRAC_2_PI, PI};
 
 pub use talon::*;
 pub use cancoder::*;
+pub use srx::*;
 
 pub enum TalonInvertType {
     CounterClockwise,
