@@ -9,6 +9,7 @@ pub mod dio;
 #[macro_use]
 pub mod call;
 pub mod led;
+pub mod solenoid;
 
 use input::Joystick;
 pub use j4rs_derive::call_from_java;
@@ -48,7 +49,7 @@ fn create_jvm() -> JavaVM{
         .option("-XX:+UseSerialGC")
         .option("-Djava.lang.invoke.stringConcat=BC_SB")
         .option("-Djava.library.path=/usr/local/frc/third-party/lib")
-        .option("-Djava.class.path=/home/lvuser/UpdatedDisco.jar")
+        .option("-Djava.class.path=/home/lvuser/javastub.jar")
         .build().unwrap();
 
     let jvm = JavaVM::with_libjvm(jvm_args, || Ok("/usr/local/frc/JRE/lib/client/libjvm.so")).unwrap();

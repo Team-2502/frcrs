@@ -11,7 +11,7 @@ pub struct SRX {
 impl SRX {
     pub fn new(id: i32) -> Self {
         let instance = create!(
-            "com.ctre.phoenix.motorcontrol.can.TalonSRX",
+            "com/ctre/phoenix/motorcontrol/can/TalonSRX",
             "(I)V",
             &[JValue::Int(id).as_jni()]
         );
@@ -22,21 +22,19 @@ impl SRX {
     }
 
     pub fn set(&self, value: f64) {
-        let string = java().new_string("PercentOutput").unwrap();
-
         let control = call_static!(
-            "com.ctre.phoenix.motorcontrol.TalonSRXControlMode",
-            "valueOf",
-            "(Ljava/lang/String;)Lcom/ctre/phoenix/motorcontrol/TalonSRXControlMode;",
-            &[JValue::Object(&JObject::from(string)).as_jni()],
+            "frc/robot/Wrapper",
+            "srxPercentOut",
+            "()Lcom/ctre/phoenix/motorcontrol/TalonSRXControlMode;",
+            &Vec::new(),
             ReturnType::Object
         ).l().unwrap();
 
         call!(
             &self.instance,
-            "com.ctre.phoenix.motorcontrol.can.TalonSRX",
+            "com/ctre/phoenix/motorcontrol/can/TalonSRX",
             "set",
-            "(Lcom/ctre/phoenix/motorcontrol/TalonSRXControlMode;DLcom/ctre/phoenix/motorcontrol/DemandType;D)V",
+            "(Lcom/ctre/phoenix/motorcontrol/TalonSRXControlMode;D)V",
             &[JValue::Object(&JObject::from(control)).as_jni(), JValue::Double(value).as_jni()],
             ReturnType::Primitive(Void)
         );
