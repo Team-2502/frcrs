@@ -98,4 +98,3 @@ model {
     }
 }
 
-deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(buildRustComponent)
