@@ -98,16 +98,4 @@ model {
     }
 }
 
-tasks.register("buildRustComponent") {
-    dependsOn(build)
-
-    def outputPath = projectDir.toString() + "/src/main/deploy";
-    def rustProjectPath = projectDir.toString() + "/../frcrs";
-
-    exec {
-        workingDir = rustProjectPath;
-        commandLine "cargo", "build", "--release", "-vv"
-    }
-}
-
 deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(buildRustComponent)
