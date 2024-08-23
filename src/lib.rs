@@ -31,7 +31,7 @@ use j4rs::prelude::*;
 use std::convert::TryFrom;
 use std::ops::Range;
 use std::thread::sleep;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use j4rs::InvocationArg;
 use uom::si::angle::degree;
 use uom::si::angle::revolution;
@@ -186,22 +186,21 @@ pub fn alliance_station() -> AllianceStation {
     AllianceStation(station as u8)
 }
 
-/*pub enum Keyword {
-    Auto,
-    Teleop,
-    Practice,
-    Test
+pub async fn sleep_hz(mut instant: Instant, hz: i32) {
+    let elapsed = instant.elapsed().as_secs_f64();
+    let left = (1. / hz as f64 - elapsed).max(0.);
+    tokio::time::sleep(Duration::from_secs_f64(left)).await;
+    instant = Instant::now();
 }
 
-pub fn get_keyword() -> Keyword {
+#[macro_export]
+macro_rules! container {
+    ($fn_name:ident, $($arg:expr),*) => {{
+        let mut last_loop = std::time::Instant::now();
 
-}*/
-
-pub trait Motor {
-    fn set(&self, value: f64);
-    fn stop(&self);
-}
-
-pub trait Encoder {
-    fn get(&self) -> f64;
+        loop {
+            $fn_name($($arg),*).await;
+            sleep_hz(last_loop, 500).await;
+        }
+    }};
 }
