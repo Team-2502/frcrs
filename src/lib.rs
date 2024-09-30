@@ -200,6 +200,8 @@ macro_rules! container {
         let mut last_loop = std::time::Instant::now();
 
         loop {
+            refresh_data();
+
             $fn_name($($arg),*).await;
             sleep_hz(last_loop, 500).await;
         }
