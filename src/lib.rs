@@ -42,7 +42,7 @@ use crate::drive::{Swerve, ToTalonEncoder};
 use crate::navx::NavX;
 use crate::rev::MotorType::Brushless;
 use std::rc::Rc;
-use std::cell::RefCell;
+use std::cell::{BorrowMutError, RefCell, RefMut};
 
 fn create_jvm() -> JavaVM{
     // set JAVA_HOME to /usr/local/frc/JRE/bin/
@@ -246,5 +246,9 @@ impl<T> Subsystem<T> {
         if let Ok(mut borrowed) = self.subsystem.try_borrow_mut() {
             f(&mut borrowed).await;
         }
+    }
+
+    pub fn try_borrow_mut(&self) -> Result<RefMut<T>, BorrowMutError> {
+        self.subsystem.try_borrow_mut()
     }
 }
