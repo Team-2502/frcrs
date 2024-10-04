@@ -1,3 +1,4 @@
+use std::env;
 use axum::{
     extract::{Extension, Json, Path},
     routing::{get, post, put},
@@ -102,9 +103,8 @@ async fn frontend(Path(path): Path<Vec<String>>) -> impl IntoResponse {
 
     let mime_type = mime_guess::from_path(path.clone()).first_or_text_plain();
 
-    let dir = PathBuf::from(format!("{}/frontend/{}", std::env::var("CARGO_MANIFEST_DIR").unwrap(), path));
-
-    info!("{:?}", dir.clone());
+    let dir = PathBuf::from(format!("/home/lvuser/talon-board/out/{}", path));
+    //let dir = PathBuf::from(format!("{}/frontend/{}", env::var("CARGO_MANIFEST_DIR").unwrap(), path));
 
     match File::open(dir.clone()).await {
         Err(_) => Response::builder()
@@ -180,4 +180,16 @@ async fn set_telemetry_value(
     }
 
     json!({"status": "success"}).to_string().into_response()
+}
+
+pub struct Chooser<T> {
+    options: Vec<T>
+}
+
+impl<T> Chooser<T> {
+    pub fn new(options: Vec<T>) -> Self {
+        Self {
+            options
+        }
+    }
 }
