@@ -1,8 +1,13 @@
 use std::collections::HashMap;
 
 use j4rs::{Instance, InvocationArg, Jvm};
+use jni::objects::{GlobalRef, JObject, JValue};
+use jni::signature::Primitive::{Int, Void};
+use jni::signature::ReturnType;
 use uom::si::{f64::Angle, angle::radian};
 use nalgebra::Vector2;
+use crate::call::{call, call_static};
+use crate::java;
 
 pub struct SmartDashboard;
 
@@ -50,46 +55,51 @@ impl SmartDashboard {
 
 pub struct Chooser<T> {
     options: Vec<T>,
-    instance: Instance,
+    instance: GlobalRef,
 }
 
 impl<T> Chooser<T> {
     pub fn new() -> Self {
-        let options = Vec::new();
-        let jvm = Jvm::attach_thread().unwrap();
+        let instance = call_static!(
+            "frc/robot/Wrapper",
+            "createIntegerSendableChooser",
+            "()Ledu/wpi/first/wpilibj/smartdashboard/SendableChooser;",
+            &Vec::new(),
+            ReturnType::Object
+        ).l().unwrap();
 
-            let instance = jvm.invoke_static(
-                "frc.robot.Wrapper",
-                "autoChooser",
-                &Vec::new()).unwrap();
-
-        Self { options, instance }
+        Self {
+            options: Vec::new(),
+            instance: java().new_global_ref(instance).unwrap()
+        }
     }
 
     pub fn add(&mut self, name: &str, option: T) {
         self.options.push(option);
         let idx = self.options.len();
-        let jvm = Jvm::attach_thread().unwrap();
 
-        jvm.invoke(
+        let string = java().new_string(name).unwrap();
+
+        call!(
             &self.instance,
+            "edu/wpi/first/wpilibj/smartdashboard/SendableChooser",
             "addOption",
-            &[
-                InvocationArg::try_from(name.to_owned()).unwrap(),
-                InvocationArg::try_from(idx as i32).unwrap().into_primitive().unwrap(),
-            ],
-        ).unwrap();
+            "(Ljava/lang/String;Ljava/lang/Object;)V",
+            &[JValue::Object(&JObject::from_raw(string.into_raw())).as_jni(),
+                JValue::Int(idx as i32).as_jni()],
+            ReturnType::Primitive(Void)
+        ).v().unwrap();
     }
 
     pub fn get(&self) -> i32 {
-        let jvm = Jvm::attach_thread().unwrap();
-        let idx: i32 = jvm.to_rust(jvm.invoke(
+        call!(
             &self.instance,
+            "edu/wpi/first/wpilibj/smartdashboard/SendableChooser",
             "getSelected",
+            "()Ljava/lang/Object;",
             &Vec::new(),
-        ).unwrap()).unwrap();
-
-        idx
+            ReturnType::Primitive(Int)
+        ).i().unwrap()
     }
 
 }

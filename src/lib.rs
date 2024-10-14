@@ -11,6 +11,7 @@ pub mod call;
 pub mod led;
 pub mod solenoid;
 pub mod telemetry;
+pub mod limelight;
 
 use input::Joystick;
 pub use j4rs_derive::call_from_java;

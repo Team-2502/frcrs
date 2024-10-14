@@ -15,15 +15,16 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.EstimatedRobotPose;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -36,8 +37,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import static edu.wpi.first.wpilibj.RobotBase.isReal;
 
-/// Wrapper to use rev classes in rust, for whatever reason they cannot be accesed from rust directly
 public class Wrapper {
+    public static NetworkTableInstance inst;
+
     public static MotorType kBrushless() {
         return MotorType.kBrushless;
     }
@@ -76,12 +78,34 @@ public class Wrapper {
     }
 
     public static void startNetworkTables() {
-        NetworkTableInstance inst = NetworkTableInstance.getDefault();
+        inst = NetworkTableInstance.getDefault();
         if (isReal()) {
-            inst.startServer("/home/lvuser/networktables.json");
+            inst.startServer();
         } else {
             inst.startServer();
         }
+
+        try {
+            int count = 0;
+
+            while(inst.getNetworkMode().contains(NetworkTableInstance.NetworkMode.kStarting)) {
+                Thread.sleep(10L);
+                ++count;
+                if (count > 100) {
+                    throw new InterruptedException();
+                }
+            }
+        } catch (InterruptedException var3) {
+            System.err.println("timed out while waiting for NT server to start");
+        }
+
+        LiveWindow.setEnabled(false);
+        Shuffleboard.disableActuatorWidgets();
+    }
+
+    public static double test() {
+        System.err.println("Test was called!");
+        return 2.2;
     }
 
     public static AHRS createAHRS() {
@@ -130,6 +154,10 @@ public class Wrapper {
 
     //public static TalonFXInvertType TalonFXCounterClockwise() { return TalonFXInvertType.CounterClockwise; }
 
+    public static SendableChooser<Integer> createIntegerSendableChooser() {
+        return new SendableChooser<Integer>();
+    }
+
     public static SendableChooser<Integer> autoChooser() {
         SendableChooser<Integer> chooser = new SendableChooser<>();
         chooser.addOption("pass on right", 1);
@@ -149,58 +177,11 @@ public class Wrapper {
         SmartDashboard.putData("field", m_field);
     }
 
-    static AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+    public static PneumaticsModuleType revPH() {
+        return PneumaticsModuleType.REVPH;
+    }
 
-    static PhotonCamera cam = new PhotonCamera("Global_Shutter_Camera");
-    static Transform3d robotToCam = new Transform3d(new Translation3d(-0.5, 0.0, 0.5), new Rotation3d(0,0,180)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
-    static PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, cam, robotToCam);
-
-    static Pose2d prevEstimatedRobotPose = new Pose2d();
-
-    public static void updateVisionOdo() {
-        //photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-        Optional<EstimatedRobotPose> robotPose =  photonPoseEstimator.update();
-
-        if (robotPose.isPresent()) {
-            try {
-                // URL to which you want to send the POST request
-                URL url = new URL("http://10.25.2.2:5807/set_position");
-
-                //prevEstimatedRobotPose = robotPose.get().estimatedPose.toPose2d();
-
-                // JSON data to be sent in the request body
-                String jsonData = "{\"x\": " + robotPose.get().estimatedPose.getX() +
-                        ", \"y\": " + robotPose.get().estimatedPose.getY() + ", \"theta\": " +
-                        (robotPose.get().estimatedPose.getRotation().getZ() + Math.PI) + "}";
-
-                System.out.println(jsonData);
-
-                // Open connection
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-                // Set request method
-                connection.setRequestMethod("POST");
-
-                // Set headers
-                connection.setRequestProperty("Content-Type", "application/json");
-
-                // Enable output for the request body
-                connection.setDoOutput(true);
-
-                // Write JSON data to the output stream
-                try (OutputStream outputStream = connection.getOutputStream()) {
-                    byte[] input = jsonData.getBytes("utf-8");
-                    outputStream.write(input, 0, input.length);
-                }
-
-                int responseCode = connection.getResponseCode();
-
-                //System.out.println("Response Code: " + responseCode);
-
-                connection.disconnect();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    public static PneumaticsModuleType ctrePCM() {
+        return PneumaticsModuleType.CTREPCM;
     }
 }
