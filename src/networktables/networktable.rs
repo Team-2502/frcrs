@@ -1,3 +1,4 @@
+use j4rs::Jvm;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
 use crate::call::{call, call_static};
@@ -8,6 +9,17 @@ pub struct NetworkTable {
 }
 
 impl NetworkTable {
+    pub fn init() {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        jvm.invoke_static(
+            "frc.robot.Wrapper",
+            "startNetworkTables",
+            &[]
+        )
+            .unwrap();
+    }
+
     pub fn get_table(name: &str) -> Self {
         let instance = call_static!(
             "edu/wpi/first/networktables/NetworkTableInstance",

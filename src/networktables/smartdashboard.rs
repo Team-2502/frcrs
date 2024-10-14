@@ -12,18 +12,6 @@ use crate::java;
 pub struct SmartDashboard;
 
 impl SmartDashboard {
-    pub fn init() {
-        let jvm = Jvm::attach_thread().unwrap();
-
-        jvm.invoke_static(
-            "frc.robot.Wrapper",
-            "startNetworkTables",
-            &[]
-        )
-            .unwrap();
-    }
-
-
     pub fn put_number(key: String, data: f64) {
         let jvm = Jvm::attach_thread().unwrap();
 
