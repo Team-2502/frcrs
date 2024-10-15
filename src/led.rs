@@ -9,14 +9,14 @@ pub struct Led {
 impl Led {
     pub fn new(port: i32, count: i32) -> Self {
         let instance = create!(
-            "edu.wpi.first.wpilibj.AddressableLED",
+            "edu/wpi/first/wpilibj/AddressableLED",
             "(I)V",
             &[JValue::Int(port).as_jni()]
         );
 
         call!(
             instance.clone(),
-            "edu.wpi.first.wpilibj.AddressableLED",
+            "edu/wpi/first/wpilibj/AddressableLED",
             "setLength",
             "(I)V",
             &[JValue::Int(count).as_jni()],
@@ -24,7 +24,7 @@ impl Led {
         );
         
         let buffer = create!(
-            "edu.wpi.first.wpilibj.AddressableLEDBuffer",
+            "edu/wpi/first/wpilibj/AddressableLEDBuffer",
             "(I)V",
             &[JValue::Int(count).as_jni()]
         );
@@ -33,7 +33,7 @@ impl Led {
 
          call!(
             &instance,
-            "edu.wpi.first.wpilibj.AddressableLED",
+            "edu/wpi/first/wpilibj/AddressableLED",
             "setData",
             "(Ledu/wpi/first/wpilibj/AddressableLEDBuffer;)V",
             &[JValue::Object(obj).as_jni()],
@@ -42,7 +42,7 @@ impl Led {
 
         call!(
             &instance,
-            "edu.wpi.first.wpilibj.AddressableLED",
+            "edu/wpi/first/wpilibj/AddressableLED",
             "start",
             "()V",
             &Vec::new(),
@@ -59,10 +59,10 @@ impl Led {
     pub fn set_rgb(&self, idx: i32, r: i32, g: i32, b: i32) {
         call!(
             &self.buffer,
-            "edu.wpi.first.wpilibj.AddressableLEDBuffer",
+            "edu/wpi/first/wpilibj/AddressableLEDBuffer",
             "setRGB",
             "(IIII)V",
-            &[JValue::Int(idx).as_jni(), JValue::Int(idx).as_jni(), JValue::Int(idx).as_jni(), JValue::Int(idx).as_jni()],
+            &[JValue::Int(idx).as_jni(), JValue::Int(r).as_jni(), JValue::Int(g).as_jni(), JValue::Int(b).as_jni()],
             ReturnType::Primitive(Primitive::Void)
         );
     }
