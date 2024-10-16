@@ -1,18 +1,22 @@
 use std::fs;
-use std::process::Command;
+use std::process::{Command, exit};
 
 use std::io::Write;
 use std::net::Ipv4Addr;
 use std::path::Path;
 use anyhow::{anyhow, Context};
 use ssh2::Session;
+use tracing::error;
 
 pub fn find_rio(team: usize) -> anyhow::Result<Ipv4Addr> {
-    assert!(team/100 <= 255);
+    if !(team / 100 <= 255) {
+        error!("Invalid team number");
+        exit(1);
+    }
 
     for address in [
         Ipv4Addr::new(10, (team/100) as u8, (team%100) as u8, 2),
-        Ipv4Addr::new(172, 22, 11, 2), // usb
+        Ipv4Addr::new(172, 22, 11, 2),
     ] {
         return Ok(address)
     }
@@ -66,7 +70,7 @@ pub fn deploy_lib(path: String, team: String) {
 }
 
 pub fn robot_command(executeable: String, team: String) {
-    let name = std::path::Path::new(&executeable).file_name().unwrap().to_str().unwrap();
+    let name = Path::new(&executeable).file_name().unwrap().to_str().unwrap();
 
     let command = format!("JAVA_HOME {}", name);
 
