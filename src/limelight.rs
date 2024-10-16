@@ -8,16 +8,6 @@ pub struct Limelight {
 }
 
 impl Limelight {
-    pub fn test() -> f64 {
-        call_static!(
-            "frc/robot/Wrapper",
-            "limelightGetTX",
-            "()D",
-            &Vec::new(),
-            ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
-    }
-
     pub fn get_tx(name: &str) -> f64 {
         let string = java().new_string(name).unwrap();
 

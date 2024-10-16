@@ -38,8 +38,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import static edu.wpi.first.wpilibj.RobotBase.isReal;
 
 public class Wrapper {
-    public static NetworkTableInstance inst;
-
     public static MotorType kBrushless() {
         return MotorType.kBrushless;
     }
@@ -78,26 +76,8 @@ public class Wrapper {
     }
 
     public static void startNetworkTables() {
-        inst = NetworkTableInstance.getDefault();
-        if (isReal()) {
-            inst.startServer();
-        } else {
-            inst.startServer();
-        }
-
-        try {
-            int count = 0;
-
-            while(inst.getNetworkMode().contains(NetworkTableInstance.NetworkMode.kStarting)) {
-                Thread.sleep(10L);
-                ++count;
-                if (count > 100) {
-                    throw new InterruptedException();
-                }
-            }
-        } catch (InterruptedException var3) {
-            System.err.println("timed out while waiting for NT server to start");
-        }
+        NetworkTableInstance inst = NetworkTableInstance.getDefault();
+        inst.startServer("/home/lvuser/networktables.json");
 
         LiveWindow.setEnabled(false);
         Shuffleboard.disableActuatorWidgets();
