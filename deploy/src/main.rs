@@ -1,6 +1,6 @@
 use std::{env, fs};
 use std::io::Write;
-use std::net::{IpAddr, SocketAddr, SocketAddrV4, TcpStream};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4, TcpStream};
 use std::path::Path;
 use std::process::{Command, exit};
 use std::time::Duration;
@@ -20,24 +20,15 @@ struct DeployArgs {
 
     executable: String,
 
-    lib: Option<String>
+    lib: Option<String>,
+    frontend: Option<String>,
+    frontend_dest: Option<String>
 }
 
 fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
-    let args = env::args().collect::<Vec<String>>();
-
-    if args[1] == "-b" {
-        info!("Building robotcode");
-
-        let output = Command::new("sh")
-            .args(["-c", "cargo build --release --target arm-unknown-linux-gnueabi"])
-            .output()
-            .expect("Failed to build robotcode");
-
-        std::io::stdout().write_all(&output.stdout).unwrap();
-    }
+    let call_args = env::args().collect::<Vec<String>>();
 
     let toml_str = fs::read_to_string("Cargo.toml").unwrap();
 
@@ -45,7 +36,11 @@ fn main() -> anyhow::Result<()> {
 
     let mut ssh = Session::new()?;
 
-    let addr = find_rio(args.team_number);
+    let mut addr = find_rio(args.team_number);
+
+    if call_args.contains(&"-u".to_owned()) {
+        addr = Ok(Ipv4Addr::new(172, 22, 11, 2))
+    }
 
     let addr = match addr {
         Ok(ipv4) => {
@@ -75,6 +70,57 @@ fn main() -> anyhow::Result<()> {
     ssh.userauth_password("admin", "")?;
     assert!(ssh.authenticated());
 
+    if call_args.contains(&"-b".to_owned()) {
+        info!("Building robotcode");
+
+        let output = Command::new("cargo")
+            .args(["build --release --target arm-unknown-linux-gnueabi"])
+            .output()
+            .expect("Failed to build robotcode");
+
+        std::io::stdout().write_all(&output.stdout).unwrap();
+    }
+
+    if call_args.contains(&"-f".to_owned()) {
+        info!("Deploying frontend");
+
+        let frontend_dir = if args.frontend.as_ref().is_some() {
+            args.frontend.as_ref().unwrap()
+        } else {
+            error!("Frontend directory not specified");
+            exit(1);
+        };
+
+        let frontend_dest = if args.frontend_dest.as_ref().is_some() {
+            args.frontend_dest.as_ref().unwrap()
+        } else {
+            error!("Frontend destination not specified");
+            exit(1);
+        };
+
+        for entry in fs::read_dir(frontend_dir)? {
+            let entry = entry?;
+            let path = entry.path();
+
+            if path.is_file() {
+                info!("Deploying frontend file: {:?}", path.display());
+
+                let remote_dest = Path::new(frontend_dest).join(path.file_name().unwrap());
+                send_file(&path, &remote_dest, &ssh)?;
+            }
+        }
+    }
+
+    if call_args.contains(&"-l".to_owned()) {
+        if let Some(lib) = args.lib {
+            info!("Deploying lib");
+            send_file(Path::new(&lib), Path::new("/home/lvuser"), &ssh).unwrap();
+        } else {
+            error!("Library file not specified");
+            exit(1);
+        }
+    }
+
     let mut channel = ssh.channel_session().unwrap();
 
     channel.exec("/usr/local/frc/bin/frcKillRobot.sh").unwrap();
@@ -86,11 +132,6 @@ fn main() -> anyhow::Result<()> {
 
     info!("Deploying executable");
     send_file(Path::new(&args.executable), Path::new("/home/lvuser"), &ssh).unwrap();
-
-    if let Some(lib) = args.lib {
-        info!("Deploying lib");
-        send_file(Path::new(&lib), Path::new("/home/lvuser"), &ssh).unwrap();
-    }
 
     info!("Writing to robotCommand");
     send_string(format!(    "JAVA_HOME=/usr/local/frc/JRE /home/lvuser/{}\n",
