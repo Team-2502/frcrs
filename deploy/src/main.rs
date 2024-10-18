@@ -1,37 +1,79 @@
-use std::net::{SocketAddrV4, TcpStream};
+use std::{env, fs};
+use std::io::Write;
+use std::net::{IpAddr, SocketAddr, SocketAddrV4, TcpStream};
 use std::path::Path;
-use clap::Parser;
+use std::process::{Command, exit};
+use std::time::Duration;
+use tracing::{error, info};
 use ssh2::Session;
 use deploy::{find_rio, send_file, send_string};
+use serde::{Deserialize, Serialize};
 
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[derive(Deserialize, Debug)]
 struct Args {
-    #[arg(short, long)]
+    deploy: Option<DeployArgs>
+}
+
+#[derive(Deserialize, Debug)]
+struct DeployArgs {
     team_number: usize,
 
-    #[arg(short, long)]
     executable: String,
 
-    #[arg(short, long)]
     lib: Option<String>
 }
 
 fn main() -> anyhow::Result<()> {
-    let args = Args::parse();
+    tracing_subscriber::fmt::init();
+
+    let args = env::args().collect::<Vec<String>>();
+
+    if args[1] == "-b" {
+        info!("Building robotcode");
+
+        let output = Command::new("sh")
+            .args(["-c", "cargo build --release --target arm-unknown-linux-gnueabi"])
+            .output()
+            .expect("Failed to build robotcode");
+
+        std::io::stdout().write_all(&output.stdout).unwrap();
+    }
+
+    let toml_str = fs::read_to_string("Cargo.toml").unwrap();
+
+    let mut args: DeployArgs = toml::from_str::<Args>(&*toml_str).unwrap().deploy.unwrap();
 
     let mut ssh = Session::new()?;
 
-    let addr = find_rio(args.team_number).unwrap();
+    let addr = find_rio(args.team_number);
 
-    let rio = TcpStream::connect(SocketAddrV4::new(addr, 22))?;
+    let addr = match addr {
+        Ok(ipv4) => {
+            info!("Rio address parsed: {:?}", ipv4);
+            ipv4
+        }
+        Err(e) => {
+            error!("Failed to parse team number: {:?}", e);
+            exit(1)
+        }
+    };
+
+    let rio = TcpStream::connect_timeout(&SocketAddr::new(IpAddr::from(addr), 22), Duration::from_secs_f64(4.));
+    let rio = match rio {
+        Ok(stream) => {
+            info!("Connected to rio");
+            stream
+        }
+        Err(e) => {
+            error!("Failed to connect to to rio: {}", e);
+            exit(1)
+        }
+    };
     ssh.set_tcp_stream(rio);
     ssh.handshake()?;
 
     ssh.userauth_password("admin", "")?;
     assert!(ssh.authenticated());
-
-    println!("Target set to {}", addr);
 
     let mut channel = ssh.channel_session().unwrap();
 
@@ -39,15 +81,18 @@ fn main() -> anyhow::Result<()> {
 
     channel.send_eof().unwrap();
 
-    println!("Deploying executable");
+    channel = ssh.channel_session().unwrap();
+    channel.exec(format!("rm {}", Path::new(&args.executable).file_name().unwrap().to_str().unwrap()).as_str()).unwrap();
+
+    info!("Deploying executable");
     send_file(Path::new(&args.executable), Path::new("/home/lvuser"), &ssh).unwrap();
 
     if let Some(lib) = args.lib {
-        println!("Deploying lib");
+        info!("Deploying lib");
         send_file(Path::new(&lib), Path::new("/home/lvuser"), &ssh).unwrap();
     }
 
-    println!("Writing to robotCommand");
+    info!("Writing to robotCommand");
     send_string(format!(    "JAVA_HOME=/usr/local/frc/JRE /home/lvuser/{}\n",
                         Path::new(&args.executable).file_name().unwrap().to_str().unwrap()),
                 Path::new("/home/lvuser/robotCommand"),

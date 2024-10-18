@@ -11,6 +11,7 @@ pub mod call;
 pub mod led;
 pub mod solenoid;
 pub mod telemetry;
+pub mod limelight;
 
 use input::Joystick;
 pub use j4rs_derive::call_from_java;
@@ -42,7 +43,8 @@ use crate::drive::{Swerve, ToTalonEncoder};
 use crate::navx::NavX;
 use crate::rev::MotorType::Brushless;
 use std::rc::Rc;
-use std::cell::RefCell;
+use std::cell::{BorrowMutError, RefCell, RefMut};
+use crate::input::RobotState;
 
 fn create_jvm() -> JavaVM{
     // set JAVA_HOME to /usr/local/frc/JRE/bin/
@@ -196,11 +198,20 @@ pub async fn sleep_hz(mut instant: Instant, hz: i32) {
 
 #[macro_export]
 macro_rules! container {
-    ($fn_name:ident, $($arg:expr),*) => {{
+    ($teleop:ident, $auto:ident, $($arg:expr),*) => {{
         let mut last_loop = std::time::Instant::now();
 
         loop {
-            $fn_name($($arg),*).await;
+            refresh_data();
+
+            let state = RobotState::get();
+
+            if state.enabled() && state.teleop() {
+                $teleop($($arg),*).await;
+            } else if state.enabled() && state.auto() {
+                $auto($($arg),*).await;
+            }
+            
             sleep_hz(last_loop, 500).await;
         }
     }};
@@ -244,5 +255,9 @@ impl<T> Subsystem<T> {
         if let Ok(mut borrowed) = self.subsystem.try_borrow_mut() {
             f(&mut borrowed).await;
         }
+    }
+
+    pub fn try_borrow_mut(&self) -> Result<RefMut<T>, BorrowMutError> {
+        self.subsystem.try_borrow_mut()
     }
 }
