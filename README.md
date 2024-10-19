@@ -63,7 +63,7 @@ See an example [here](https://github.com/Team-2502/frcrs-template/tree/disco)
     ```toml
     [deploy]
     team_number = 2502
-    executable = "target/arm-unknown-linux-gnueabi/release\\robotcode"
+    executable = "target/arm-unknown-linux-gnueabi/release/robotcode"
     lib = "javastub.jar"
     frontend = "talon-board/out"
     frontend_dest = "/home/lvuser/talon-board/out"
