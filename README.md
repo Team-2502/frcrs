@@ -58,6 +58,16 @@ See an example [here](https://github.com/Team-2502/frcrs-template/tree/disco)
    ```
 7. Add directory to path `$HOME/.gradle/toolchains/frc/YYYY/roborio/bin` where `YYYY` is the year of the toolchain
 8. Build frcrs with `cargo build --release --target arm-unknown-linux-gnueabi`
+9. Create robotcode, see an example [here](https://github.com/Team-2502/frcrs-template/tree/disco)
+10. Deploy your code, see deploy crate for deployment. An example toml is here
+    ```toml
+    [deploy]
+    team_number = 2502
+    executable = "target/arm-unknown-linux-gnueabi/release\\robotcode"
+    lib = "javastub.jar"
+    frontend = "talon-board/out"
+    frontend_dest = "/home/lvuser/talon-board/out"
+    ```
 
 # Contributing
 We welcome contributions! If you have suggestions for improvements or find bugs, feel free to create an issue or submit a pull request.
