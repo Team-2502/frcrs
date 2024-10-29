@@ -1,3 +1,4 @@
+use bitvec::macros::internal::funty::Fundamental;
 use j4rs::Jvm;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
@@ -42,5 +43,17 @@ impl Limelight {
             &[JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()],
             ReturnType::Primitive(Primitive::Double)
         ).d().unwrap()
+    }
+
+    pub fn get_tid(name: &str) -> i32 {
+        let string = java().new_string(name).unwrap();
+        let id_float = call_static!(
+            "frc/robot/LimelightHelpers",
+            "getFiducialID",
+            "(Ljava/lang/String;)D",
+            &[JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()],
+            ReturnType::Primitive(Primitive::Double)
+        ).d().unwrap();
+        id_float.as_i32()
     }
 }
