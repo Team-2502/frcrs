@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-
-use j4rs::{Instance, InvocationArg, Jvm};
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::Primitive::{Int, Void};
 use jni::signature::ReturnType;
@@ -13,31 +10,27 @@ pub struct SmartDashboard;
 
 impl SmartDashboard {
     pub fn put_number(key: String, data: f64) {
-        let jvm = Jvm::attach_thread().unwrap();
+        let key = java().new_string(key).unwrap();
 
-        jvm.invoke_static(
-            "edu.wpi.first.wpilibj.smartdashboard.SmartDashboard",
+        call_static!(
+            "edu/wpi/first/wpilibj/smartdashboard/SmartDashboard",
             "putNumber",
-            &[
-                InvocationArg::try_from(key).unwrap(),
-                InvocationArg::try_from(data).unwrap().into_primitive().unwrap(),
-            ]
-        )
-        .unwrap();
+            "(Ljava/lang/String;D)V",
+            &[JValue::Object(&JObject::from_raw(key.into_raw())).as_jni(), JValue::Double(data).as_jni()],
+            ReturnType::Primitive(Void)
+        ).v().unwrap()
     }
 
     pub fn put_bool(key: String, data: bool) {
-        let jvm = Jvm::attach_thread().unwrap();
+        let key = java().new_string(key).unwrap();
 
-        jvm.invoke_static(
-            "edu.wpi.first.wpilibj.smartdashboard.SmartDashboard",
+        call_static!(
+            "edu/wpi/first/wpilibj/smartdashboard/SmartDashboard",
             "putBoolean",
-            &[
-                InvocationArg::try_from(key).unwrap(),
-                InvocationArg::try_from(data).unwrap().into_primitive().unwrap(),
-            ]
-        )
-        .unwrap();
+            "(Ljava/lang/String;Z)V",
+            &[JValue::Object(&JObject::from_raw(key.into_raw())).as_jni(), JValue::Bool(data).as_jni()],
+            ReturnType::Primitive(Void)
+        ).v().unwrap()
     }
 }
 
@@ -92,6 +85,7 @@ impl<T> Chooser<T> {
 
 }
 
+/*
 pub fn set_position(position: Vector2<f64>, angle: Angle) {
     let jvm = Jvm::attach_thread().unwrap();
 
@@ -108,3 +102,4 @@ pub fn set_position(position: Vector2<f64>, angle: Angle) {
     )
     .unwrap();
 }
+*/
