@@ -1,5 +1,4 @@
 use bitvec::macros::internal::funty::Fundamental;
-use j4rs::Jvm;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
 use crate::java;

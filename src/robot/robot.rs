@@ -1,4 +1,3 @@
-use j4rs::Jvm;
 use crate::robot::{Command, Subsystem};
 
 pub struct Robot {

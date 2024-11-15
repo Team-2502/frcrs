@@ -14,7 +14,6 @@ pub mod telemetry;
 pub mod limelight;
 
 use input::Joystick;
-pub use j4rs_derive::call_from_java;
 use jni::objects::{JObject, JString, JValue, JValueGen};
 use jni::signature::Primitive;
 use jni::strings::JNIString;
@@ -28,12 +27,10 @@ extern crate uom;
 
 use crate::rev::ControlType::Position;
 use crate::rev::{IdleMode, MotorType, Spark, };
-use j4rs::prelude::*;
 use std::convert::TryFrom;
 use std::ops::Range;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
-use j4rs::InvocationArg;
 use uom::si::angle::degree;
 use uom::si::angle::revolution;
 use uom::si::f64::*;

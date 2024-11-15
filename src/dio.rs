@@ -1,4 +1,3 @@
-use j4rs::{Jvm, InvocationArg, Instance};
 use jni::{objects::{GlobalRef, JObject, JValue}, signature::{Primitive, ReturnType}};
 
 use crate::call::*;
