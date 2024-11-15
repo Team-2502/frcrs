@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "A robotics control framework designed to streamline the development of control systems for FRC robots"
+repository = "https://github.com/Team-2502/frcrs"
+exclude = [
+    "javastub/",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
