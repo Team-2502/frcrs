@@ -1,6 +1,7 @@
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::Primitive::{Int, Void};
 use jni::signature::ReturnType;
+use jni::sys::jboolean;
 use uom::si::{f64::Angle, angle::radian};
 use nalgebra::Vector2;
 use crate::call::{call, call_static};
@@ -28,7 +29,7 @@ impl SmartDashboard {
             "edu/wpi/first/wpilibj/smartdashboard/SmartDashboard",
             "putBoolean",
             "(Ljava/lang/String;Z)V",
-            &[JValue::Object(&JObject::from_raw(key.into_raw())).as_jni(), JValue::Bool(data).as_jni()],
+            &[JValue::Object(&JObject::from_raw(key.into_raw())).as_jni(), JValue::Bool(jboolean::from(data)).as_jni()],
             ReturnType::Primitive(Void)
         ).v().unwrap()
     }
