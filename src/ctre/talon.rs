@@ -9,16 +9,38 @@ pub enum ControlMode {
     Position
 }
 
+/// Represents a motor controller of type `TalonFX`.
+///
+/// The `Talon` struct provides methods to instantiate a new `TalonFX` motor controller
+/// and set its output.
+///
+/// # Example
+///
+/// ```rust
+/// use frcrs::ctre::ControlMode;
+/// use crate::ctre::talon::TalonFX;
+///
+/// let motor = Talon::new(1, None);  // Creates a new TalonSRX motor controller with ID 1
+/// motor.set(ControlMode::Percent, 0.5);           // Sets the motor output to 50%
+/// ```
 pub struct Talon {
     pub(crate) instance: GlobalRef
 }
 
 impl Talon {
-    /// Constructs a new Talon FX motor controller object.
-    /// # Parameters:
-    /// - id - ID of the device, as configured in Phoenix Tuner.
-    /// - can_bus - Name of the CAN bus this device is on,
-    /// None will select rio
+    /// Creates a new Talon motor controller instance.
+    ///
+    /// # Arguments
+    /// - `id`: The numerical identifier for the motor controller.
+    /// - `can_bus`: An optional string specifying the CAN bus on which the motor controller is connected. Defaults to "rio" if not provided.
+    ///
+    /// # Returns
+    /// A new instance of `Talon`.
+    ///
+    /// # Example
+    /// ```rust
+    /// let talon = Talon::new(1, Some("can0".to_string()));
+    /// ```
     pub fn new(id: i32, can_bus: Option<String>) -> Self {
         let string = java().new_string(can_bus.unwrap_or("rio".to_string())).unwrap();
 
@@ -37,10 +59,16 @@ impl Talon {
         }
     }
 
-    /// Request selected output for motor controller
-    /// # Paramaters
-    /// - control_mode: the requested control mode [ControlMode]
-    /// - amount: the amount requested for the control
+    /// Sets the output for the motor controller.
+    ///
+    /// # Arguments
+    /// - `control_mode`: The control mode for the motor (e.g., `ControlMode::Percent` or `ControlMode::Position`).
+    /// - `amount`: The desired output amount (e.g., a percentage for `ControlMode::Percent` or a position value for `ControlMode::Position`).
+    ///
+    /// # Example
+    /// ```rust
+    /// talon.set(ControlMode::Percent, 0.5);
+    /// ```
     pub fn set(&self, control_mode: ControlMode, amount: f64) {
         match control_mode {
             ControlMode::Percent => {
@@ -90,7 +118,15 @@ impl Talon {
         ).v().unwrap()
     }
 
-    /// Get the current velocity of the motor
+    /// Retrieves the current velocity of the motor.
+    ///
+    /// # Returns
+    /// A `f64` value representing the motor's current velocity.
+    ///
+    /// # Example
+    /// ```rust
+    /// let velocity = talon.get_velocity();
+    /// ```
     pub fn get_velocity(&self) -> f64 {
         let status_signal = call!(
             self.instance.as_obj(),
@@ -111,7 +147,15 @@ impl Talon {
         ).d().unwrap()
     }
 
-    /// Get the current position of the motor
+    /// Retrieves the current position of the motor.
+    ///
+    /// # Returns
+    /// A `f64` value representing the motor's current position.
+    ///
+    /// # Example
+    /// ```rust
+    /// let position = talon.get_position();
+    /// ```
     pub fn get_position(&self) -> f64 {
         let status_signal = call!(
             self.instance.as_obj(),
