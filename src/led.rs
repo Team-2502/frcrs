@@ -65,5 +65,32 @@ impl Led {
             ReturnType::Primitive(Primitive::Void)
         );
     }
+
+    pub fn set_data(&self) {
+        call!(
+            &self.instance,
+            "edu/wpi/first/wpilibj/AddressableLED",
+            "setData",
+            "(Ledu/wpi/first/wpilibj/AddressableLEDBuffer;)V",
+            &[JValue::Object(self.buffer.as_obj()).as_jni()],
+            ReturnType::Primitive(Primitive::Void)
+        );
+    }
+
+    pub fn start(&self) {
+        call!(
+            &self.instance,
+            "edu/wpi/first/wpilibj/AddressableLED",
+            "start",
+            "()V",
+            &Vec::new(),
+            ReturnType::Primitive(Primitive::Void)
+        );
+    }
+
+    pub fn flush(&self) {
+        self.set_data();
+        self.start();
+    }
 }
 
