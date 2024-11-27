@@ -10,11 +10,12 @@ fn main() {
     let out = env::var("OUT_DIR").unwrap();
     let file = Path::new(&out).join("bindings.rs");
     let class_name = vec![
+        "com.ctre.phoenix6.hardware.TalonFX",
         "edu.wpi.first.hal.HAL",
         "edu.wpi.first.wpilibj.DriverStation",
         "edu.wpi.first.hal.DriverStationJNI"
     ];
-    let class_path = Some("Z:\\frcrs\\hal-sys\\unwrapped".to_string());
+    let class_path = Some("unwrapped".to_string());
 
     let options = vec![
         "-XX:+UseSerialGC".to_string(),

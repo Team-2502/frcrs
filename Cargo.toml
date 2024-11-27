@@ -1,6 +1,3 @@
-[workspace]
-members = ["hal-sys"]
-
 [package]
 name = "frcrs"
 version = "0.1.0"
@@ -8,5 +5,8 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[build-dependencies]
+auto-jni = { path = "E:\\auto-jni" }
+
 [dependencies]
-hal-sys = { path = "hal-sys" }
+auto-jni = { path = "E:\\auto-jni" }
