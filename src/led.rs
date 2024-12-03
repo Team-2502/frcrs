@@ -1,5 +1,6 @@
 use jni::{objects::{GlobalRef, JObject, JValue}, signature::{Primitive, ReturnType}};
 
+#[derive(Clone)]
 pub struct Led {
     instance: GlobalRef,
     buffer: GlobalRef
