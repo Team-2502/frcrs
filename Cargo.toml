@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-auto-jni = { path = "E:\\auto-jni" }
+auto-jni = { path = "../programming/auto-jni" }
 
 [dependencies]
-auto-jni = { path = "E:\\auto-jni" }
+auto-jni = { path = "../programming/auto-jni" }

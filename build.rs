@@ -13,9 +13,15 @@ fn main() {
         "com.ctre.phoenix6.hardware.TalonFX",
         "edu.wpi.first.hal.HAL",
         "edu.wpi.first.wpilibj.DriverStation",
-        "edu.wpi.first.hal.DriverStationJNI"
+        "edu.wpi.first.hal.DriverStationJNI",
+        "com.ctre.phoenix6.controls.DutyCycleOut",
+        "com.ctre.phoenix6.controls.PositionDutyCycle",
+        "com.ctre.phoenix6.hardware.core.CoreTalonFX",
+        "com.ctre.phoenix6.StatusSignal",
+        "com.ctre.phoenix.motorcontrol.can.TalonSRX",
+        "com.ctre.phoenix.motorcontrol.TalonSRXControlMode"
     ];
-    let class_path = Some("unwrapped".to_string());
+    let class_path = Some("/Users/64001830/unwrapped".to_string());
 
     let options = vec![
         "-XX:+UseSerialGC".to_string(),
