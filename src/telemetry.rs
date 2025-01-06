@@ -61,7 +61,7 @@ impl Telemetry {
         }
     }
 
-    pub async fn add_number(&self, key: &str, value: i32) {
+    pub async fn add_number(&self, key: &str, value: f64) {
         self.add_string(key, value.to_string()).await;
     }
 
