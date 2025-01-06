@@ -11,8 +11,6 @@ use axum::body::Body;
 use axum::http::{header, HeaderValue, Response, StatusCode};
 use axum::response::IntoResponse;
 use tokio::sync::{Mutex, RwLock};
-use tracing::info;
-use tracing_subscriber;
 use serde_json::json;
 use serde::{Deserialize, Serialize};
 use tokio::fs::File;
@@ -34,8 +32,6 @@ pub struct Telemetry {
 
 impl Telemetry {
     pub fn new(port: u16) -> Self {
-        tracing_subscriber::fmt::init();
-
         let shared_state = AppState {
             telemetry_data: RwLock::new(vec![]),
         };
@@ -49,7 +45,7 @@ impl Telemetry {
             .layer(Extension(shared_state.clone()));
 
         let addr = SocketAddr::from(([0, 0, 0, 0], port));
-        info!("Listening on {}", addr);
+        println!("Listening on {}", addr);
 
         tokio::spawn(async move {
             let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
