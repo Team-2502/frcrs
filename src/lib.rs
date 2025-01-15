@@ -41,6 +41,8 @@ use crate::navx::NavX;
 use crate::rev::MotorType::Brushless;
 use std::rc::Rc;
 use std::cell::{BorrowMutError, RefCell, RefMut};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use crate::input::RobotState;
 
 fn create_jvm() -> JavaVM{
@@ -212,49 +214,4 @@ macro_rules! container {
             sleep_hz(last_loop, 500).await;
         }
     }};
-}
-
-pub struct Subsystem<
-    T: ?Sized,
-> {
-    subsystem: Rc<RefCell<T>>
-}
-
-impl<T> Clone for Subsystem<T> {
-    fn clone(&self) -> Self {
-        Self {
-            subsystem: self.subsystem.clone(),
-        }
-    }
-}
-
-impl<T> Subsystem<T> {
-    pub fn new(subsystem: T) -> Self {
-        Self {
-            subsystem: Rc::new(RefCell::new(subsystem)),
-        }
-    }
-
-    pub fn with_borrow_mut<F>(&self, mut f: F)
-    where
-        F: FnOnce(&mut T),
-    {
-        if let Ok(mut borrowed) = self.subsystem.try_borrow_mut() {
-            f(&mut borrowed);
-        }
-    }
-
-    pub async fn with_borrow_mut_async<F, Fut>(&self, f: F)
-    where
-        F: FnOnce(&mut T) -> Fut,
-        Fut: std::future::Future<Output = ()>,
-    {
-        if let Ok(mut borrowed) = self.subsystem.try_borrow_mut() {
-            f(&mut borrowed).await;
-        }
-    }
-
-    pub fn try_borrow_mut(&self) -> Result<RefMut<T>, BorrowMutError> {
-        self.subsystem.try_borrow_mut()
-    }
 }
