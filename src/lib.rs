@@ -13,6 +13,7 @@ pub mod telemetry;
 pub mod limelight;
 
 use std::any::TypeId;
+use std::cmp::PartialEq;
 use std::collections::HashMap;
 use std::future::Future;
 use std::hash::{Hash, Hasher};
@@ -206,7 +207,7 @@ macro_rules! container {
 
 use tokio::task::{spawn_local, AbortHandle, LocalSet};
 use tokio::time::{interval, sleep};
-use crate::input::RobotState;
+use crate::input::{RobotMode, RobotState};
 
 struct TaskId(String);
 
@@ -313,40 +314,68 @@ pub trait Robot {
 
             observe_user_program_starting();
 
-            let mut previous_state = RobotState::get();
+            let mut previous_mode = RobotMode::Disabled;
             let mut last_loop = Instant::now();
             let mut dt = Duration::from_millis(0);
 
             loop {
                 refresh_data();
 
-                let state = RobotState::get();
+                let state = RobotState::get().mode();
 
-                // State transition logic
-                if !state.enabled() && previous_state.enabled() {
-                    self.disabled_init();
-                } else if state.enabled() {
-                    if state.auto() && !previous_state.auto() {
-                        self.autonomous_init();
-                    } else if state.teleop() && !previous_state.teleop() {
-                        self.teleop_init();
-                    } else if state.test() && !previous_state.test() {
-                        self.test_init();
+                // if state != previous_mode {
+                //     if state == RobotMode::Disabled {
+                //         self.disabled_init();
+                //         previous_mode = RobotMode::Disabled;
+                //     } else {
+                //         match state {
+                //             RobotMode::Auto => {
+                //                 self.autonomous_init();
+                //                 previous_mode = RobotMode::Auto;
+                //             }
+                //             RobotMode::Teleop => {
+                //                 self.teleop_init();
+                //                 previous_mode = RobotMode::Teleop;
+                //             }
+                //             RobotMode::Test => {
+                //                 self.test_init();
+                //                 previous_mode = RobotMode::Test;
+                //             }
+                //             RobotMode::Disabled => {}
+                //         }
+                //     }
+                // }
+
+                if state != previous_mode {
+                    match state {
+                        RobotMode::Disabled => {
+                            self.disabled_init();
+                            previous_mode = RobotMode::Disabled;
+                        }
+                        RobotMode::Auto => {
+                            self.autonomous_init();
+                            previous_mode = RobotMode::Auto;
+                        }
+                        RobotMode::Teleop => {
+                            self.teleop_init();
+                            previous_mode = RobotMode::Teleop;
+                        }
+                        RobotMode::Test => {
+                            self.test_init();
+                            previous_mode = RobotMode::Test;
+                        }
                     }
                 }
 
-                // Periodic logic
-                if !state.enabled() {
-                    self.disabled_periodic();
-                } else if state.auto() {
-                    self.autonomous_periodic();
-                } else if state.teleop() {
-                    self.teleop_periodic();
-                } else if state.test() {
-                    self.test_periodic();
+                match state {
+                    RobotMode::Disabled => self.disabled_periodic(),
+                    RobotMode::Auto => self.autonomous_periodic(),
+                    RobotMode::Teleop => self.teleop_periodic(),
+                    RobotMode::Test => self.test_periodic(),
                 }
 
-                previous_state = state;
+
+                previous_mode = state.clone();
 
                 // Enforce a periodic loop delay
                 dt = last_loop.elapsed();
