@@ -68,7 +68,7 @@ impl Swerve {
     }
 
     pub fn optimize(target_speed: f64, target_angle: f64, current_angle: f64) -> (f64, f64) {
-        let mut target_angle = Self::place_in_appropriate_0_to_360_scope(current_angle, target_angle);
+        let target_angle = Self::place_in_appropriate_0_to_360_scope(current_angle, target_angle);
         //println!("{}", target_angle);
 
         let delta = target_angle - current_angle;

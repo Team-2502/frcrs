@@ -2,7 +2,6 @@ use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::Primitive::Void;
 use jni::signature::ReturnType;
 use jni::sys::jboolean;
-use crate::java;
 
 pub struct Solenoid {
     instance: GlobalRef

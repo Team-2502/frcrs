@@ -28,7 +28,8 @@ prometheus = "0.13.4"
 tokio = { version = "1.39.2", features = ["full"] }
 mime_guess = "2.0.5"
 include_dir = "0.7.3"
-reqwest = { version = "0.11", features = ["json"] }
+async-trait = "0.1.83"
+reqwest = { version = "0.11", features = ["json", "rustls-tls"], default-features = false }
 thiserror = "2.0.11"
 
 [workspace]

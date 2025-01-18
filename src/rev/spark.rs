@@ -1,4 +1,4 @@
-use crate::call::{self, call, call_static, create, once};
+use crate::call::{call, create, once};
 use crate::java;
 use crate::rev::{ControlType, IdleMode, MotorType, };
 use jni::objects::{GlobalRef, JObject, JValue};

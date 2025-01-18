@@ -2,6 +2,9 @@ use thiserror::Error;
 use std::net::{Ipv4Addr, SocketAddr};
 use std::time::Duration;
 use bitvec::macros::internal::funty::Fundamental;
+use jni::objects::{GlobalRef, JObject, JValue};
+use jni::signature::{Primitive, ReturnType};
+use crate::java;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 

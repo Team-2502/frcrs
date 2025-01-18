@@ -1,4 +1,4 @@
-use jni::{objects::{GlobalRef, JObject, JValue}, signature::{Primitive, ReturnType}};
+use jni::{objects::{GlobalRef, JValue}, signature::{Primitive, ReturnType}};
 
 #[derive(Clone)]
 pub struct Led {

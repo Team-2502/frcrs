@@ -1,9 +1,10 @@
+use std::future::Future;
 use std::time::Instant;
 
 use bitvec::prelude::*;
 use jni::{objects::{GlobalRef, JObject, JValue}, signature::{Primitive, ReturnType}};
 use once_cell::sync::OnceCell;
-
+use tokio::task::LocalSet;
 use crate::{call::{call, call_static, create, once}, java};
 
 // https://github.com/wpilibsuite/allwpilib/blob/main/wpilibj/src/main/java/edu/wpi/first/wpilibj/XboxController.java
@@ -67,6 +68,7 @@ impl Direction {
     }
 }
 
+#[derive(Clone)]
 pub struct Gamepad {
     id: i32,
     instance: GlobalRef,
@@ -292,4 +294,26 @@ impl Gamepad {
             ).i().unwrap()
         )
     }
+
+    pub fn while_held<F, Fut>(mut self, button_id: usize, local: &LocalSet, action: F)
+    where
+        F: Fn() -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = ()> + 'static,
+    {
+        local.spawn_local(async move {
+            loop {
+                // Check if the button is still held
+                if !self.button(button_id) {
+                    break;
+                }
+
+                // Run the provided action
+                action().await;
+
+                // Yield to prevent tight looping
+                tokio::task::yield_now().await;
+            }
+        });
+    }
+
 }

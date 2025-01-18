@@ -2,7 +2,6 @@ use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::Primitive::Void;
 use jni::signature::ReturnType;
 use crate::call::{call, call_static, create};
-use crate::java;
 
 /// Represents a motor controller of type `TalonSRX`.
 ///
