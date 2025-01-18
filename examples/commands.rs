@@ -57,9 +57,9 @@ impl Robot for MyRobot {
         };
 
         if self.gamepad.left_bumper() {
-            self.task_manager.run_task("example_task".to_string(), task);
+            self.task_manager.run_task(task);
         } else {
-            self.task_manager.abort_task("example_task".to_string());
+            self.task_manager.abort_task(task);
         }
 
         if self.gamepad.right_bumper() {

@@ -2,7 +2,6 @@ pub mod ctre;
 pub mod input;
 pub mod networktables;
 pub mod rev;
-pub mod robot;
 pub mod navx;
 pub mod drive;
 pub mod dio;
@@ -236,12 +235,13 @@ impl TaskManager {
         }
     }
 
-    pub fn run_task<F, Fut>(&mut self, task_name: String, task_fn: F)
+    pub fn run_task<F, Fut>(&mut self, task_fn: F)
     where
         F: Fn() -> Fut + Send + Sync + 'static,
         Fut: Future<Output = ()> + 'static,
     {
-        let task_id = TaskId(task_name);
+        let type_id = format!("{:?}", TypeId::of::<F>());
+        let task_id = TaskId(type_id);
 
         if !self.running_tasks.contains_key(&task_id) {
             // println!("Starting new task");
@@ -270,8 +270,13 @@ impl TaskManager {
         }
     }
 
-    pub fn abort_task(&mut self, task_name: String) {
-        let task_id = TaskId(task_name);
+    pub fn abort_task<F, Fut>(&mut self, task_fn: F)
+    where
+        F: Fn() -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = ()> + 'static,
+    {
+        let type_id = format!("{:?}", TypeId::of::<F>());
+        let task_id = TaskId(type_id);
 
         if let Some((running, abort_handle)) = self.running_tasks.remove(&task_id) {
             println!("Aborting task");
