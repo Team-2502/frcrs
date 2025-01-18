@@ -16,7 +16,6 @@ use std::any::TypeId;
 use std::cmp::PartialEq;
 use std::future::Future;
 use std::hash::{Hash, Hasher};
-pub use j4rs_derive::call_from_java;
 use jni::objects::{JObject, JValue};
 use jni::signature::Primitive;
 use jni::{InitArgsBuilder, JNIEnv, JNIVersion, JavaVM};
