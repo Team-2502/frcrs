@@ -39,6 +39,22 @@ pub enum Direction {
 }
 
 impl Direction {
+    /// Converts an angle in degrees to the corresponding `Direction`.
+    ///
+    /// # Arguments
+    ///
+    /// - `degrees`: The angle in degrees.
+    ///
+    /// # Returns
+    ///
+    /// A `Direction` corresponding to the provided angle.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let direction = Direction::from_degrees(90);
+    /// assert_eq!(direction, Direction::Right);
+    /// ```
     fn from_degrees(degrees: i32) -> Self {
         match degrees {
             0 => Self::Up,
@@ -61,6 +77,18 @@ pub struct Gamepad {
 }
 
 impl Gamepad {
+    /// Constructs a new `Gamepad` instance with the specified `id`.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The identifier for the gamepad.
+    ///
+    /// This function initializes the gamepad instance, sets up an empty button state, and
+    /// initializes the last updated timestamp.
+    ///
+    /// # Returns
+    ///
+    /// A new `Gamepad` instance.
     pub fn new(id: i32) -> Self {
         let instance = create!(
             "edu/wpi/first/wpilibj/XboxController",

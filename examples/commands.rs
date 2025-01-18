@@ -61,12 +61,6 @@ impl Robot for MyRobot {
         } else {
             self.task_manager.abort_task(task);
         }
-
-        if self.gamepad.right_bumper() {
-            spawn_local(async move {
-                println!("Local spawn");
-            });
-        }
     }
 
     fn test_periodic(&mut self) {

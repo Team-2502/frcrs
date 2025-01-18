@@ -15,6 +15,16 @@ pub struct Joystick {
 }
 
 impl Joystick {
+    /// Creates a new instance of `Joystick` with the given `id`.
+    ///
+    /// This method initializes a new Java object for the joystick and sets up its button states
+    /// and last updated timestamp.
+    ///
+    /// # Arguments
+    /// - `id`: An integer identifier for the joystick.
+    ///
+    /// # Returns
+    /// A new instance of `Joystick`.
     pub fn new(id: i32) -> Self {
         JAVA.attach_current_thread_as_daemon().unwrap();
         let instance = create!(
@@ -31,6 +41,12 @@ impl Joystick {
         Self { id, instance, buttons, last_updated }
     }
 
+    /// Gets the X-axis value of the joystick.
+    ///
+    /// This method calls the corresponding Java method to retrieve the X-axis value.
+    ///
+    /// # Returns
+    /// The X-axis value as a `f64`.
     pub fn get_x(&self) -> f64 {
         call!(
             self.instance.as_obj(),
@@ -42,6 +58,12 @@ impl Joystick {
         ).d().unwrap()
     }
 
+    /// Gets the Y-axis value of the joystick.
+    ///
+    /// This method calls the corresponding Java method to retrieve the Y-axis value.
+    ///
+    /// # Returns
+    /// The Y-axis value as a `f64`.
     pub fn get_y(&self) -> f64 {
         call!(
             self.instance.as_obj(),
@@ -53,6 +75,12 @@ impl Joystick {
         ).d().unwrap()
     }
 
+    /// Gets the Z-axis value of the joystick.
+    ///
+    /// This method calls the corresponding Java method to retrieve the Z-axis value.
+    ///
+    /// # Returns
+    /// The Z-axis value as a `f64`.
     pub fn get_z(&self) -> f64 {
         call!(
             self.instance.as_obj(),
@@ -64,6 +92,12 @@ impl Joystick {
         ).d().unwrap()
     }
 
+    /// Gets the throttle value of the joystick.
+    ///
+    /// This method calls the corresponding Java method to retrieve the throttle value.
+    ///
+    /// # Returns
+    /// The throttle value as a `f64`.
     pub fn get_throttle(&self) -> f64 {
         call!(
             self.instance.as_obj(),
@@ -75,6 +109,16 @@ impl Joystick {
         ).d().unwrap()
     }
 
+    /// Gets the state of the specified button by `id`.
+    ///
+    /// This method checks if the button states need to be refreshed based on the last updated timestamp,
+    /// then retrieves the state of the specified button.
+    ///
+    /// # Arguments
+    /// - `id`: The button identifier, starting from 1.
+    ///
+    /// # Returns
+    /// `true` if the button is pressed, `false` otherwise.
     pub fn get(&mut self, id: usize) -> bool {
         if self.last_updated.elapsed().as_millis() < 15 {
             return self.buttons[id - 1];

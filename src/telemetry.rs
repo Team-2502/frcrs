@@ -1,6 +1,6 @@
 use axum::{
     extract::{Extension, Json, Path},
-    routing::{get, post},
+    routing::{get, post, put},
     Router,
 };
 use std::net::SocketAddr;
@@ -10,12 +10,11 @@ use axum::body::Body;
 use axum::http::{header, HeaderValue, Response, StatusCode};
 use axum::response::IntoResponse;
 use tokio::sync::{Mutex, RwLock};
-use tracing::info;
-use tracing_subscriber;
 use serde_json::json;
 use serde::{Deserialize, Serialize};
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
+use lazy_static::lazy_static;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TelemetryData {
@@ -27,83 +26,86 @@ pub struct AppState {
     telemetry_data: RwLock<Vec<TelemetryData>>,
 }
 
-pub struct Telemetry {
-    state: Arc<Mutex<AppState>>,
+lazy_static! {
+    static ref TELEMETRY_STATE: Arc<Mutex<AppState>> = Arc::new(Mutex::new(AppState {
+        telemetry_data: RwLock::new(vec![]),
+    }));
 }
 
+pub struct Telemetry;
+
 impl Telemetry {
-    pub fn new(port: u16) -> Self {
-        tracing_subscriber::fmt::init();
-
-        let shared_state = AppState {
-            telemetry_data: RwLock::new(vec![]),
-        };
-        let shared_state = Arc::new(Mutex::new(shared_state));
-
+    pub fn init(port: u16) {
         let app = Router::new()
             .route("/telemetry", post(update_telemetry).get(get_telemetry))
             .route("/", get(frontend))
             .route("/*path", get(frontend))
             .route("/telemetry/:key", get(get_telemetry_value).put(set_telemetry_value))
-            .layer(Extension(shared_state.clone()));
+            .layer(Extension(TELEMETRY_STATE.clone()));
 
         let addr = SocketAddr::from(([0, 0, 0, 0], port));
-        info!("Listening on {}", addr);
+        println!("Listening on {}", addr);
 
         tokio::spawn(async move {
             let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
             axum::serve(listener, app).await.unwrap();
         });
+    }
 
-        Self {
-            state: shared_state,
+    pub async fn put_number(key: &str, value: f64) {
+        Self::put_string(key, value.to_string()).await;
+    }
+
+    pub async fn put_string(key: &str, value: String) {
+        let state = TELEMETRY_STATE.lock().await;
+        let mut telemetry_data = state.telemetry_data.write().await;
+
+        if let Some(existing) = telemetry_data.iter_mut().find(|data| data.key == key) {
+            existing.value = value;
+        } else {
+            telemetry_data.push(TelemetryData {
+                key: key.to_string(),
+                value,
+            });
         }
     }
 
-    pub async fn add_number(&self, key: &str, value: i32) {
-        self.add_string(key, value.to_string()).await;
-    }
-
-    pub async fn add_string(&self, key: &str, value: String) {
-        let state = self.state.lock().await;
-        state.telemetry_data.write().await.push(TelemetryData {
-            key: key.to_string(),
-            value,
-        });
-    }
-
-    pub async fn add_vec<T: Serialize>(&self, key: &str, values: Vec<T>) {
+    pub async fn put_vec<T: Serialize>(key: &str, values: Vec<T>) {
         let json_values = serde_json::to_string(&values).unwrap();
-        let state = self.state.lock().await;
-        state.telemetry_data.write().await.push(TelemetryData {
-            key: key.to_string(),
-            value: json_values,
-        });
+        let state = TELEMETRY_STATE.lock().await;
+        let mut telemetry_data = state.telemetry_data.write().await;
+
+        if let Some(existing) = telemetry_data.iter_mut().find(|data| data.key == key) {
+            existing.value = json_values;
+        } else {
+            telemetry_data.push(TelemetryData {
+                key: key.to_string(),
+                value: json_values,
+            });
+        }
     }
 
-    pub async fn get(&self, key: &str) -> Option<String> {
-        let state = self.state.lock().await;
+    pub async fn get(key: &str) -> Option<String> {
+        let state = TELEMETRY_STATE.lock().await;
         let telemetry_data = state.telemetry_data.read().await;
 
-        match telemetry_data.iter().find(|data| data.key == key) {
-            Some(data) => Some(data.clone().value),
-            None => None
-        }
+        telemetry_data.iter()
+            .find(|data| data.key == key)
+            .map(|data| data.value.clone())
     }
 }
 
 async fn frontend(Path(path): Path<Vec<String>>) -> impl IntoResponse {
-    let path = path.join("/");
+    let mut path = path.join("/");
     let mut path = path.trim_start_matches('/');
 
     if path.is_empty() {
         path = "index.html";
     }
 
-    let mime_type = mime_guess::from_path(path).first_or_text_plain();
+    let mime_type = mime_guess::from_path(path.clone()).first_or_text_plain();
 
-    let dir = PathBuf::from(format!("/home/lvuser/talon-board/out/{}", path));
-    //let dir = PathBuf::from(format!("{}/frontend/{}", env::var("CARGO_MANIFEST_DIR").unwrap(), path));
+    let dir = PathBuf::from(format!("/home/lvuser/frontend/{}", path));
 
     match File::open(dir.clone()).await {
         Err(_) => Response::builder()
@@ -179,16 +181,4 @@ async fn set_telemetry_value(
     }
 
     json!({"status": "success"}).to_string().into_response()
-}
-
-pub struct Chooser<T> {
-    options: Vec<T>
-}
-
-impl<T> Chooser<T> {
-    pub fn new(options: Vec<T>) -> Self {
-        Self {
-            options
-        }
-    }
 }

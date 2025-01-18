@@ -14,7 +14,6 @@ pub mod limelight;
 
 use std::any::TypeId;
 use std::cmp::PartialEq;
-use std::collections::HashMap;
 use std::future::Future;
 use std::hash::{Hash, Hasher};
 pub use j4rs_derive::call_from_java;
@@ -22,17 +21,20 @@ use jni::objects::{JObject, JValue};
 use jni::signature::Primitive;
 use jni::{InitArgsBuilder, JNIEnv, JNIVersion, JavaVM};
 use lazy_static::lazy_static;
+use tokio::task::{spawn_local, AbortHandle, LocalSet};
+use tokio::time::{interval, sleep};
+use crate::input::{RobotMode, RobotState};
 
 #[macro_use]
 extern crate uom;
 
+use std::convert::TryFrom;
 use std::ops::Range;
-use std::pin::Pin;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
-use std::sync::Mutex;
-use tokio::runtime::Runtime;
+use crate::drive::ToTalonEncoder;
+use std::collections::HashMap;
+use std::sync::Arc;
 
 fn create_jvm() -> JavaVM{
     // set JAVA_HOME to /usr/local/frc/JRE/bin/
@@ -204,10 +206,6 @@ macro_rules! container {
         }
     }};
 }
-
-use tokio::task::{spawn_local, AbortHandle, LocalSet};
-use tokio::time::{interval, sleep};
-use crate::input::{RobotMode, RobotState};
 
 struct TaskId(String);
 
@@ -386,5 +384,4 @@ pub trait Robot {
             }
         }));
     }
-
 }
