@@ -54,6 +54,7 @@ impl Limelight {
         }
     }
 
+    // Limelightlib-rust
     async fn get_json<T: serde::de::DeserializeOwned>(&self, endpoint: &str) -> Result<T, LimelightError> {
         let url = format!("http://{}:{}/{}", self.ip.ip(), self.ip.port(), endpoint);
 
@@ -68,8 +69,30 @@ impl Limelight {
         Ok(response)
     }
 
+    async fn post_json<T: serde::Serialize + ?Sized>(
+        &self,
+        endpoint: &str,
+        data: &T,
+    ) -> Result<bool, LimelightError> {
+        let url = format!("http://{}:{}/{}", self.ip.ip(), self.ip.port(), endpoint);
+
+        let response = self.client
+            .post(&url)
+            .json(data)
+            .timeout(Duration::from_millis(100))
+            .send()
+            .await?;
+
+        Ok(response.status().is_success())
+    }
+
     pub async fn results(&self) -> Result<LimelightResults, LimelightError> {
         self.get_json("results").await
+    }
+
+    pub async fn update_robot_orientation(&self, yaw: f64) -> Result<bool, LimelightError> {
+        let orientation_data = vec![yaw, 0.0, 0.0, 0.0, 0.0, 0.0];
+        self.post_json("update-robotorientation", &orientation_data).await
     }
 }
 

@@ -33,6 +33,32 @@ impl SmartDashboard {
             ReturnType::Primitive(Void)
         ).v().unwrap()
     }
+
+    pub fn set_position(position: Vector2<f64>, angle: Angle) {
+        let angle = angle.get::<radian>();
+
+        call_static!(
+            "frc/robot/Wrapper",
+            "setPosition",
+            "(DDD)V",
+            &[
+                JValue::Double(position.x).as_jni(),
+                JValue::Double(position.y).as_jni(),
+                JValue::Double(angle).as_jni()
+            ],
+            ReturnType::Primitive(Void)
+        ).v().unwrap();
+    }
+
+    pub fn put_field() {
+        call_static!(
+            "frc/robot/Wrapper",
+            "putField",
+            "()V",
+            &Vec::new(),
+            ReturnType::Primitive(Void)
+        ).v().unwrap();
+    }
 }
 
 pub struct Chooser<T> {

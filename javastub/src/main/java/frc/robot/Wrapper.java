@@ -151,10 +151,12 @@ public class Wrapper {
 
     private static final Field2d m_field = new Field2d();
 
+    public static void putField() {
+        SmartDashboard.putData("field", m_field);
+    }
+
     public static void setPosition(double x, double y, double theta) {
         m_field.setRobotPose(x, y, Rotation2d.fromRadians(theta));
-
-        SmartDashboard.putData("field", m_field);
     }
 
     public static PneumaticsModuleType revPH() {
