@@ -13,38 +13,26 @@ pub mod solenoid;
 pub mod telemetry;
 pub mod limelight;
 
-use input::Joystick;
+use std::any::TypeId;
+use std::collections::HashMap;
+use std::future::Future;
+use std::hash::{Hash, Hasher};
 pub use j4rs_derive::call_from_java;
-use jni::objects::{JObject, JString, JValue, JValueGen};
+use jni::objects::{JObject, JValue};
 use jni::signature::Primitive;
-use jni::strings::JNIString;
-use jni::sys::jint;
 use jni::{InitArgsBuilder, JNIEnv, JNIVersion, JavaVM};
 use lazy_static::lazy_static;
-use networktables::SmartDashboard;
 
 #[macro_use]
 extern crate uom;
 
-use crate::rev::ControlType::Position;
-use crate::rev::{IdleMode, MotorType, Spark, };
-use j4rs::prelude::*;
-use std::convert::TryFrom;
 use std::ops::Range;
-use std::thread::sleep;
+use std::pin::Pin;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
-use j4rs::InvocationArg;
-use uom::si::angle::degree;
-use uom::si::angle::revolution;
-use uom::si::f64::*;
-use crate::ctre::{CanCoder, ControlMode};
-use crate::ctre::TalonInvertType::CounterClockwise;
-use crate::drive::{Swerve, ToTalonEncoder};
-use crate::navx::NavX;
-use crate::rev::MotorType::Brushless;
-use std::rc::Rc;
-use std::cell::{BorrowMutError, RefCell, RefMut};
-use crate::input::RobotState;
+use std::sync::Mutex;
+use tokio::runtime::Runtime;
 
 fn create_jvm() -> JavaVM{
     // set JAVA_HOME to /usr/local/frc/JRE/bin/
@@ -84,7 +72,7 @@ pub fn deadzone(input: f64, from_range: &Range<f64>, to_range: &Range<f64>) -> f
         out
     }
 }
-
+/*
 #[cfg(test)]
 mod tests {
     use super::deadzone;
@@ -111,7 +99,7 @@ mod tests {
         let result = deadzone(0.75, &(0.5..1.0), &(0.0..2.0));
         assert_eq!(result, 1.0);
     }
-}
+}*/
 
 pub fn observe_user_program_starting() {
     // Show "robot code" on driver's station
@@ -217,47 +205,152 @@ macro_rules! container {
     }};
 }
 
-pub struct Subsystem<
-    T: ?Sized,
-> {
-    subsystem: Rc<RefCell<T>>
-}
+use tokio::task::{spawn_local, AbortHandle, LocalSet};
+use tokio::time::{interval, sleep};
+use crate::input::RobotState;
 
-impl<T> Clone for Subsystem<T> {
-    fn clone(&self) -> Self {
-        Self {
-            subsystem: self.subsystem.clone(),
-        }
+struct TaskId(String);
+
+impl PartialEq for TaskId {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
     }
 }
 
-impl<T> Subsystem<T> {
-    pub fn new(subsystem: T) -> Self {
+impl Eq for TaskId {}
+
+impl Hash for TaskId {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state)
+    }
+}
+
+pub struct TaskManager {
+    running_tasks: HashMap<TaskId, (Arc<AtomicBool>, AbortHandle)>,
+}
+
+impl TaskManager {
+    pub fn new() -> Self {
         Self {
-            subsystem: Rc::new(RefCell::new(subsystem)),
+            running_tasks: HashMap::new(),
         }
     }
 
-    pub fn with_borrow_mut<F>(&self, mut f: F)
+    pub fn run_task<F, Fut>(&mut self, task_name: String, task_fn: F)
     where
-        F: FnOnce(&mut T),
+        F: Fn() -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = ()> + 'static,
     {
-        if let Ok(mut borrowed) = self.subsystem.try_borrow_mut() {
-            f(&mut borrowed);
+        let task_id = TaskId(task_name);
+
+        if !self.running_tasks.contains_key(&task_id) {
+            // println!("Starting new task");
+
+            let running = Arc::new(AtomicBool::new(true));
+            let running_clone = running.clone();
+
+            let task_fn = Arc::new(task_fn);
+            let task_fn = task_fn.clone();
+
+            let future = async move {
+                // println!("Task loop starting");
+                let mut interval = interval(Duration::from_millis(4));
+                while running_clone.load(Ordering::SeqCst) {
+                    interval.tick().await;
+                    task_fn().await;
+                }
+                // println!("Task loop ended");
+            };
+
+            let abort_handle = spawn_local(future).abort_handle();
+
+            self.running_tasks.insert(task_id, (running, abort_handle));
+        } else {
+            // println!("Task already running");
         }
     }
 
-    pub async fn with_borrow_mut_async<F, Fut>(&self, f: F)
+    pub fn abort_task(&mut self, task_name: String) {
+        let task_id = TaskId(task_name);
+
+        if let Some((running, abort_handle)) = self.running_tasks.remove(&task_id) {
+            println!("Aborting task");
+            running.store(false, Ordering::SeqCst);
+            abort_handle.abort();
+        } else {
+            // println!("Task not found");
+        }
+    }
+}
+
+pub trait Robot {
+    fn robot_init(&mut self);
+    fn disabled_init(&mut self) {}
+    fn autonomous_init(&mut self) {}
+    fn teleop_init(&mut self) {}
+    fn test_init(&mut self) {}
+
+    fn disabled_periodic(&mut self) {}
+    fn autonomous_periodic(&mut self) {}
+    fn teleop_periodic(&mut self) {}
+    fn test_periodic(&mut self) {}
+
+    fn start_competition(&mut self, runtime: tokio::runtime::Runtime, local_set: LocalSet)
     where
-        F: FnOnce(&mut T) -> Fut,
-        Fut: std::future::Future<Output = ()>,
+        Self: 'static + Send + Sync,
     {
-        if let Ok(mut borrowed) = self.subsystem.try_borrow_mut() {
-            f(&mut borrowed).await;
-        }
+        runtime.block_on(local_set.run_until(async {
+            self.robot_init();
+
+            if !init_hal() {
+                panic!("Failed to initialize HAL");
+            }
+
+            observe_user_program_starting();
+
+            let mut previous_state = RobotState::get();
+            let mut last_loop = Instant::now();
+            let mut dt = Duration::from_millis(0);
+
+            loop {
+                refresh_data();
+
+                let state = RobotState::get();
+
+                // State transition logic
+                if !state.enabled() && previous_state.enabled() {
+                    self.disabled_init();
+                } else if state.enabled() {
+                    if state.auto() && !previous_state.auto() {
+                        self.autonomous_init();
+                    } else if state.teleop() && !previous_state.teleop() {
+                        self.teleop_init();
+                    } else if state.test() && !previous_state.test() {
+                        self.test_init();
+                    }
+                }
+
+                // Periodic logic
+                if !state.enabled() {
+                    self.disabled_periodic();
+                } else if state.auto() {
+                    self.autonomous_periodic();
+                } else if state.teleop() {
+                    self.teleop_periodic();
+                } else if state.test() {
+                    self.test_periodic();
+                }
+
+                previous_state = state;
+
+                // Enforce a periodic loop delay
+                dt = last_loop.elapsed();
+                let elapsed = dt.as_secs_f64();
+                let left = (1. / 250. - elapsed).max(0.);
+                sleep(Duration::from_secs_f64(left)).await;
+                last_loop = Instant::now();
+            }
+        }));
     }
 
-    pub fn try_borrow_mut(&self) -> Result<RefMut<T>, BorrowMutError> {
-        self.subsystem.try_borrow_mut()
-    }
 }
