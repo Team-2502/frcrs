@@ -2,7 +2,6 @@ mod talon;
 mod cancoder;
 mod srx;
 
-use std::f32::consts::{FRAC_2_PI, PI};
 
 pub use talon::*;
 pub use cancoder::*;
@@ -20,9 +19,6 @@ impl TalonInvertType {
     }
 }
 
-use uom::fmt::DisplayStyle::*;
-use uom::si::f64::*;
-use uom::si::length::meter;
 
 
 const TICKS_TO_ROTATIONS: f32 = (1.) / (1. * 12.8);

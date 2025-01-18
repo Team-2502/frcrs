@@ -1,7 +1,6 @@
-use j4rs::{Instance, InvocationArg, Jvm};
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
-use crate::call::{call, call_static, create};
+use crate::call::{call, create};
 use crate::java;
 
 pub struct CanCoder {

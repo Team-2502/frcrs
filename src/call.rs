@@ -25,7 +25,7 @@ macro_rules! call {
     ($obj:expr, $path:tt, $method:tt, $sig:tt, $args:expr, $ret:expr) => {
         {
         use once_cell::sync::OnceCell;
-        use jni::objects::{JClass, JMethodID};
+        use jni::objects::JMethodID;
         use crate::java;
         static FNPTR: OnceCell<JMethodID> = OnceCell::new();
         let mut java = java();

@@ -1,6 +1,5 @@
-use jni::objects::{GlobalRef, JClass, JMethodID, JObject, JValue};
+use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
-use once_cell::sync::OnceCell;
 use crate::call::{call, call_static, create};
 use crate::java;
 
@@ -26,7 +25,7 @@ impl Talon {
             "com/ctre/phoenix6/hardware/TalonFX",
             "(ILjava/lang/String;)V",
             &[JValue::Int(id).as_jni(),
-                JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()
+                JValue::Object(&JObject::from(string)).as_jni()
             ]
         );
 

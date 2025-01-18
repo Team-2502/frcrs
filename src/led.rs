@@ -1,5 +1,4 @@
-use j4rs::{Jvm, InvocationArg, Instance};
-use jni::{objects::{GlobalRef, JObject, JValue}, signature::{Primitive, ReturnType}};
+use jni::{objects::{GlobalRef, JValue}, signature::{Primitive, ReturnType}};
 
 pub struct Led {
     instance: GlobalRef,

@@ -1,8 +1,9 @@
+use std::future::Future;
 use std::time::Instant;
 
 use bitvec::prelude::*;
-use jni::{objects::{GlobalRef, JObject, JValue}, signature::{Primitive, ReturnType}};
-
+use jni::{objects::{GlobalRef, JValue}, signature::{Primitive, ReturnType}};
+use tokio::task::JoinHandle;
 use crate::{call::{call, call_static, create}, java, JAVA};
 
 
@@ -89,5 +90,45 @@ impl Joystick {
         self.buttons[..].store(value);
         self.last_updated = Instant::now();
         self.buttons[id-1]
+    }
+
+    pub fn while_held<F, Fut>(&'static mut self, button_id: usize, action: F)
+    where
+        F: Fn() -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = ()> + 'static,
+    {
+        // Use a thread-local handle to manage the task
+        thread_local! {
+            static BUTTON_TASKS: std::cell::RefCell<std::collections::HashMap<usize, Option<JoinHandle<()>>>>
+                = std::cell::RefCell::new(std::collections::HashMap::new());
+        }
+
+        BUTTON_TASKS.with(|tasks_cell| {
+            let mut tasks = tasks_cell.borrow_mut();
+
+            // Cancel any existing task for this button
+            if let Some(Some(handle)) = tasks.get_mut(&button_id) {
+                handle.abort();
+            }
+
+            // Spawn a new task that continuously checks the button
+            let handle = tokio::task::spawn_local(async move {
+                loop {
+                    // Check if the button is still held
+                    if !self.get(button_id) {
+                        break;
+                    }
+
+                    // Run the provided action
+                    action().await;
+
+                    // Yield to prevent tight looping
+                    tokio::task::yield_now().await;
+                }
+            });
+
+            // Store the new task handle
+            tasks.insert(button_id, Some(handle));
+        });
     }
 }

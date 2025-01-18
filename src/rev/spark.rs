@@ -1,7 +1,6 @@
-use crate::call::{self, call, call_static, create, once};
+use crate::call::{call, create, once};
 use crate::java;
 use crate::rev::{ControlType, IdleMode, MotorType, };
-use j4rs::{Instance, InvocationArg, Jvm};
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
 use once_cell::sync::OnceCell;

@@ -1,6 +1,5 @@
-use std::collections::HashMap;
 
-use j4rs::{Instance, InvocationArg, Jvm};
+use j4rs::{InvocationArg, Jvm};
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::Primitive::{Int, Void};
 use jni::signature::ReturnType;

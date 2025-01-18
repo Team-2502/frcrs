@@ -1,7 +1,6 @@
-use std::env;
 use axum::{
     extract::{Extension, Json, Path},
-    routing::{get, post, put},
+    routing::{get, post},
     Router,
 };
 use std::net::SocketAddr;
@@ -66,7 +65,7 @@ impl Telemetry {
     }
 
     pub async fn add_string(&self, key: &str, value: String) {
-        let mut state = self.state.lock().await;
+        let state = self.state.lock().await;
         state.telemetry_data.write().await.push(TelemetryData {
             key: key.to_string(),
             value,
@@ -75,7 +74,7 @@ impl Telemetry {
 
     pub async fn add_vec<T: Serialize>(&self, key: &str, values: Vec<T>) {
         let json_values = serde_json::to_string(&values).unwrap();
-        let mut state = self.state.lock().await;
+        let state = self.state.lock().await;
         state.telemetry_data.write().await.push(TelemetryData {
             key: key.to_string(),
             value: json_values,
@@ -83,7 +82,7 @@ impl Telemetry {
     }
 
     pub async fn get(&self, key: &str) -> Option<String> {
-        let mut state = self.state.lock().await;
+        let state = self.state.lock().await;
         let telemetry_data = state.telemetry_data.read().await;
 
         match telemetry_data.iter().find(|data| data.key == key) {
@@ -94,14 +93,14 @@ impl Telemetry {
 }
 
 async fn frontend(Path(path): Path<Vec<String>>) -> impl IntoResponse {
-    let mut path = path.join("/");
+    let path = path.join("/");
     let mut path = path.trim_start_matches('/');
 
     if path.is_empty() {
         path = "index.html";
     }
 
-    let mime_type = mime_guess::from_path(path.clone()).first_or_text_plain();
+    let mime_type = mime_guess::from_path(path).first_or_text_plain();
 
     let dir = PathBuf::from(format!("/home/lvuser/talon-board/out/{}", path));
     //let dir = PathBuf::from(format!("{}/frontend/{}", env::var("CARGO_MANIFEST_DIR").unwrap(), path));
@@ -131,7 +130,7 @@ async fn update_telemetry(
     Extension(state): Extension<Arc<Mutex<AppState>>>,
     Json(payload): Json<TelemetryData>,
 ) -> String {
-    let mut state = state.lock().await;
+    let state = state.lock().await;
     state.telemetry_data.write().await.push(payload);
     json!({"status": "success"}).to_string()
 }
@@ -166,7 +165,7 @@ async fn set_telemetry_value(
     Path(key): Path<String>,
     Json(payload): Json<serde_json::Value>,
 ) -> impl IntoResponse {
-    let mut state = state.lock().await;
+    let state = state.lock().await;
     let mut telemetry_data = state.telemetry_data.write().await;
 
     let value = payload.to_string();
