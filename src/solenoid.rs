@@ -1,6 +1,6 @@
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::Primitive::Void;
-use jni::signature::ReturnType;
+use jni::signature::{Primitive, ReturnType};
 use jni::sys::jboolean;
 
 pub struct Solenoid {
@@ -51,5 +51,27 @@ impl Solenoid {
             &[JValue::Bool(jboolean::from(engaged)).as_jni()],
             ReturnType::Primitive(Void)
         );
+    }
+
+    pub fn toggle(&self) {
+        call!(
+            &self.instance,
+            "edu/wpi/first/wpilibj/Solenoid",
+            "toggle",
+            "()V",
+            &Vec::new(),
+            ReturnType::Primitive(Void)
+        );
+    }
+
+    pub fn get(&self) -> bool {
+        call!(
+            &self.instance,
+            "edu/wpi/first/wpilibj/Solenoid",
+            "get",
+            "()Z",
+            &Vec::new(),
+            ReturnType::Primitive(Primitive::Boolean)
+        ).z().unwrap()
     }
 }
