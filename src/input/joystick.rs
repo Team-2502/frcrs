@@ -7,6 +7,7 @@ use tokio::task::JoinHandle;
 use crate::{call::{call, call_static, create}, java, JAVA};
 
 
+#[derive(Clone)]
 pub struct Joystick {
     id: i32,
     instance: GlobalRef,

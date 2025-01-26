@@ -33,6 +33,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 use crate::drive::ToTalonEncoder;
 use std::collections::HashMap;
+use std::pin::Pin;
 use std::sync::Arc;
 
 fn create_jvm() -> JavaVM{
@@ -206,6 +207,7 @@ macro_rules! container {
     }};
 }
 
+#[derive(Clone)]
 struct TaskId(String);
 
 impl PartialEq for TaskId {
@@ -222,6 +224,7 @@ impl Hash for TaskId {
     }
 }
 
+#[derive(Clone)]
 pub struct TaskManager {
     running_tasks: HashMap<TaskId, (Arc<AtomicBool>, AbortHandle)>,
 }
@@ -233,9 +236,9 @@ impl TaskManager {
         }
     }
 
-    pub fn run_task<F, Fut>(&mut self, task_fn: F)
+    pub fn run_task<F, Fut>(&mut self, mut task_fn: F)
     where
-        F: Fn() -> Fut + Send + Sync + 'static,
+        F: FnMut() -> Fut + 'static,
         Fut: Future<Output = ()> + 'static,
     {
         let type_id = format!("{:?}", TypeId::of::<F>());
@@ -247,8 +250,8 @@ impl TaskManager {
             let running = Arc::new(AtomicBool::new(true));
             let running_clone = running.clone();
 
-            let task_fn = Arc::new(task_fn);
-            let task_fn = task_fn.clone();
+            //let task_fn = Arc::new(task_fn);
+            //let task_fn = task_fn.clone();
 
             let future = async move {
                 // println!("Task loop starting");
@@ -268,9 +271,9 @@ impl TaskManager {
         }
     }
 
-    pub fn abort_task<F, Fut>(&mut self, task_fn: F)
+    pub fn abort_task<F, Fut>(&mut self, mut task_fn: F)
     where
-        F: Fn() -> Fut + Send + Sync + 'static,
+        F: FnMut() -> Fut + 'static,
         Fut: Future<Output = ()> + 'static,
     {
         let type_id = format!("{:?}", TypeId::of::<F>());
@@ -293,14 +296,14 @@ pub trait Robot {
     fn teleop_init(&mut self) {}
     fn test_init(&mut self) {}
 
-    fn disabled_periodic(&mut self) {}
-    fn autonomous_periodic(&mut self) {}
-    fn teleop_periodic(&mut self) {}
-    fn test_periodic(&mut self) {}
+    async fn disabled_periodic(&mut self) {}
+    async fn autonomous_periodic(&mut self) {}
+    async fn teleop_periodic(&mut self) {}
+    async fn test_periodic(&mut self) {}
 
     fn start_competition(&mut self, runtime: tokio::runtime::Runtime, local_set: LocalSet)
     where
-        Self: 'static + Send + Sync,
+        Self: 'static,
     {
         runtime.block_on(local_set.run_until(async {
             self.robot_init();
@@ -365,10 +368,10 @@ pub trait Robot {
                 }
 
                 match state {
-                    RobotMode::Disabled => self.disabled_periodic(),
-                    RobotMode::Auto => self.autonomous_periodic(),
-                    RobotMode::Teleop => self.teleop_periodic(),
-                    RobotMode::Test => self.test_periodic(),
+                    RobotMode::Disabled => self.disabled_periodic().await,
+                    RobotMode::Auto => self.autonomous_periodic().await,
+                    RobotMode::Teleop => self.teleop_periodic().await,
+                    RobotMode::Test => self.test_periodic().await,
                 }
 
 
@@ -382,5 +385,36 @@ pub trait Robot {
                 last_loop = Instant::now();
             }
         }));
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+    use tokio::time::sleep;
+
+    #[test]
+    fn check_type_id() {
+        #[derive(Debug)]
+        enum TestEnum {
+            A,
+            B
+        }
+
+        let task = {
+            move |x: TestEnum| {
+                async move {
+                    println!("{:?}", x);
+                    sleep(Duration::from_secs(1)).await;
+                    println!("Task Finished");
+                }
+            }
+        };
+
+        let mut task_manager = super::TaskManager::new();
+        task_manager.run_task(task(TestEnum::A));
+        task_manager.abort_task(task(TestEnum::A));
+        println!("Should not print finished");
     }
 }

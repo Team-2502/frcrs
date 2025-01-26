@@ -41,15 +41,15 @@ impl Robot for MyRobot {
         println!("Test init");
     }
 
-    fn disabled_periodic(&mut self) {
+    async fn disabled_periodic(&mut self) {
         // println!("Disabled periodic");
     }
 
-    fn autonomous_periodic(&mut self) {
+    async fn autonomous_periodic(&mut self) {
         // println!("Autonomous periodic");
     }
 
-    fn teleop_periodic(&mut self) {
+    async fn teleop_periodic(&mut self) {
         let task = || async {
             println!("Task Started");
             sleep(Duration::from_secs(1)).await;
@@ -63,7 +63,7 @@ impl Robot for MyRobot {
         }
     }
 
-    fn test_periodic(&mut self) {
+    async fn test_periodic(&mut self) {
         println!("Test periodic");
     }
 }

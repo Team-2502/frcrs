@@ -18,7 +18,8 @@ pub struct LimelightResults {
     pub tx: f64,
     pub ty: f64,
     pub Fiducial: Vec<Fiducial>,
-    pub botpose_orb_wpiblue: [f64; 6]
+    pub botpose_orb_wpiblue: [f64; 6],
+    pub botpose_wpiblue: [f64; 6],
 }
 
 impl Default for LimelightResults {
@@ -27,7 +28,8 @@ impl Default for LimelightResults {
             tx: 0.0,
             ty: 0.0,
             Fiducial: vec![],
-            botpose_orb_wpiblue: [0.0; 6]
+            botpose_orb_wpiblue: [0.0; 6],
+            botpose_wpiblue: [0.0; 6],
         }
     }
 }
