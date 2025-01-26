@@ -1,5 +1,6 @@
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
+use jni::sys::jboolean;
 use crate::call::{call, call_static, create};
 use crate::java;
 
@@ -23,7 +24,8 @@ pub enum ControlMode {
 /// motor.set(ControlMode::Percent, 0.5);           // Sets the motor output to 50%
 /// ```
 pub struct Talon {
-    pub(crate) instance: GlobalRef
+    pub(crate) instance: GlobalRef,
+    pub(crate) id: i32,
 }
 
 impl Talon {
@@ -54,7 +56,8 @@ impl Talon {
         let instance = java().new_global_ref(instance).unwrap();
 
         Self {
-            instance
+            instance,
+            id
         }
     }
 
@@ -172,5 +175,28 @@ impl Talon {
             &[JValue::Object(&status_signal).as_jni()],
             ReturnType::Primitive(Primitive::Double)
         ).d().unwrap()
+    }
+
+    pub fn get_id(&self) -> i32 {
+        self.id
+    }
+
+    pub fn follow(&self, master: &Talon, inverted: bool) {
+        let follower = create!(
+            "com/ctre/phoenix6/controls/Follower",
+            "(IZ)V",
+            &[JValue::Int(master.get_id()).as_jni(),
+                JValue::Bool(jboolean::from(inverted)).as_jni()
+            ]
+        );
+
+        call!(
+            &self.instance.as_obj(),
+            "com/ctre/phoenix6/hardware/core/CoreTalonFX",
+            "setControl",
+            "(Lcom/ctre/phoenix6/controls/Follower;)Lcom/ctre/phoenix6/StatusCode;",
+            &[JValue::Object(&follower).as_jni()],
+            ReturnType::Object
+        ).l().unwrap();
     }
 }
