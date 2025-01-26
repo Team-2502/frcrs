@@ -1,11 +1,13 @@
 mod talon;
 mod cancoder;
 mod srx;
+mod pigeon;
 
 
 pub use talon::*;
 pub use cancoder::*;
 pub use srx::*;
+pub use pigeon::*;
 
 pub enum TalonInvertType {
     CounterClockwise,
