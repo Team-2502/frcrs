@@ -35,6 +35,7 @@ use crate::drive::ToTalonEncoder;
 use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::Arc;
+use serde::de::IntoDeserializer;
 
 fn create_jvm() -> JavaVM{
     // set JAVA_HOME to /usr/local/frc/JRE/bin/
@@ -290,7 +291,7 @@ impl TaskManager {
 }
 
 pub trait Robot {
-    fn robot_init(&mut self);
+    async fn robot_init(&mut self);
     fn disabled_init(&mut self) {}
     fn autonomous_init(&mut self) {}
     fn teleop_init(&mut self) {}
@@ -306,7 +307,7 @@ pub trait Robot {
         Self: 'static,
     {
         runtime.block_on(local_set.run_until(async {
-            self.robot_init();
+            self.robot_init().await;
 
             if !init_hal() {
                 panic!("Failed to initialize HAL");
