@@ -11,6 +11,7 @@ pub mod led;
 pub mod solenoid;
 pub mod telemetry;
 pub mod limelight;
+pub mod laser_can;
 
 use std::any::TypeId;
 use std::cmp::PartialEq;
