@@ -2,14 +2,17 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.kauailabs.navx.frc.AHRS;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import static com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkFlex;
 import com.ctre.phoenix6.StatusSignal;
-import static com.revrobotics.CANSparkMax.ControlType;
 
+import static com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import static com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+import static com.revrobotics.spark.SparkBase.ControlType;
+
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
+import com.studica.frc.AHRS;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.AllianceStationID;
@@ -18,6 +21,7 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -51,9 +55,12 @@ public class Wrapper {
     public static ControlType kPosition() { return ControlType.kPosition; }
     public static ControlType kVelocity() { return ControlType.kVelocity; }
 
-    public static CANSparkFlex createSparkFlex(int id) { return new CANSparkFlex(id, MotorType.kBrushless); }
+    public static SparkFlex createSparkFlex(int id) { return new SparkFlex(id, MotorType.kBrushless); }
 
-    public static void sparkFollow(CANSparkMax leader, CANSparkMax follower, boolean invert) { follower.follow(leader, invert); }
+    public static void sparkFollow(SparkMax leader, SparkMax follower, boolean invert) {
+//        follower.follow(leader, invert);
+        follower.resumeFollowerMode();
+    }
 
     public static int getAllianceStation() {
         AllianceStationID allianceID = DriverStationJNI.getAllianceStation();
@@ -89,7 +96,7 @@ public class Wrapper {
     }
 
     public static AHRS createAHRS() {
-        return new AHRS();
+        return new AHRS(AHRS.NavXComType.kMXP_SPI);
     }
 
     public static double getAngle(AHRS navx) {
@@ -108,9 +115,9 @@ public class Wrapper {
       return ControlMode.PercentOutput;
     }
 
-    public static double ctre6GetVelocity(com.ctre.phoenix6.hardware.TalonFX motor) {
-      return motor.getVelocity().getValue();
-    }
+//    public static double ctre6GetVelocity(com.ctre.phoenix6.hardware.TalonFX motor) {
+//      return motor.getVelocity().getValue().in(AngularVelocityUnit.combine());
+//    }
 
     public static RumbleType kBothRumble() {
         return RumbleType.kBothRumble;
