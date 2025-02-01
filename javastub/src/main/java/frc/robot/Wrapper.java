@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.units.measure.ImmutableAngle;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -131,8 +132,8 @@ public class Wrapper {
         return RumbleType.kRightRumble;
     }
 
-    public static double getValue(StatusSignal<Double> holder) {
-        return holder.getValue();
+    public static double getValue(StatusSignal<ImmutableAngle> holder) {
+        return holder.getValue().magnitude();
     }
 
     /*public static void setSpeed(TalonFX motor, double speed) {
