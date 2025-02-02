@@ -6,7 +6,8 @@ use crate::java;
 
 pub enum ControlMode {
     Percent,
-    Position
+    Position,
+    MotionMagic
 }
 
 /// Represents a motor controller of type `TalonFX`.
@@ -101,6 +102,22 @@ impl Talon {
                     "com/ctre/phoenix6/hardware/core/CoreTalonFX",
                     "setControl",
                     "(Lcom/ctre/phoenix6/controls/PositionDutyCycle;)Lcom/ctre/phoenix6/StatusCode;",
+                    &[JValue::Object(&control.as_obj()).as_jni()],
+                    ReturnType::Object
+                ).l().unwrap();
+            },
+            ControlMode::MotionMagic => {
+                let control = create!(
+                    "com/ctre/phoenix6/controls/MotionMagicDutyCycle",
+                    "(D)V",
+                    &[JValue::Double(amount).as_jni()]
+                );
+
+                call!(
+                    self.instance.as_obj(),
+                    "com/ctre/phoenix6/hardware/core/CoreTalonFX",
+                    "setControl",
+                    "(Lcom/ctre/phoenix6/controls/MotionMagicDutyCycle;)Lcom/ctre/phoenix6/StatusCode;",
                     &[JValue::Object(&control.as_obj()).as_jni()],
                     ReturnType::Object
                 ).l().unwrap();
