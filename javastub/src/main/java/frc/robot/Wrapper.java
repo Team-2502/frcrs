@@ -2,12 +2,18 @@ package frc.robot;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.studica.frc.AHRS;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -16,7 +22,17 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.units.measure.ImmutableAngle;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+import java.net.URL;
+
+import com.ctre.phoenix6.hardware.TalonFX;
+
+import static edu.wpi.first.wpilibj.RobotBase.isReal;
 
 public class Wrapper {
     public static SparkLowLevel.MotorType kBrushless() {
@@ -31,6 +47,8 @@ public class Wrapper {
 
     public static SparkBase.ControlType kPosition() { return SparkBase.ControlType.kPosition; }
     public static SparkBase.ControlType kVelocity() { return SparkBase.ControlType.kVelocity; }
+
+    public static SparkFlex createSparkFlex(int id) { return new SparkFlex(id, SparkLowLevel.MotorType.kBrushless); }
 
     public static int getAllianceStation() {
         AllianceStationID allianceID = DriverStationJNI.getAllianceStation();
@@ -85,8 +103,8 @@ public class Wrapper {
         return RumbleType.kRightRumble;
     }
 
-    public static double getValue(StatusSignal<ImmutableAngle> holder) {
-        return holder.getValue().magnitude();
+    public static double getValue(StatusSignal<Double> holder) {
+        return holder.getValue();
     }
 
     /*public static void setSpeed(TalonFX motor, double speed) {

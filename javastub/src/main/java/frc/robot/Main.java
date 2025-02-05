@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * Do NOT add any static variables to this class, or any initialization at all. Unless you know what
@@ -19,13 +19,5 @@ public final class Main {
    *
    * <p>If you change your main robot class, change the parameter type.
    */
-
-  private static native void rustentry(); // stub for entrypoint
-  static {
-    System.load( // load rust static library
-      Filesystem.getDeployDirectory() + "/libRobotCode2025.so"
-    );
-  }
-
   public static void main(String... args) {}
 }
