@@ -1,27 +1,14 @@
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.StatusSignal;
-
-import static com.revrobotics.spark.SparkLowLevel.MotorType;
-
-import static com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
-import static com.revrobotics.spark.SparkBase.ControlType;
-
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkLowLevel;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.studica.frc.AHRS;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -31,37 +18,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.units.measure.ImmutableAngle;
 
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.net.URL;
-
-import com.ctre.phoenix6.hardware.TalonFX;
-
-import static edu.wpi.first.wpilibj.RobotBase.isReal;
-
 public class Wrapper {
-    public static MotorType kBrushless() {
-        return MotorType.kBrushless;
+    public static SparkLowLevel.MotorType kBrushless() {
+        return SparkLowLevel.MotorType.kBrushless;
     }
-    public static MotorType kBrushed() {
-        return MotorType.kBrushed;
+    public static SparkLowLevel.MotorType kBrushed() {
+        return SparkLowLevel.MotorType.kBrushed;
     }
 
-    public static IdleMode kBrake() { return IdleMode.kBrake; }
-    public static IdleMode kCoast() { return IdleMode.kCoast; }
+    public static SparkBaseConfig.IdleMode kBrake() { return SparkBaseConfig.IdleMode.kBrake; }
+    public static SparkBaseConfig.IdleMode kCoast() { return SparkBaseConfig.IdleMode.kCoast; }
 
-    public static ControlType kPosition() { return ControlType.kPosition; }
-    public static ControlType kVelocity() { return ControlType.kVelocity; }
-
-    public static SparkFlex createSparkFlex(int id) { return new SparkFlex(id, MotorType.kBrushless); }
-
-    public static void sparkFollow(SparkMax leader, SparkMax follower, boolean invert) {
-//        follower.follow(leader, invert);
-        follower.resumeFollowerMode();
-    }
+    public static SparkBase.ControlType kPosition() { return SparkBase.ControlType.kPosition; }
+    public static SparkBase.ControlType kVelocity() { return SparkBase.ControlType.kVelocity; }
 
     public static int getAllianceStation() {
         AllianceStationID allianceID = DriverStationJNI.getAllianceStation();
@@ -103,22 +72,6 @@ public class Wrapper {
     public static double getAngle(AHRS navx) {
         return navx.getAngle();
     }
-
-    public static ControlMode ctreVelocity() {
-        return ControlMode.Velocity;
-    }
-
-    public static ControlMode ctrePosition() {
-        return ControlMode.Position;
-    }
-
-    public static ControlMode ctrePercent() {
-      return ControlMode.PercentOutput;
-    }
-
-//    public static double ctre6GetVelocity(com.ctre.phoenix6.hardware.TalonFX motor) {
-//      return motor.getVelocity().getValue().in(AngularVelocityUnit.combine());
-//    }
 
     public static RumbleType kBothRumble() {
         return RumbleType.kBothRumble;

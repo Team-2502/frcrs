@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+<<<<<<< HEAD
 import edu.wpi.first.wpilibj.Filesystem;
+=======
+import edu.wpi.first.wpilibj.RobotBase;
+>>>>>>> 9f22ad9 (updated to 2025 javastub)
 
 /**
  * Do NOT add any static variables to this class, or any initialization at all. Unless you know what
@@ -19,6 +23,7 @@ public final class Main {
    *
    * <p>If you change your main robot class, change the parameter type.
    */
+<<<<<<< HEAD
 
   private static native void rustentry(); // stub for entrypoint
   static {
@@ -29,5 +34,7 @@ public final class Main {
   public static void main(String... args) {
     rustentry();
   }
+=======
+  public static void main(String... args) {}
+>>>>>>> 9f22ad9 (updated to 2025 javastub)
 }
-
