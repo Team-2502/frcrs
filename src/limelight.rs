@@ -8,12 +8,13 @@ use crate::java;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone)]
 pub struct Limelight {
     ip: SocketAddr,
     client: Client
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct LimelightResults {
     pub tx: f64,
     pub ty: f64,
@@ -34,7 +35,7 @@ impl Default for LimelightResults {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct Fiducial {
     pub fID: i32,
 }
