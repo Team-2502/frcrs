@@ -55,17 +55,16 @@ impl LaserCan {
             self.instance.as_obj(),
             "au/grapplerobotics/LaserCan",
             "getMeasurement",
-            "()Lau/grapplerobotics/LaserCan$Measurement;",
+            "()Lau/grapplerobotics/interfaces/LaserCanInterface$Measurement;",
             &Vec::new(),
             ReturnType::Object
         ).l().unwrap();
 
-        call!(
-            ret,
-            "au/grapplerobotics/LaserCan$Measurement",
-            "distance_mm",
-            "I",
-            &Vec::new(),
+        call_static!(
+            "frc/robot/Wrapper",
+            "laserCanMeasurement",
+            "(Lau/grapplerobotics/interfaces/LaserCanInterface$Measurement;)I",
+            &[JValue::Object(&ret).as_jni()],
             ReturnType::Primitive(Primitive::Int)
         ).i().unwrap()
     }
