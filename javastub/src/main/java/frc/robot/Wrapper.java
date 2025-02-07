@@ -1,5 +1,6 @@
 package frc.robot;
 
+import au.grapplerobotics.interfaces.LaserCanInterface;
 import com.ctre.phoenix6.StatusSignal;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
@@ -144,5 +145,13 @@ public class Wrapper {
 
     public static PneumaticsModuleType ctrePCM() {
         return PneumaticsModuleType.CTREPCM;
+    }
+
+    public static int laserCanMeasurement(LaserCanInterface.Measurement measurement) {
+        if (measurement != null) {
+            return -1;
+        }
+
+        return measurement.distance_mm;
     }
 }
