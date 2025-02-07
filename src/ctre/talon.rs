@@ -185,11 +185,12 @@ impl Talon {
             ReturnType::Object
         ).l().unwrap();
 
-        call_static!(
-            "frc/robot/Wrapper",
+        call!(
+            &status_signal,
+            "com/ctre/phoenix6/StatusSignal",
             "getValue",
-            "(Lcom/ctre/phoenix6/StatusSignal;)D",
-            &[JValue::Object(&status_signal).as_jni()],
+            "()Ljava/lang/Object;",
+            &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
         ).d().unwrap()
     }
