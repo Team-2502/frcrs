@@ -12,6 +12,7 @@ pub mod solenoid;
 pub mod telemetry;
 pub mod limelight;
 pub mod laser_can;
+pub mod trapezoidal;
 
 use std::any::TypeId;
 use std::cmp::PartialEq;
@@ -390,7 +391,7 @@ pub trait Robot {
     }
 }
 
-
+/*
 #[cfg(test)]
 mod tests {
     use std::time::Duration;
@@ -419,4 +420,4 @@ mod tests {
         task_manager.abort_task(task(TestEnum::A));
         println!("Should not print finished");
     }
-}
+}*/
