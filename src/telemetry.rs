@@ -156,7 +156,7 @@ async fn get_telemetry_value(
         Some(data) => data.clone().value.into_response(),
         None => Response::builder()
             .status(StatusCode::OK)
-            .body(Body::new("null"))
+            .body(Body::new("null".into_response()))
             .unwrap()
             .into_response(),
     }
