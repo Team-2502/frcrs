@@ -155,8 +155,8 @@ async fn get_telemetry_value(
     match telemetry_data.iter().find(|data| data.key == key) {
         Some(data) => data.clone().value.into_response(),
         None => Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Body::empty())
+            .status(StatusCode::OK)
+            .body(Body::new("null"))
             .unwrap()
             .into_response(),
     }
