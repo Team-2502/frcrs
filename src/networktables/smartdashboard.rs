@@ -59,6 +59,16 @@ impl SmartDashboard {
             ReturnType::Primitive(Void)
         ).v().unwrap();
     }
+
+    pub fn start_camera_server() {
+        call_static!(
+            "edu/wpi/first/cameraserver/CameraServer",
+            "startAutomaticCapture",
+            "()Ledu/wpi/first/cscore/UsbCamera;",
+            &Vec::new(),
+            ReturnType::Object
+        ).l().unwrap();
+    }
 }
 
 pub struct Chooser<T> {
