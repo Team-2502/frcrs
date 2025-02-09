@@ -137,6 +137,16 @@ impl Joystick {
         self.buttons[id-1]
     }
 
+    pub fn get_pov(&self) -> i32 {
+        call_static!(
+            "edu/wpi/first/wpilibj/DriverStation",
+            "getStickPOV",
+            "(II)I",
+            &[JValue::Int(self.id).as_jni(), JValue::Int(0).as_jni()],
+            ReturnType::Primitive(Primitive::Int)
+        ).i().unwrap()
+    }
+
     pub fn while_held<F, Fut>(&'static mut self, button_id: usize, action: F)
     where
         F: Fn() -> Fut + Send + Sync + 'static,
