@@ -51,20 +51,28 @@ impl LaserCan {
 
     /// Gets the measurement from the laser can in mm
     pub fn get_measurement(&self) -> i32 {
-        let ret = call!(
-            self.instance.as_obj(),
-            "au/grapplerobotics/LaserCan",
-            "getMeasurement",
-            "()Lau/grapplerobotics/interfaces/LaserCanInterface$Measurement;",
-            &Vec::new(),
-            ReturnType::Object
-        ).l().unwrap();
+        // let ret = call!(
+        //     self.instance.as_obj(),
+        //     "au/grapplerobotics/LaserCan",
+        //     "getMeasurement",
+        //     "()Lau/grapplerobotics/interfaces/LaserCanInterface$Measurement;",
+        //     &Vec::new(),
+        //     ReturnType::Object
+        // ).l().unwrap();
+        //
+        // call_static!(
+        //     "frc/robot/Wrapper",
+        //     "laserCanMeasurement",
+        //     "(Lau/grapplerobotics/interfaces/LaserCanInterface$Measurement;)I",
+        //     &[JValue::Object(&ret).as_jni()],
+        //     ReturnType::Primitive(Primitive::Int)
+        // ).i().unwrap()
 
         call_static!(
             "frc/robot/Wrapper",
-            "laserCanMeasurement",
-            "(Lau/grapplerobotics/interfaces/LaserCanInterface$Measurement;)I",
-            &[JValue::Object(&ret).as_jni()],
+            "laserCanMeasureFull",
+            "(Lau/grapplerobotics/LaserCan;)I",
+            &[JValue::Object(&self.instance.as_obj()).as_jni()],
             ReturnType::Primitive(Primitive::Int)
         ).i().unwrap()
     }

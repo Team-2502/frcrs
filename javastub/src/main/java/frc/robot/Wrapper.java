@@ -1,5 +1,6 @@
 package frc.robot;
 
+import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.interfaces.LaserCanInterface;
 import com.ctre.phoenix6.StatusSignal;
 import com.revrobotics.spark.SparkBase;
@@ -105,7 +106,7 @@ public class Wrapper {
     }
 
     public static double getValue(StatusSignal<Double> holder) {
-        return holder.getValue();
+        return holder.getValueAsDouble();
     }
 
     /*public static void setSpeed(TalonFX motor, double speed) {
@@ -153,5 +154,14 @@ public class Wrapper {
         }
 
         return measurement.distance_mm;
+    }
+
+    public static int laserCanMeasureFull(LaserCan laserCan) {
+        LaserCan.Measurement measurement = laserCan.getMeasurement();
+        if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
+            return measurement.distance_mm;
+        } else {
+            return -1;
+        }
     }
 }
