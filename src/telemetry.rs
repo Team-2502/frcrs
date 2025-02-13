@@ -53,6 +53,7 @@ pub struct Telemetry;
 impl Telemetry {
     pub fn init(port: u16) {
         let app = Router::new()
+            .route("/status", get(status_check))
             .route("/telemetry", post(update_telemetry).get(get_telemetry))
             .route("/", get(frontend))
             .route("/*path", get(frontend))
@@ -143,6 +144,10 @@ impl Telemetry {
             .find(|data| data.key == key)
             .map(|data| data.value.clone())
     }
+}
+
+async fn status_check() -> impl IntoResponse {
+    "OK"
 }
 
 async fn frontend(Path(path): Path<Vec<String>>) -> impl IntoResponse {
