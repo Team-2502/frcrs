@@ -6,15 +6,25 @@ use axum::{
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 use axum::body::Body;
-use axum::http::{header, HeaderValue, Response, StatusCode};
+use axum::http::{header, HeaderValue, Method, Response, StatusCode};
 use axum::response::IntoResponse;
 use tokio::sync::{Mutex, RwLock};
-use serde_json::json;
+use serde_json::{json, Value};
 use serde::{Deserialize, Serialize};
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 use lazy_static::lazy_static;
+use tokio::fs;
+use tokio::runtime::Runtime;
+use tokio::task::LocalSet;
+use tokio::time::sleep;
+use tower_http::cors::{Any, CorsLayer};
+use crate::ctre::{ControlMode, Talon};
+use crate::{observe_user_program_starting, refresh_data};
+use crate::input::RobotState;
+use crate::trapezoidal::{TrapezoidalProfile, PID};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TelemetryData {
@@ -41,7 +51,9 @@ impl Telemetry {
             .route("/", get(frontend))
             .route("/*path", get(frontend))
             .route("/telemetry/:key", get(get_telemetry_value).put(set_telemetry_value))
-            .layer(Extension(TELEMETRY_STATE.clone()));
+            .route("/telemetry_layout", post(save_layout).get(load_layout))
+            .layer(Extension(TELEMETRY_STATE.clone()))
+            .layer(CorsLayer::permissive());
 
         let addr = SocketAddr::from(([0, 0, 0, 0], port));
         println!("Listening on {}", addr);
@@ -181,4 +193,53 @@ async fn set_telemetry_value(
     }
 
     json!({"status": "success"}).to_string().into_response()
+}
+
+async fn save_layout(Json(layout): Json<Value>) -> impl IntoResponse {
+    if let Ok(layout_str) = serde_json::to_string_pretty(&layout) {
+        if let Err(e) = fs::write("dashboard_layout.json", layout_str).await {
+            eprintln!("Error saving layout: {}", e);
+            return Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(Body::from("Failed to save layout"))
+                .unwrap();
+        }
+    }
+
+    Response::builder()
+        .status(StatusCode::OK)
+        .body(Body::from("Layout saved"))
+        .unwrap()
+}
+
+async fn load_layout() -> impl IntoResponse {
+    match fs::read_to_string("dashboard_layout.json").await {
+        Ok(content) => Response::builder()
+            .status(StatusCode::OK)
+            .header("Content-Type", "application/json")
+            .body(Body::from(content))
+            .unwrap(),
+        Err(_) => Response::builder()
+            .status(StatusCode::OK)
+            .body(Body::from("{}"))
+            .unwrap(),
+    }
+}
+
+#[test]
+fn telemetry() {
+    let executor = Runtime::new().unwrap();
+    let local = LocalSet::new();
+
+    let controller = local.run_until(async {
+        Telemetry::init(5807);
+
+        Telemetry::put_number("number test", 42.0).await;
+        Telemetry::put_string("string test", "hello".to_string()).await;
+        Telemetry::put_vec("vec test", vec![1, 2, 3]).await;
+
+        loop {}
+    });
+
+    executor.block_on(controller);
 }

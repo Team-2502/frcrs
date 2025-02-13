@@ -31,6 +31,12 @@ include_dir = "0.7.3"
 async-trait = "0.1.83"
 reqwest = { version = "0.11", features = ["json", "rustls-tls"], default-features = false }
 thiserror = "2.0.11"
+tower-http = { version = "0.6.2", features = ["cors"] }
+http = "0.2"
 
 [workspace]
 members = ["deploy"]
+
+[deploy]
+team_number = 2502
+executable = "target/arm-unknown-linux-gnueabi/release/examples/trapezoid_talon"
