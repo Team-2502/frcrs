@@ -27,6 +27,12 @@ use crate::input::RobotState;
 use crate::trapezoidal::{TrapezoidalProfile, PID};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SelectorData {
+    options: Vec<String>,
+    selected: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TelemetryData {
     key: String,
     value: String,
@@ -94,6 +100,38 @@ impl Telemetry {
                 key: key.to_string(),
                 value: json_values,
             });
+        }
+    }
+
+    pub async fn put_selector(key: &str, options: Vec<String>) {
+        let selector_data = SelectorData {
+            options: options.clone(),
+            selected: options.first()
+                .map(|s| s.clone())
+                .unwrap_or_else(|| "".to_string()),
+        };
+
+        let json = serde_json::to_string(&selector_data).unwrap();
+        Self::put_string(key, json).await;
+    }
+
+    pub async fn get_selection(key: &str) -> Option<String> {
+        if let Some(json) = Self::get(key).await {
+            serde_json::from_str::<SelectorData>(&json)
+                .ok()
+                .map(|data| data.selected)
+        } else {
+            None
+        }
+    }
+
+    pub async fn get_options(key: &str) -> Option<Vec<String>> {
+        if let Some(json) = Self::get(key).await {
+            serde_json::from_str::<SelectorData>(&json)
+                .ok()
+                .map(|data| data.options)
+        } else {
+            None
         }
     }
 
@@ -177,12 +215,26 @@ async fn get_telemetry_value(
 async fn set_telemetry_value(
     Extension(state): Extension<Arc<Mutex<AppState>>>,
     Path(key): Path<String>,
-    Json(payload): Json<serde_json::Value>,
+    Json(payload): Json<Value>,
 ) -> impl IntoResponse {
     let state = state.lock().await;
     let mut telemetry_data = state.telemetry_data.write().await;
 
-    let value = payload.to_string();
+    let value = if let Some(selection) = payload.get("selected") {
+        if let Some(existing) = telemetry_data.iter().find(|data| data.key == key) {
+            if let Ok(mut selector) = serde_json::from_str::<SelectorData>(&existing.value) {
+                selector.selected = selection.as_str().unwrap_or("").to_string();
+                serde_json::to_string(&selector).unwrap()
+            } else {
+                payload.to_string()
+            }
+        } else {
+            payload.to_string()
+        }
+    } else {
+        payload.to_string()
+    };
+
     if let Some(existing) = telemetry_data.iter_mut().find(|data| data.key == key) {
         existing.value = value;
     } else {
@@ -237,8 +289,17 @@ fn telemetry() {
         Telemetry::put_number("number test", 42.0).await;
         Telemetry::put_string("string test", "hello".to_string()).await;
         Telemetry::put_vec("vec test", vec![1, 2, 3]).await;
+        Telemetry::put_selector("selector test", vec!["one".to_string(), "two".to_string(), "three".to_string()]).await;
 
-        loop {}
+        loop {
+            if let Some(selected) = Telemetry::get_selection("selector test").await {
+                println!("Current mode: {}", selected);
+            } else {
+                eprintln!("Failed to get from selector")
+            }
+
+            sleep(Duration::from_secs(5)).await;
+        }
     });
 
     executor.block_on(controller);
