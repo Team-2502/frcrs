@@ -65,24 +65,3 @@ impl TrapezoidalProfile {
         output.clamp(-self.cruise_power, self.cruise_power)
     }
 }
-
-
-#[test]
-fn trapezoidal() {
-    // Create profile:
-    // - Accelerate at 2.0 units per second
-    // - Decelerate at 4.0 units per second
-    // - Cruise at 80% power
-    let mut profile = TrapezoidalProfile::new(20.0, 40.0, 0.8);
-
-    // Test over time
-    let target = 5000.0;
-    let dt = 0.02; // 20ms loop time
-
-    let positions = [0.0, 500.0, 1000.0, 2000.0, 3500.0, 4000.0, 4250.0, 4500.0, 4750.0, 4900.0, 5100.0, 5200.0, 5300.0, 5400.0, 5500.0, 5600.0, 5700.0, 5800.0, 5900.0, 6000.0];
-
-    for pos in positions.iter() {
-        let output = profile.calculate_output(*pos, target, dt);
-        println!("Position: {:.2}, Output: {:.3}", pos, output);
-    }
-}
