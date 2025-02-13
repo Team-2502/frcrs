@@ -24,7 +24,6 @@ use tower_http::cors::{Any, CorsLayer};
 use crate::ctre::{ControlMode, Talon};
 use crate::{observe_user_program_starting, refresh_data};
 use crate::input::RobotState;
-use crate::trapezoidal::{TrapezoidalProfile, PID};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SelectorData {
