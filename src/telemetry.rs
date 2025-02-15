@@ -59,7 +59,7 @@ impl Telemetry {
             .route("/telemetry/:key", get(get_telemetry_value).put(set_telemetry_value))
             .route("/telemetry_layout", post(save_layout).get(load_layout))
             .layer(Extension(TELEMETRY_STATE.clone()))
-            .layer(CorsLayer::permissive());
+            .layer(CorsLayer::very_permissive());
 
         let addr = SocketAddr::from(([0, 0, 0, 0], port));
         println!("Listening on {}", addr);
