@@ -215,4 +215,14 @@ impl Talon {
             ReturnType::Object
         ).l().unwrap();
     }
+    pub fn zero(&self) {
+        call!(
+            &self.instance.as_obj(),
+            "com/ctre/phoenix6/hardware/core/CoreTalonFX",
+            "setPosition",
+            "(D)Lcom/ctre/phoenix6/StatusCode;",
+            &[JValue::Double(0.).as_jni()],
+            ReturnType::Object
+        ).l().unwrap();
+    }
 }
