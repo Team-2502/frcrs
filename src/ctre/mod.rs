@@ -2,7 +2,7 @@ mod talon;
 mod cancoder;
 mod srx;
 mod pigeon;
-
+mod canrange;
 
 pub use talon::*;
 pub use cancoder::*;
