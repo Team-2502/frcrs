@@ -8,6 +8,7 @@ pub use talon::*;
 pub use cancoder::*;
 pub use srx::*;
 pub use pigeon::*;
+pub use canrange::*;
 
 pub enum TalonInvertType {
     CounterClockwise,
