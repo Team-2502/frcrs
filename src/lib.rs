@@ -13,6 +13,7 @@ pub mod telemetry;
 pub mod limelight;
 pub mod laser_can;
 pub mod trapezoidal;
+pub mod redux;
 
 use std::any::TypeId;
 use std::cmp::PartialEq;
