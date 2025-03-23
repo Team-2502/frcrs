@@ -7,6 +7,9 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import com.reduxrobotics.sensors.canandgyro.Canandgyro;
+
 import au.grapplerobotics.CanBridge;
 
 /**
@@ -26,6 +29,7 @@ public class Robot extends TimedRobot {
    */
   public Robot() {
     CanBridge.runTCP();
+    Canandgyro gyro = new Canandgyro(9); 
   }
 
   /**
