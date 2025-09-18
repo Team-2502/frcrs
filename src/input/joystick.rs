@@ -1,11 +1,16 @@
 use std::future::Future;
 use std::time::Instant;
 
+use crate::{
+    call::{call, call_static, create},
+    java, JAVA,
+};
 use bitvec::prelude::*;
-use jni::{objects::{GlobalRef, JValue}, signature::{Primitive, ReturnType}};
+use jni::{
+    objects::{GlobalRef, JValue},
+    signature::{Primitive, ReturnType},
+};
 use tokio::task::JoinHandle;
-use crate::{call::{call, call_static, create}, java, JAVA};
-
 
 #[derive(Clone)]
 pub struct Joystick {
@@ -39,7 +44,12 @@ impl Joystick {
 
         let instance = java().new_global_ref(instance).unwrap();
 
-        Self { id, instance, buttons, last_updated }
+        Self {
+            id,
+            instance,
+            buttons,
+            last_updated,
+        }
     }
 
     /// Gets the X-axis value of the joystick.
@@ -56,7 +66,9 @@ impl Joystick {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     /// Gets the Y-axis value of the joystick.
@@ -73,7 +85,9 @@ impl Joystick {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     /// Gets the Z-axis value of the joystick.
@@ -90,7 +104,9 @@ impl Joystick {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     /// Gets the throttle value of the joystick.
@@ -107,7 +123,9 @@ impl Joystick {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     /// Gets the state of the specified button by `id`.
@@ -131,10 +149,12 @@ impl Joystick {
             "(I)I",
             &[JValue::Int(self.id).as_jni()],
             ReturnType::Primitive(Primitive::Int)
-        ).i().unwrap();
+        )
+        .i()
+        .unwrap();
         self.buttons[..].store(value);
         self.last_updated = Instant::now();
-        self.buttons[id-1]
+        self.buttons[id - 1]
     }
 
     pub fn get_pov(&self) -> i32 {
@@ -144,7 +164,9 @@ impl Joystick {
             "(II)I",
             &[JValue::Int(self.id).as_jni(), JValue::Int(0).as_jni()],
             ReturnType::Primitive(Primitive::Int)
-        ).i().unwrap()
+        )
+        .i()
+        .unwrap()
     }
 
     pub fn while_held<F, Fut>(&'static mut self, button_id: usize, action: F)

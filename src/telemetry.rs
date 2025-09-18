@@ -1,29 +1,29 @@
+use crate::ctre::{ControlMode, Talon};
+use crate::input::RobotState;
+use crate::{observe_user_program_starting, refresh_data};
+use axum::body::Body;
+use axum::http::{header, HeaderValue, Method, Response, StatusCode};
+use axum::response::IntoResponse;
 use axum::{
     extract::{Extension, Json, Path},
     routing::{get, post, put},
     Router,
 };
+use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use axum::body::Body;
-use axum::http::{header, HeaderValue, Method, Response, StatusCode};
-use axum::response::IntoResponse;
-use tokio::sync::{Mutex, RwLock};
-use serde_json::{json, Value};
-use serde::{Deserialize, Serialize};
+use tokio::fs;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
-use lazy_static::lazy_static;
-use tokio::fs;
 use tokio::runtime::Runtime;
+use tokio::sync::{Mutex, RwLock};
 use tokio::task::LocalSet;
 use tokio::time::sleep;
 use tower_http::cors::{Any, CorsLayer};
-use crate::ctre::{ControlMode, Talon};
-use crate::{observe_user_program_starting, refresh_data};
-use crate::input::RobotState;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SelectorData {
@@ -56,7 +56,10 @@ impl Telemetry {
             .route("/telemetry", post(update_telemetry).get(get_telemetry))
             .route("/", get(frontend))
             .route("/*path", get(frontend))
-            .route("/telemetry/:key", get(get_telemetry_value).put(set_telemetry_value))
+            .route(
+                "/telemetry/:key",
+                get(get_telemetry_value).put(set_telemetry_value),
+            )
             .route("/telemetry_layout", post(save_layout).get(load_layout))
             .layer(Extension(TELEMETRY_STATE.clone()))
             .layer(CorsLayer::very_permissive());
@@ -106,7 +109,8 @@ impl Telemetry {
     pub async fn put_selector(key: &str, options: Vec<String>) {
         let selector_data = SelectorData {
             options: options.clone(),
-            selected: options.first()
+            selected: options
+                .first()
                 .map(|s| s.clone())
                 .unwrap_or_else(|| "".to_string()),
         };
@@ -139,7 +143,8 @@ impl Telemetry {
         let state = TELEMETRY_STATE.lock().await;
         let telemetry_data = state.telemetry_data.read().await;
 
-        telemetry_data.iter()
+        telemetry_data
+            .iter()
             .find(|data| data.key == key)
             .map(|data| data.value.clone())
     }
@@ -178,7 +183,7 @@ async fn frontend(Path(path): Path<Vec<String>>) -> impl IntoResponse {
                 )
                 .body(Body::from(contents))
                 .unwrap()
-        },
+        }
     }
 }
 
@@ -293,7 +298,11 @@ fn telemetry() {
         Telemetry::put_number("number test", 42.0).await;
         Telemetry::put_string("string test", "hello".to_string()).await;
         Telemetry::put_vec("vec test", vec![1, 2, 3]).await;
-        Telemetry::put_selector("selector test", vec!["one".to_string(), "two".to_string(), "three".to_string()]).await;
+        Telemetry::put_selector(
+            "selector test",
+            vec!["one".to_string(), "two".to_string(), "three".to_string()],
+        )
+        .await;
 
         loop {
             if let Some(selected) = Telemetry::get_selection("selector test").await {

@@ -1,29 +1,30 @@
-use jni::objects::{GlobalRef, JObject, JValue};
-use jni::signature::{Primitive, ReturnType};
 use crate::call::{call, call_static, create};
 use crate::java;
+use jni::objects::{GlobalRef, JObject, JValue};
+use jni::signature::{Primitive, ReturnType};
 
 pub struct CanCoder {
-    instance: GlobalRef
+    instance: GlobalRef,
 }
 
 impl CanCoder {
     pub fn new(id: i32, can_loop: Option<String>) -> Self {
-        let string = java().new_string(can_loop.unwrap_or("rio".to_string())).unwrap();
+        let string = java()
+            .new_string(can_loop.unwrap_or("rio".to_string()))
+            .unwrap();
 
         let instance = create!(
             "com/ctre/phoenix6/hardware/core/CoreCANcoder",
             "(ILjava/lang/String;)V",
-            &[JValue::Int(id).as_jni(),
+            &[
+                JValue::Int(id).as_jni(),
                 JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()
             ]
         );
 
         let instance = java().new_global_ref(instance).unwrap();
 
-        Self {
-            instance
-        }
+        Self { instance }
     }
 
     /*pub fn get(&self) -> f64 {
@@ -45,7 +46,9 @@ impl CanCoder {
             "()Lcom/ctre/phoenix6/StatusSignal;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         call_static!(
             "frc/robot/Wrapper",
@@ -53,6 +56,8 @@ impl CanCoder {
             "(Lcom/ctre/phoenix6/StatusSignal;)D",
             &[JValue::Object(&status_signal).as_jni()],
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 }

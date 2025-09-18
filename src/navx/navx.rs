@@ -1,6 +1,12 @@
-use jni::{objects::GlobalRef, signature::{Primitive, ReturnType}};
+use jni::{
+    objects::GlobalRef,
+    signature::{Primitive, ReturnType},
+};
 
-use crate::{call::{call, call_static}, java};
+use crate::{
+    call::{call, call_static},
+    java,
+};
 
 pub struct NavX {
     instance: GlobalRef,
@@ -14,13 +20,13 @@ impl NavX {
             "()Lcom/kauailabs/navx/frc/AHRS;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         let instance = java().new_global_ref(instance).unwrap();
 
-        Self {
-            instance
-        }
+        Self { instance }
     }
 
     pub fn get_angle(&self) -> f64 {
@@ -31,7 +37,9 @@ impl NavX {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     pub fn reset_angle(&self) {
@@ -42,6 +50,8 @@ impl NavX {
             "()V",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Void)
-        ).v().unwrap()
+        )
+        .v()
+        .unwrap()
     }
 }

@@ -1,4 +1,7 @@
-use jni::{objects::{GlobalRef, JValue}, signature::{Primitive, ReturnType}};
+use jni::{
+    objects::{GlobalRef, JValue},
+    signature::{Primitive, ReturnType},
+};
 
 use crate::call::*;
 
@@ -7,14 +10,14 @@ pub struct DIO {
 }
 
 impl DIO {
-    pub fn new(port: i32) -> Self { 
+    pub fn new(port: i32) -> Self {
         let instance = create!(
             "edu/wpi/first/wpilibj/DigitalInput",
             "(I)V",
             &[JValue::Int(port).as_jni()]
         );
 
-        Self { instance } 
+        Self { instance }
     }
 
     pub fn get(&self) -> bool {
@@ -25,6 +28,8 @@ impl DIO {
             "()Z",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Boolean)
-        ).z().unwrap()
+        )
+        .z()
+        .unwrap()
     }
 }

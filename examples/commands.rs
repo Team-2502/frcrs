@@ -1,21 +1,21 @@
+use frcrs::input::Gamepad;
+use frcrs::{Robot, TaskManager};
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::runtime::Builder;
 use tokio::task::{spawn_local, LocalSet};
 use tokio::time::sleep;
-use frcrs::input::Gamepad;
-use frcrs::{Robot, TaskManager};
 
 pub struct MyRobot {
     task_manager: TaskManager,
-    gamepad: Gamepad
+    gamepad: Gamepad,
 }
 
 impl MyRobot {
     pub fn new() -> Self {
         Self {
             task_manager: TaskManager::new(),
-            gamepad: Gamepad::new(1)
+            gamepad: Gamepad::new(1),
         }
     }
 }

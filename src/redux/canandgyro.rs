@@ -1,8 +1,8 @@
+use crate::call::{call, create};
+use crate::java;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
 use nalgebra::{Rotation3, Vector3};
-use crate::call::{call, create};
-use crate::java;
 
 pub struct CanAndGyro {
     instance: GlobalRef,
@@ -10,7 +10,6 @@ pub struct CanAndGyro {
 
 impl CanAndGyro {
     pub fn new(id: i32) -> Self {
-
         let instance = create!(
             "com/reduxrobotics/sensors/canandgyro/Canandgyro",
             "(I)V",
@@ -18,7 +17,7 @@ impl CanAndGyro {
         );
 
         Self {
-            instance: java().new_global_ref(instance).unwrap()
+            instance: java().new_global_ref(instance).unwrap(),
         }
     }
 
@@ -30,6 +29,8 @@ impl CanAndGyro {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 }

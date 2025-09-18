@@ -1,9 +1,9 @@
-mod joystick;
 mod gamepad;
+mod joystick;
 
+pub use gamepad::*;
 use jni::signature::{Primitive, ReturnType};
 pub use joystick::*;
-pub use gamepad::*;
 
 use bitvec::prelude::*;
 
@@ -23,18 +23,20 @@ pub struct RobotState {
 }
 
 impl RobotState {
-    pub fn get() -> Self { 
+    pub fn get() -> Self {
         let value = call_static!(
             "edu/wpi/first/hal/DriverStationJNI",
             "nativeGetControlWord",
             "()I",
             &[],
             ReturnType::Primitive(Primitive::Int)
-        ).i().unwrap();
-    
+        )
+        .i()
+        .unwrap();
+
         let mut buttons = bitvec![0; 32];
         buttons[..].store(value);
-        Self { buttons } 
+        Self { buttons }
     }
 
     pub fn teleop(&self) -> bool {

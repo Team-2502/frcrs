@@ -1,9 +1,12 @@
-use jni::{objects::{GlobalRef, JValue}, signature::{Primitive, ReturnType}};
+use jni::{
+    objects::{GlobalRef, JValue},
+    signature::{Primitive, ReturnType},
+};
 
 #[derive(Clone)]
 pub struct Led {
     instance: GlobalRef,
-    buffer: GlobalRef
+    buffer: GlobalRef,
 }
 
 impl Led {
@@ -22,7 +25,7 @@ impl Led {
             &[JValue::Int(count).as_jni()],
             ReturnType::Primitive(Primitive::Void)
         );
-        
+
         let buffer = create!(
             "edu/wpi/first/wpilibj/AddressableLEDBuffer",
             "(I)V",
@@ -31,7 +34,7 @@ impl Led {
 
         let obj = buffer.as_obj();
 
-         call!(
+        call!(
             &instance,
             "edu/wpi/first/wpilibj/AddressableLED",
             "setData",
@@ -49,11 +52,7 @@ impl Led {
             ReturnType::Primitive(Primitive::Void)
         );
 
-
-        Self {
-            instance,
-            buffer
-        }
+        Self { instance, buffer }
     }
 
     pub fn set_rgb(&self, idx: i32, r: i32, g: i32, b: i32) {
@@ -62,7 +61,12 @@ impl Led {
             "edu/wpi/first/wpilibj/AddressableLEDBuffer",
             "setRGB",
             "(IIII)V",
-            &[JValue::Int(idx).as_jni(), JValue::Int(r).as_jni(), JValue::Int(g).as_jni(), JValue::Int(b).as_jni()],
+            &[
+                JValue::Int(idx).as_jni(),
+                JValue::Int(r).as_jni(),
+                JValue::Int(g).as_jni(),
+                JValue::Int(b).as_jni()
+            ],
             ReturnType::Primitive(Primitive::Void)
         );
     }
@@ -94,4 +98,3 @@ impl Led {
         self.start();
     }
 }
-

@@ -1,46 +1,46 @@
 pub mod ctre;
+pub mod dio;
+pub mod drive;
 pub mod input;
+pub mod navx;
 pub mod networktables;
 pub mod rev;
-pub mod navx;
-pub mod drive;
-pub mod dio;
 #[macro_use]
 pub mod call;
+pub mod laser_can;
 pub mod led;
+pub mod limelight;
+pub mod redux;
 pub mod solenoid;
 pub mod telemetry;
-pub mod limelight;
-pub mod laser_can;
 pub mod trapezoidal;
-pub mod redux;
 
-use std::any::TypeId;
-use std::cmp::PartialEq;
-use std::future::Future;
-use std::hash::{Hash, Hasher};
+use crate::input::{RobotMode, RobotState};
 use jni::objects::{JObject, JValue};
 use jni::signature::Primitive;
 use jni::{InitArgsBuilder, JNIEnv, JNIVersion, JavaVM};
 use lazy_static::lazy_static;
+use std::any::TypeId;
+use std::cmp::PartialEq;
+use std::future::Future;
+use std::hash::{Hash, Hasher};
 use tokio::task::{spawn_local, AbortHandle, LocalSet};
 use tokio::time::{interval, sleep};
-use crate::input::{RobotMode, RobotState};
 
 #[macro_use]
 extern crate uom;
 
+use crate::drive::ToTalonEncoder;
+use serde::de::IntoDeserializer;
+use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::ops::Range;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::{Duration, Instant};
-use crate::drive::ToTalonEncoder;
-use std::collections::HashMap;
 use std::pin::Pin;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use serde::de::IntoDeserializer;
+use std::time::{Duration, Instant};
 
-fn create_jvm() -> JavaVM{
+fn create_jvm() -> JavaVM {
     // set JAVA_HOME to /usr/local/frc/JRE/bin/
     let jvm_args = InitArgsBuilder::new()
         .version(JNIVersion::V8)
@@ -48,15 +48,17 @@ fn create_jvm() -> JavaVM{
         .option("-Djava.lang.invoke.stringConcat=BC_SB")
         .option("-Djava.library.path=/usr/local/frc/third-party/lib")
         .option("-Djava.class.path=/home/lvuser/javastub.jar")
-        .build().unwrap();
+        .build()
+        .unwrap();
 
-    let jvm = JavaVM::with_libjvm(jvm_args, || Ok("/usr/local/frc/JRE/lib/client/libjvm.so")).unwrap();
+    let jvm =
+        JavaVM::with_libjvm(jvm_args, || Ok("/usr/local/frc/JRE/lib/client/libjvm.so")).unwrap();
     jvm.attach_current_thread_as_daemon().unwrap();
     jvm
 }
 
-lazy_static!{
-    static ref  JAVA: JavaVM = create_jvm();
+lazy_static! {
+    static ref JAVA: JavaVM = create_jvm();
 }
 
 fn java() -> JNIEnv<'static> {
@@ -71,7 +73,9 @@ pub fn deadzone(input: f64, from_range: &Range<f64>, to_range: &Range<f64>) -> f
     let to_len = to_range.end - to_range.start;
     let standard = (input - from_range.start) / from_len;
     let mut out = (standard * to_len) + to_range.start;
-    if input < from_range.start { out = 0.0 };
+    if input < from_range.start {
+        out = 0.0
+    };
     if neg {
         -out
     } else {
@@ -130,55 +134,61 @@ pub fn refresh_data() {
 
 pub fn init_hal() -> bool {
     call_static!(
-		"edu/wpi/first/hal/HAL",
-		"initialize",
-		"(II)Z",
-		&[JValue::Int(500).as_jni(),
-          JValue::Int(1).as_jni()],
+        "edu/wpi/first/hal/HAL",
+        "initialize",
+        "(II)Z",
+        &[JValue::Int(500).as_jni(), JValue::Int(1).as_jni()],
         jni::signature::ReturnType::Primitive(Primitive::Boolean)
-    ).z().unwrap()
+    )
+    .z()
+    .unwrap()
 }
 
 pub fn hal_report(resource: i32, instance_number: i32, context: i32, feature: String) {
     let string = java().new_string(feature).unwrap();
     call_static!(
-		"edu/wpi/first/hal/HAL",
-		"report",
-		"(IIILjava/lang/String;)I",
-		&[JValue::Int(resource).as_jni(),
-		  JValue::Int(instance_number).as_jni(),
-          JValue::Int(context).as_jni(),
-          JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()
+        "edu/wpi/first/hal/HAL",
+        "report",
+        "(IIILjava/lang/String;)I",
+        &[
+            JValue::Int(resource).as_jni(),
+            JValue::Int(instance_number).as_jni(),
+            JValue::Int(context).as_jni(),
+            JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()
         ],
         jni::signature::ReturnType::Primitive(Primitive::Int)
-    ).i().unwrap();
+    )
+    .i()
+    .unwrap();
 }
 
 pub struct AllianceStation(u8);
 
 impl AllianceStation {
-   pub fn red(&self) -> bool {
-       match self.0 {
-           1 | 2 | 3 => true,
-           _ => false,
-       }
-   }
-   pub fn blue(&self) -> bool {
-       match self.0 {
-           4 | 5 | 6 => true,
-           _ => false,
-       }
-   }
+    pub fn red(&self) -> bool {
+        match self.0 {
+            1 | 2 | 3 => true,
+            _ => false,
+        }
+    }
+    pub fn blue(&self) -> bool {
+        match self.0 {
+            4 | 5 | 6 => true,
+            _ => false,
+        }
+    }
 }
 
 pub fn alliance_station() -> AllianceStation {
     let station = call_static!(
-		"frc/robot/Wrapper",
-		"getAllianceStation",
-		"()I",
+        "frc/robot/Wrapper",
+        "getAllianceStation",
+        "()I",
         &Vec::new(),
         jni::signature::ReturnType::Primitive(Primitive::Int)
-    ).i().unwrap();
+    )
+    .i()
+    .unwrap();
 
     AllianceStation(station as u8)
 }
@@ -205,7 +215,7 @@ macro_rules! container {
             } else if state.enabled() && state.auto() {
                 $auto($($arg),*).await;
             }
-            
+
             sleep_hz(last_loop, 500).await;
         }
     }};
@@ -377,7 +387,6 @@ pub trait Robot {
                     RobotMode::Teleop => self.teleop_periodic().await,
                     RobotMode::Test => self.test_periodic().await,
                 }
-
 
                 previous_mode = state.clone();
 

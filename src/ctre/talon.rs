@@ -1,13 +1,13 @@
+use crate::call::{call, call_static, create};
+use crate::java;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
 use jni::sys::jboolean;
-use crate::call::{call, call_static, create};
-use crate::java;
 
 pub enum ControlMode {
     Percent,
     Position,
-    MotionMagic
+    MotionMagic,
 }
 
 /// Represents a motor controller of type `TalonFX`.
@@ -44,22 +44,22 @@ impl Talon {
     /// let talon = Talon::new(1, Some("can0".to_string()));
     /// ```
     pub fn new(id: i32, can_bus: Option<String>) -> Self {
-        let string = java().new_string(can_bus.unwrap_or("rio".to_string())).unwrap();
+        let string = java()
+            .new_string(can_bus.unwrap_or("rio".to_string()))
+            .unwrap();
 
         let instance = create!(
             "com/ctre/phoenix6/hardware/TalonFX",
             "(ILjava/lang/String;)V",
-            &[JValue::Int(id).as_jni(),
+            &[
+                JValue::Int(id).as_jni(),
                 JValue::Object(&JObject::from(string)).as_jni()
             ]
         );
 
         let instance = java().new_global_ref(instance).unwrap();
 
-        Self {
-            instance,
-            id
-        }
+        Self { instance, id }
     }
 
     /// Sets the output for the motor controller.
@@ -88,7 +88,9 @@ impl Talon {
                     "(Lcom/ctre/phoenix6/controls/DutyCycleOut;)Lcom/ctre/phoenix6/StatusCode;",
                     &[JValue::Object(&control.as_obj()).as_jni()],
                     ReturnType::Object
-                ).l().unwrap();
+                )
+                .l()
+                .unwrap();
             }
             ControlMode::Position => {
                 let control = create!(
@@ -105,7 +107,7 @@ impl Talon {
                     &[JValue::Object(&control.as_obj()).as_jni()],
                     ReturnType::Object
                 ).l().unwrap();
-            },
+            }
             ControlMode::MotionMagic => {
                 let control = create!(
                     "com/ctre/phoenix6/controls/MotionMagicDutyCycle",
@@ -134,7 +136,9 @@ impl Talon {
             "()V",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Void)
-        ).v().unwrap()
+        )
+        .v()
+        .unwrap()
     }
 
     /// Retrieves the current velocity of the motor.
@@ -154,7 +158,9 @@ impl Talon {
             "()Lcom/ctre/phoenix6/StatusSignal;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         call_static!(
             "frc/robot/Wrapper",
@@ -162,7 +168,9 @@ impl Talon {
             "(Lcom/ctre/phoenix6/StatusSignal;)D",
             &[JValue::Object(&status_signal).as_jni()],
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     /// Retrieves the current position of the motor.
@@ -182,7 +190,9 @@ impl Talon {
             "()Lcom/ctre/phoenix6/StatusSignal;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         call_static!(
             "frc/robot/Wrapper",
@@ -190,7 +200,9 @@ impl Talon {
             "(Lcom/ctre/phoenix6/StatusSignal;)D",
             &[JValue::Object(&status_signal).as_jni()],
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     pub fn get_id(&self) -> i32 {
@@ -201,7 +213,8 @@ impl Talon {
         let follower = create!(
             "com/ctre/phoenix6/controls/Follower",
             "(IZ)V",
-            &[JValue::Int(master.get_id()).as_jni(),
+            &[
+                JValue::Int(master.get_id()).as_jni(),
                 JValue::Bool(jboolean::from(inverted)).as_jni()
             ]
         );
@@ -213,7 +226,9 @@ impl Talon {
             "(Lcom/ctre/phoenix6/controls/Follower;)Lcom/ctre/phoenix6/StatusCode;",
             &[JValue::Object(&follower).as_jni()],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
     }
     pub fn zero(&self) {
         call!(
@@ -223,6 +238,8 @@ impl Talon {
             "(D)Lcom/ctre/phoenix6/StatusCode;",
             &[JValue::Double(0.).as_jni()],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
     }
 }

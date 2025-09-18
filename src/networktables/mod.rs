@@ -1,5 +1,5 @@
-mod smartdashboard;
 mod networktable;
+mod smartdashboard;
 
-pub use smartdashboard::*;
 pub use networktable::*;
+pub use smartdashboard::*;

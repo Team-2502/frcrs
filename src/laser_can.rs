@@ -1,7 +1,7 @@
+use crate::java;
 use jni::objects::{GlobalRef, JValue};
 use jni::signature::{Primitive, ReturnType};
 use nalgebra::Vector4;
-use crate::java;
 
 pub struct LaserCan {
     instance: GlobalRef,
@@ -9,7 +9,7 @@ pub struct LaserCan {
 
 pub enum RangingMode {
     Long,
-    Short
+    Short,
 }
 
 impl LaserCan {
@@ -37,7 +37,9 @@ impl LaserCan {
             "(Ljava/lang/String;)Lau/grapplerobotics/LaserCan$RangingMode;",
             &[JValue::Object(&java().new_string(s).unwrap()).as_jni()],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         call!(
             self.instance.as_obj(),
@@ -74,6 +76,8 @@ impl LaserCan {
             "(Lau/grapplerobotics/LaserCan;)I",
             &[JValue::Object(&self.instance.as_obj()).as_jni()],
             ReturnType::Primitive(Primitive::Int)
-        ).i().unwrap()
+        )
+        .i()
+        .unwrap()
     }
 }

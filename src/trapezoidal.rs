@@ -136,11 +136,16 @@ fn trapezoid() {
     // Define motion profile parameters
     let start_position = 0.0;
     let goal_position = 100.0;
-    let max_velocity = 50.0;     // units per second (for example, inches/sec or degrees/sec)
+    let max_velocity = 50.0; // units per second (for example, inches/sec or degrees/sec)
     let max_acceleration = 100.0; // units per second^2
 
     // Create the trapezoidal profile
-    let profile = TrapezoidalProfile::new(start_position, goal_position, max_velocity, max_acceleration);
+    let profile = TrapezoidalProfile::new(
+        start_position,
+        goal_position,
+        max_velocity,
+        max_acceleration,
+    );
 
     // Simulate a control loop running at 20ms intervals.
     let dt = 0.02; // 20 ms
@@ -154,10 +159,7 @@ fn trapezoid() {
         // (Optionally) retrieve the desired velocity for feedforward control.
         let desired_velocity = profile.velocity_at(t);
 
-        println!(
-            "{:.2}\t{:.2}\t{:.2}",
-            t, desired_position, desired_velocity
-        );
+        println!("{:.2}\t{:.2}\t{:.2}", t, desired_position, desired_velocity);
 
         t += dt;
     }
