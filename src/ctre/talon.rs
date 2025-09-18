@@ -242,4 +242,36 @@ impl Talon {
         .l()
         .unwrap();
     }
+
+    /// Retrieves the stator current from the motor in Amps.
+    ///
+    /// # Returns
+    /// A `f64` value representing the current drawn by the motor stator.
+    ///
+    /// # Example
+    /// ```rust
+    /// let current = talon.get_current();
+    /// ```
+    pub fn get_current(&self) -> f64 {
+        let status_signal = call!(
+            self.instance.as_obj(),
+            "com/ctre/phoenix6/hardware/core/CoreTalonFX",
+            "getStatorCurrent",
+            "()Lcom/ctre/phoenix6/StatusSignal;",
+            &Vec::new(),
+            ReturnType::Object
+        )
+        .l()
+        .unwrap();
+
+        call_static!(
+            "frc/robot/Wrapper",
+            "getValue",
+            "(Lcom/ctre/phoenix6/StatusSignal;)D",
+            &[JValue::Object(&status_signal).as_jni()],
+            ReturnType::Primitive(Primitive::Double)
+        )
+        .d()
+        .unwrap()
+    }
 }
