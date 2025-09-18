@@ -14,6 +14,7 @@ pub mod redux;
 pub mod solenoid;
 pub mod telemetry;
 pub mod trapezoidal;
+mod trajectory;
 
 use crate::input::{RobotMode, RobotState};
 use jni::objects::{JObject, JValue};
