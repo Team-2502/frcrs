@@ -1,14 +1,14 @@
-mod talon;
 mod cancoder;
-mod srx;
-mod pigeon;
 mod canrange;
+mod pigeon;
+mod srx;
+mod talon;
 
-pub use talon::*;
 pub use cancoder::*;
-pub use srx::*;
-pub use pigeon::*;
 pub use canrange::*;
+pub use pigeon::*;
+pub use srx::*;
+pub use talon::*;
 
 pub enum TalonInvertType {
     CounterClockwise,
@@ -21,8 +21,6 @@ impl TalonInvertType {
         }
     }
 }
-
-
 
 const TICKS_TO_ROTATIONS: f32 = (1.) / (1. * 12.8);
 
@@ -52,9 +50,12 @@ impl ToTalonEncoder for f64 {
 
 #[cfg(test)]
 mod tests {
-    use uom::si::{f64::Angle, angle::{degree, revolution}};
+    use uom::si::{
+        angle::{degree, revolution},
+        f64::Angle,
+    };
 
-    use super::{ToTalonEncoder, talon_encoder_tick};
+    use super::{talon_encoder_tick, ToTalonEncoder};
 
     #[test]
     fn uom_equivalent() {

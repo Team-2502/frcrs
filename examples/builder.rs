@@ -1,10 +1,10 @@
+use frcrs::input::{Gamepad, Joystick};
+use frcrs::{observe_user_program_starting, refresh_data, Command, CommandScheduler};
 use std::sync::{Arc, Mutex};
 use std::thread::sleep;
 use std::time::Duration;
 use tokio::runtime::Runtime;
 use tokio::task::LocalSet;
-use frcrs::{observe_user_program_starting, refresh_data, Command, CommandScheduler};
-use frcrs::input::{Gamepad, Joystick};
 
 //#[tokio::main(flavor = "current_thread")]
 fn main() {

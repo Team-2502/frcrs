@@ -1,11 +1,11 @@
+use crate::call::{call, call_static};
+use crate::java;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::Primitive::{Int, Void};
 use jni::signature::ReturnType;
 use jni::sys::jboolean;
-use uom::si::{f64::Angle, angle::radian};
 use nalgebra::Vector2;
-use crate::call::{call, call_static};
-use crate::java;
+use uom::si::{angle::radian, f64::Angle};
 
 pub struct SmartDashboard;
 
@@ -17,9 +17,14 @@ impl SmartDashboard {
             "edu/wpi/first/wpilibj/smartdashboard/SmartDashboard",
             "putNumber",
             "(Ljava/lang/String;D)V",
-            &[JValue::Object(&JObject::from_raw(key.into_raw())).as_jni(), JValue::Double(data).as_jni()],
+            &[
+                JValue::Object(&JObject::from_raw(key.into_raw())).as_jni(),
+                JValue::Double(data).as_jni()
+            ],
             ReturnType::Primitive(Void)
-        ).v().unwrap()
+        )
+        .v()
+        .unwrap()
     }
 
     pub fn put_bool(key: String, data: bool) {
@@ -29,9 +34,14 @@ impl SmartDashboard {
             "edu/wpi/first/wpilibj/smartdashboard/SmartDashboard",
             "putBoolean",
             "(Ljava/lang/String;Z)V",
-            &[JValue::Object(&JObject::from_raw(key.into_raw())).as_jni(), JValue::Bool(jboolean::from(data)).as_jni()],
+            &[
+                JValue::Object(&JObject::from_raw(key.into_raw())).as_jni(),
+                JValue::Bool(jboolean::from(data)).as_jni()
+            ],
             ReturnType::Primitive(Void)
-        ).v().unwrap()
+        )
+        .v()
+        .unwrap()
     }
 
     pub fn set_position(position: Vector2<f64>, angle: Angle) {
@@ -47,7 +57,9 @@ impl SmartDashboard {
                 JValue::Double(angle).as_jni()
             ],
             ReturnType::Primitive(Void)
-        ).v().unwrap();
+        )
+        .v()
+        .unwrap();
     }
 
     pub fn put_field() {
@@ -57,7 +69,9 @@ impl SmartDashboard {
             "()V",
             &Vec::new(),
             ReturnType::Primitive(Void)
-        ).v().unwrap();
+        )
+        .v()
+        .unwrap();
     }
 
     pub fn start_camera_server() {
@@ -67,7 +81,9 @@ impl SmartDashboard {
             "()Ledu/wpi/first/cscore/UsbCamera;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
     }
 }
 
@@ -84,11 +100,13 @@ impl<T> Chooser<T> {
             "()Ledu/wpi/first/wpilibj/smartdashboard/SendableChooser;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         Self {
             options: Vec::new(),
-            instance: java().new_global_ref(instance).unwrap()
+            instance: java().new_global_ref(instance).unwrap(),
         }
     }
 
@@ -103,10 +121,14 @@ impl<T> Chooser<T> {
             "edu/wpi/first/wpilibj/smartdashboard/SendableChooser",
             "addOption",
             "(Ljava/lang/String;Ljava/lang/Object;)V",
-            &[JValue::Object(&JObject::from_raw(string.into_raw())).as_jni(),
-                JValue::Int(idx as i32).as_jni()],
+            &[
+                JValue::Object(&JObject::from_raw(string.into_raw())).as_jni(),
+                JValue::Int(idx as i32).as_jni()
+            ],
             ReturnType::Primitive(Void)
-        ).v().unwrap();
+        )
+        .v()
+        .unwrap();
     }
 
     pub fn get(&self) -> i32 {
@@ -117,9 +139,10 @@ impl<T> Chooser<T> {
             "()Ljava/lang/Object;",
             &Vec::new(),
             ReturnType::Primitive(Int)
-        ).i().unwrap()
+        )
+        .i()
+        .unwrap()
     }
-
 }
 
 /*

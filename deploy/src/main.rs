@@ -1,17 +1,17 @@
-use std::{env, fs};
+use deploy::{find_rio, send_file, send_string};
+use serde::{Deserialize, Serialize};
+use ssh2::Session;
 use std::io::Write;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4, TcpStream};
 use std::path::Path;
-use std::process::{Command, exit};
+use std::process::{exit, Command};
 use std::time::Duration;
+use std::{env, fs};
 use tracing::{error, info};
-use ssh2::Session;
-use deploy::{find_rio, send_file, send_string};
-use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
 struct Args {
-    deploy: Option<DeployArgs>
+    deploy: Option<DeployArgs>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -22,7 +22,7 @@ struct DeployArgs {
 
     lib: Option<String>,
     frontend: Option<String>,
-    frontend_dest: Option<String>
+    frontend_dest: Option<String>,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -53,7 +53,10 @@ fn main() -> anyhow::Result<()> {
         }
     };
 
-    let rio = TcpStream::connect_timeout(&SocketAddr::new(IpAddr::from(addr), 22), Duration::from_secs_f64(4.));
+    let rio = TcpStream::connect_timeout(
+        &SocketAddr::new(IpAddr::from(addr), 22),
+        Duration::from_secs_f64(4.),
+    );
     let rio = match rio {
         Ok(stream) => {
             info!("Connected to rio");
@@ -128,16 +131,37 @@ fn main() -> anyhow::Result<()> {
     channel.send_eof().unwrap();
 
     channel = ssh.channel_session().unwrap();
-    channel.exec(format!("rm {}", Path::new(&args.executable).file_name().unwrap().to_str().unwrap()).as_str()).unwrap();
+    channel
+        .exec(
+            format!(
+                "rm {}",
+                Path::new(&args.executable)
+                    .file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+            )
+            .as_str(),
+        )
+        .unwrap();
 
     info!("Deploying executable");
     send_file(Path::new(&args.executable), Path::new("/home/lvuser"), &ssh).unwrap();
 
     info!("Writing to robotCommand");
-    send_string(format!(    "JAVA_HOME=/usr/local/frc/JRE /home/lvuser/{}\n",
-                        Path::new(&args.executable).file_name().unwrap().to_str().unwrap()),
-                Path::new("/home/lvuser/robotCommand"),
-                &ssh).unwrap();
+    send_string(
+        format!(
+            "JAVA_HOME=/usr/local/frc/JRE /home/lvuser/{}\n",
+            Path::new(&args.executable)
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+        ),
+        Path::new("/home/lvuser/robotCommand"),
+        &ssh,
+    )
+    .unwrap();
 
     Ok(())
 }

@@ -41,7 +41,13 @@ impl Swerve {
         let wa4 = a.atan2(c) * (180. / PI);
 
         let mut max = ws1;
-        if ws2 > max { max = ws2; } else if ws3 > max { max = ws3; } else if ws4 > max { max = ws4 }
+        if ws2 > max {
+            max = ws2;
+        } else if ws3 > max {
+            max = ws3;
+        } else if ws4 > max {
+            max = ws4
+        }
         if max > 1. {
             ws1 /= max;
             ws2 /= max;
@@ -63,7 +69,7 @@ impl Swerve {
             wa1,
             wa2,
             wa3,
-            wa4
+            wa4,
         }
     }
 
@@ -72,15 +78,13 @@ impl Swerve {
         //println!("{}", target_angle);
 
         let delta = target_angle - current_angle;
-        let offset = if delta > 0. {
-            180.
-        } else { -180. };
+        let offset = if delta > 0. { 180. } else { -180. };
 
         return if delta.abs() > 90. {
             (-target_speed, target_angle - offset)
         } else {
             (target_speed, target_angle - offset)
-        }
+        };
     }
 
     pub fn place_in_appropriate_0_to_360_scope(scope_ref: f64, new_angle: f64) -> f64 {
@@ -129,8 +133,8 @@ impl ToTalonEncoder for f64 {
 
 #[cfg(test)]
 mod tests {
-    use std::time::Instant;
     use crate::drive::{Swerve, ToTalonEncoder};
+    use std::time::Instant;
 
     #[test]
     fn place_in_scope() {

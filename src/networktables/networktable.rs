@@ -1,10 +1,10 @@
-use jni::objects::{GlobalRef, JObject, JValue};
-use jni::signature::{Primitive, ReturnType};
 use crate::call::{call, call_static};
 use crate::java;
+use jni::objects::{GlobalRef, JObject, JValue};
+use jni::signature::{Primitive, ReturnType};
 
 pub struct NetworkTable {
-    instance: GlobalRef
+    instance: GlobalRef,
 }
 
 impl NetworkTable {
@@ -15,7 +15,9 @@ impl NetworkTable {
             "()V",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Void)
-        ).v().unwrap()
+        )
+        .v()
+        .unwrap()
     }
 
     pub fn get_table(name: &str) -> Self {
@@ -25,7 +27,9 @@ impl NetworkTable {
             "()Ledu/wpi/first/networktables/NetworkTableInstance;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         let string = java().new_string(name).unwrap();
 
@@ -36,10 +40,12 @@ impl NetworkTable {
             "Ljava/lang/String;)Ledu/wpi/first/networktables/NetworkTable",
             &[JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         Self {
-            instance: java().new_global_ref(table).unwrap()
+            instance: java().new_global_ref(table).unwrap(),
         }
     }
 
@@ -53,16 +59,18 @@ impl NetworkTable {
             "(Ljava/lang/String;)Ledu/wpi/first/networktables/NetworkTableEntry;",
             &[JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         NetworkTableEntry {
-            instance: java().new_global_ref(instance).unwrap()
+            instance: java().new_global_ref(instance).unwrap(),
         }
     }
 }
 
 pub struct NetworkTableEntry {
-    instance: GlobalRef
+    instance: GlobalRef,
 }
 
 impl NetworkTableEntry {
@@ -74,6 +82,8 @@ impl NetworkTableEntry {
             "(D)D",
             &[JValue::Double(0.).as_jni()],
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 }

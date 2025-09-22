@@ -4,12 +4,12 @@ pub use spark::*;
 
 pub enum MotorType {
     Brushed,
-    Brushless
+    Brushless,
 }
 
 pub enum IdleMode {
     Brake,
-    Coast
+    Coast,
 }
 
 pub enum ControlType {
@@ -21,7 +21,7 @@ impl MotorType {
     pub fn as_str(&self) -> &str {
         match &self {
             MotorType::Brushed => "kBrushed",
-            MotorType::Brushless => "kBrushless"
+            MotorType::Brushless => "kBrushless",
         }
     }
 }
@@ -30,16 +30,16 @@ impl IdleMode {
     pub fn as_str(&self) -> &str {
         match &self {
             IdleMode::Brake => "kBrake",
-            IdleMode::Coast => "kCoast"
+            IdleMode::Coast => "kCoast",
         }
     }
 }
 
 impl ControlType {
-    pub fn as_str(&self)-> &str {
+    pub fn as_str(&self) -> &str {
         match &self {
             ControlType::Position => "kPosition",
-            ControlType::Velocity => "kVelocity"
+            ControlType::Velocity => "kVelocity",
         }
     }
 }

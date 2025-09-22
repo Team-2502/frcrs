@@ -1,11 +1,17 @@
 use std::future::Future;
 use std::time::Instant;
 
+use crate::{
+    call::{call, call_static, create, once},
+    java,
+};
 use bitvec::prelude::*;
-use jni::{objects::{GlobalRef, JObject, JValue}, signature::{Primitive, ReturnType}};
+use jni::{
+    objects::{GlobalRef, JObject, JValue},
+    signature::{Primitive, ReturnType},
+};
 use once_cell::sync::OnceCell;
 use tokio::task::LocalSet;
-use crate::{call::{call, call_static, create, once}, java};
 
 // https://github.com/wpilibsuite/allwpilib/blob/main/wpilibj/src/main/java/edu/wpi/first/wpilibj/XboxController.java
 enum Buttons {
@@ -62,8 +68,7 @@ impl Direction {
             180 => Self::Down,
             270 => Self::Left,
             -1 => Self::None,
-            _  => Self::Other,
-
+            _ => Self::Other,
         }
     }
 }
@@ -101,7 +106,12 @@ impl Gamepad {
 
         let instance = java().new_global_ref(instance).unwrap();
 
-        Self { id, instance, buttons, last_updated }
+        Self {
+            id,
+            instance,
+            buttons,
+            last_updated,
+        }
     }
 
     pub fn left_y(&self) -> f64 {
@@ -112,7 +122,9 @@ impl Gamepad {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     pub fn right_y(&self) -> f64 {
@@ -123,7 +135,9 @@ impl Gamepad {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     pub fn left_x(&self) -> f64 {
@@ -134,7 +148,9 @@ impl Gamepad {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     pub fn right_x(&self) -> f64 {
@@ -145,7 +161,9 @@ impl Gamepad {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     pub fn left_trigger(&self) -> f64 {
@@ -156,7 +174,9 @@ impl Gamepad {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     pub fn right_trigger(&self) -> f64 {
@@ -167,7 +187,9 @@ impl Gamepad {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     fn button(&mut self, id: usize) -> bool {
@@ -181,10 +203,12 @@ impl Gamepad {
             "(I)I",
             &[JValue::Int(self.id).as_jni()],
             ReturnType::Primitive(Primitive::Int)
-        ).i().unwrap();
+        )
+        .i()
+        .unwrap();
         self.buttons[..].store(value);
         self.last_updated = Instant::now();
-        self.buttons[id-1]
+        self.buttons[id - 1]
     }
 
     pub fn left_bumper(&mut self) -> bool {
@@ -228,44 +252,50 @@ impl Gamepad {
     }
 
     pub fn rumble_left(&mut self, strength: f64) {
-        let left = once!(
-            java().call_static_method(
+        let left = once!(java()
+            .call_static_method(
                 "frc/robot/Wrapper",
                 "kLeftRumble",
                 "()Ledu/wpi/first/wpilibj/GenericHID$RumbleType;",
                 &Vec::new()
-            ).unwrap().l().unwrap()
-        );
+            )
+            .unwrap()
+            .l()
+            .unwrap());
 
         call!(
             self.instance.as_obj(),
             "edu/wpi/first/wpilibj/GenericHID",
             "setRumble",
             "(Ledu/wpi/first/wpilibj/GenericHID$RumbleType;D)V",
-            &[JValue::Object(&left).as_jni(),
-            JValue::Double(strength).as_jni(),
+            &[
+                JValue::Object(&left).as_jni(),
+                JValue::Double(strength).as_jni(),
             ],
             ReturnType::Primitive(Primitive::Void)
         );
     }
 
     pub fn rumble_right(&mut self, strength: f64) {
-        let left = once!(
-            java().call_static_method(
+        let left = once!(java()
+            .call_static_method(
                 "frc/robot/Wrapper",
                 "kRightRumble",
                 "()Ledu/wpi/first/wpilibj/GenericHID$RumbleType;",
                 &Vec::new()
-            ).unwrap().l().unwrap()
-        );
+            )
+            .unwrap()
+            .l()
+            .unwrap());
 
         call!(
             self.instance.as_obj(),
             "edu/wpi/first/wpilibj/GenericHID",
             "setRumble",
             "(Ledu/wpi/first/wpilibj/GenericHID$RumbleType;D)V",
-            &[JValue::Object(&left).as_jni(),
-            JValue::Double(strength).as_jni(),
+            &[
+                JValue::Object(&left).as_jni(),
+                JValue::Double(strength).as_jni(),
             ],
             ReturnType::Primitive(Primitive::Void)
         );
@@ -279,7 +309,9 @@ impl Gamepad {
             "()I",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Int)
-        ).i().unwrap()
+        )
+        .i()
+        .unwrap()
     }
 
     pub fn get_dpad_direction(&self) -> Direction {
@@ -291,7 +323,9 @@ impl Gamepad {
                 "()I",
                 &Vec::new(),
                 ReturnType::Primitive(Primitive::Int)
-            ).i().unwrap()
+            )
+            .i()
+            .unwrap(),
         )
     }
 
@@ -315,5 +349,4 @@ impl Gamepad {
             }
         });
     }
-
 }

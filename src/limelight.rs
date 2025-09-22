@@ -1,17 +1,17 @@
-use thiserror::Error;
-use std::net::{Ipv4Addr, SocketAddr};
-use std::time::Duration;
+use crate::java;
 use bitvec::macros::internal::funty::Fundamental;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
-use crate::java;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use std::net::{Ipv4Addr, SocketAddr};
+use std::time::Duration;
+use thiserror::Error;
 
 #[derive(Clone)]
 pub struct Limelight {
     ip: SocketAddr,
-    client: Client
+    client: Client,
 }
 
 #[derive(Deserialize, Clone)]
@@ -23,7 +23,7 @@ pub struct LimelightResults {
     pub botpose_wpiblue: [f64; 6],
 }
 
-impl Default for LimelightResults {
+impl core::default::Default for LimelightResults {
     fn default() -> Self {
         Self {
             tx: 0.0,
@@ -53,15 +53,19 @@ impl Limelight {
     pub fn new(ip: SocketAddr) -> Self {
         Self {
             ip,
-            client: Client::new()
+            client: Client::new(),
         }
     }
 
     // Limelightlib-rust
-    async fn get_json<T: serde::de::DeserializeOwned>(&self, endpoint: &str) -> Result<T, LimelightError> {
+    async fn get_json<T: serde::de::DeserializeOwned>(
+        &self,
+        endpoint: &str,
+    ) -> Result<T, LimelightError> {
         let url = format!("http://{}:{}/{}", self.ip.ip(), self.ip.port(), endpoint);
 
-        let response = self.client
+        let response = self
+            .client
             .get(&url)
             .timeout(Duration::from_millis(100))
             .send()
@@ -79,7 +83,8 @@ impl Limelight {
     ) -> Result<bool, LimelightError> {
         let url = format!("http://{}:{}/{}", self.ip.ip(), self.ip.port(), endpoint);
 
-        let response = self.client
+        let response = self
+            .client
             .post(&url)
             .json(data)
             .timeout(Duration::from_millis(100))
@@ -95,7 +100,8 @@ impl Limelight {
 
     pub async fn update_robot_orientation(&self, yaw: f64) -> Result<bool, LimelightError> {
         let orientation_data = vec![yaw, 0.0, 0.0, 0.0, 0.0, 0.0];
-        self.post_json("update-robotorientation", &orientation_data).await
+        self.post_json("update-robotorientation", &orientation_data)
+            .await
     }
 }
 
@@ -113,6 +119,16 @@ mod tests {
         assert_eq!(results.tx, 0.3374213002711173);
         assert_eq!(results.ty, -23.007593523896787);
         assert_eq!(results.Fiducial[0].fID, 7);
-        assert_eq!(results.botpose_orb_wpiblue, [14.712794941741944, 4.092588775262237, 5.9604645663569045e-09, 0.0, 0.0, 0.0]);
+        assert_eq!(
+            results.botpose_orb_wpiblue,
+            [
+                14.712794941741944,
+                4.092588775262237,
+                5.9604645663569045e-09,
+                0.0,
+                0.0,
+                0.0
+            ]
+        );
     }
 }

@@ -1,7 +1,7 @@
+use crate::call::{call, call_static, create};
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::Primitive::Void;
 use jni::signature::ReturnType;
-use crate::call::{call, call_static, create};
 
 /// Represents a motor controller of type `TalonSRX`.
 ///
@@ -21,7 +21,7 @@ use crate::call::{call, call_static, create};
 /// motor.set(0.5);           // Sets the motor output to 50%
 /// ```
 pub struct SRX {
-    instance: GlobalRef
+    instance: GlobalRef,
 }
 
 impl SRX {
@@ -49,9 +49,7 @@ impl SRX {
             &[JValue::Int(id).as_jni()]
         );
 
-        Self {
-            instance
-        }
+        Self { instance }
     }
 
     /// Sets the output of the `TalonSRX` motor controller.
@@ -76,14 +74,19 @@ impl SRX {
             "()Lcom/ctre/phoenix/motorcontrol/TalonSRXControlMode;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         call!(
             &self.instance,
             "com/ctre/phoenix/motorcontrol/can/TalonSRX",
             "set",
             "(Lcom/ctre/phoenix/motorcontrol/TalonSRXControlMode;D)V",
-            &[JValue::Object(&JObject::from(control)).as_jni(), JValue::Double(value).as_jni()],
+            &[
+                JValue::Object(&JObject::from(control)).as_jni(),
+                JValue::Double(value).as_jni()
+            ],
             ReturnType::Primitive(Void)
         );
     }

@@ -1,6 +1,6 @@
 use crate::call::{call, create, once};
 use crate::java;
-use crate::rev::{ControlType, IdleMode, MotorType, };
+use crate::rev::{ControlType, IdleMode, MotorType};
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
 use once_cell::sync::OnceCell;
@@ -16,8 +16,7 @@ pub struct Spark {
 }
 
 impl Spark {
-
-    pub fn set_reference(&mut self,value: f64,control_type: ControlType) {
+    pub fn set_reference(&mut self, value: f64, control_type: ControlType) {
         self.set_reference_ff(value, control_type, 0.)
     }
 
@@ -29,8 +28,11 @@ impl Spark {
                 "frc/robot/Wrapper",
                 control_type.as_str(),
                 "()Lcom/revrobotics/CANSparkBase$ControlType;",
-                &Vec::new()
-            ).unwrap().l().unwrap()
+                &Vec::new(),
+            )
+            .unwrap()
+            .l()
+            .unwrap()
         };
 
         let control_type = match control_type {
@@ -40,17 +42,21 @@ impl Spark {
 
         let controller = self.get_controller();
 
-        call!(controller,
+        call!(
+            controller,
             "com/revrobotics/SparkPIDController",
             "setReference",
             "(DLcom/revrobotics/CANSparkBase$ControlType;ID)Lcom/revrobotics/REVLibError;",
-            &[JValue::Double(value).as_jni(),
-              JValue::Object(&JObject::from_raw(control_type.as_raw())).as_jni(),
-              JValue::Int(0).as_jni(), // PID 0, TODO: handle multiple
-              JValue::Double(feed_forward).as_jni(),
+            &[
+                JValue::Double(value).as_jni(),
+                JValue::Object(&JObject::from_raw(control_type.as_raw())).as_jni(),
+                JValue::Int(0).as_jni(), // PID 0, TODO: handle multiple
+                JValue::Double(feed_forward).as_jni(),
             ],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
     }
 
     pub fn get_current(&self) -> f64 {
@@ -61,7 +67,9 @@ impl Spark {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     pub(crate) fn get_controller(&mut self) -> &JObject {
@@ -69,14 +77,22 @@ impl Spark {
             return &self.pid.as_ref().unwrap();
         }
 
-        self.pid = Some(java().new_global_ref(call!(
-            self.instance.as_obj(),
-            "com/revrobotics/CANSparkBase",
-            "getPIDController",
-            "()Lcom/revrobotics/SparkPIDController;",
-            &Vec::new(),
-            ReturnType::Object
-        ).l().unwrap()).unwrap());
+        self.pid = Some(
+            java()
+                .new_global_ref(
+                    call!(
+                        self.instance.as_obj(),
+                        "com/revrobotics/CANSparkBase",
+                        "getPIDController",
+                        "()Lcom/revrobotics/SparkPIDController;",
+                        &Vec::new(),
+                        ReturnType::Object
+                    )
+                    .l()
+                    .unwrap(),
+                )
+                .unwrap(),
+        );
 
         &self.pid.as_ref().unwrap()
     }
@@ -86,17 +102,24 @@ impl Spark {
             return &self.encoder.as_ref().unwrap();
         }
 
-        self.encoder = Some(java().new_global_ref(call!(
-            self.instance.as_obj(),
-            "com/revrobotics/CANSparkBase",
-            "getEncoder",
-            "()Lcom/revrobotics/RelativeEncoder;",
-            &Vec::new(),
-            ReturnType::Object
-        ).l().unwrap()).unwrap());
+        self.encoder = Some(
+            java()
+                .new_global_ref(
+                    call!(
+                        self.instance.as_obj(),
+                        "com/revrobotics/CANSparkBase",
+                        "getEncoder",
+                        "()Lcom/revrobotics/RelativeEncoder;",
+                        &Vec::new(),
+                        ReturnType::Object
+                    )
+                    .l()
+                    .unwrap(),
+                )
+                .unwrap(),
+        );
 
         &self.encoder.as_ref().unwrap()
-
     }
 
     pub fn get_velocity(&mut self) -> f64 {
@@ -108,7 +131,9 @@ impl Spark {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     pub fn get_position(&mut self) -> Angle {
@@ -120,7 +145,9 @@ impl Spark {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap();
+        )
+        .d()
+        .unwrap();
 
         Angle::new::<revolution>(rots)
     }
@@ -131,16 +158,27 @@ impl Spark {
 
     pub fn new(can_id: i32, motor_type: MotorType) -> Self {
         let mut jvm = java();
- 
-        let motortype = jvm.call_static_method("frc/robot/Wrapper", motor_type.as_str(), "()Lcom/revrobotics/CANSparkLowLevel$MotorType;", &Vec::new()).unwrap().l().unwrap();
+
+        let motortype = jvm
+            .call_static_method(
+                "frc/robot/Wrapper",
+                motor_type.as_str(),
+                "()Lcom/revrobotics/CANSparkLowLevel$MotorType;",
+                &Vec::new(),
+            )
+            .unwrap()
+            .l()
+            .unwrap();
 
         let instance = create!(
             "com/revrobotics/CANSparkMax",
             "(ILcom/revrobotics/CANSparkMaxLowLevel$MotorType;)V",
-            &[JValue::Int(can_id).as_jni(),
-              JValue::Object(&JObject::from_raw(motortype.into_raw())).as_jni()]
+            &[
+                JValue::Int(can_id).as_jni(),
+                JValue::Object(&JObject::from_raw(motortype.into_raw())).as_jni()
+            ]
         );
-        
+
         Self {
             can_id,
             instance,
@@ -164,13 +202,24 @@ impl Spark {
             "(D)V",
             &[JValue::Double(amount).as_jni()],
             ReturnType::Primitive(Primitive::Void)
-        ).v().unwrap();
+        )
+        .v()
+        .unwrap();
     }
 
     pub fn set_idle_mode(&self, idle_mode: IdleMode) {
         let mut jvm = java();
 
-        let mode = jvm.call_static_method("frc/robot/Wrapper", idle_mode.as_str(), "()Lcom/revrobotics/CANSparkBase$IdleMode;", &Vec::new()).unwrap().l().unwrap();
+        let mode = jvm
+            .call_static_method(
+                "frc/robot/Wrapper",
+                idle_mode.as_str(),
+                "()Lcom/revrobotics/CANSparkBase$IdleMode;",
+                &Vec::new(),
+            )
+            .unwrap()
+            .l()
+            .unwrap();
 
         call!(
             self.instance.as_obj(),
@@ -189,11 +238,13 @@ impl Spark {
             "follow",
             "Lcom/revrobotics/CANSparkBase;Z)Lcom/revrobotics/REVLibError;",
             &[
-            JValue::Object(&JObject::from_raw(master.instance().as_raw())).as_jni(),
-            JValue::Bool(invert as u8).as_jni()
+                JValue::Object(&JObject::from_raw(master.instance().as_raw())).as_jni(),
+                JValue::Bool(invert as u8).as_jni()
             ],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
     }
 
     /// Stop the motor
@@ -205,7 +256,9 @@ impl Spark {
             "()V",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Void)
-        ).v().unwrap();
+        )
+        .v()
+        .unwrap();
     }
 
     pub fn set_position(&mut self, position: Angle) {
@@ -218,42 +271,54 @@ impl Spark {
     }
 
     pub fn set_p(&mut self, p: f64) {
-        call!(self.get_controller(),
+        call!(
+            self.get_controller(),
             "com/revrobotics/SparkPIDController",
             "setP",
             "(D)Lcom/revrobotics/REVLibError;",
             &[JValue::Double(p).as_jni()],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
     }
 
     pub fn set_i(&mut self, i: f64) {
-        call!(self.get_controller(),
+        call!(
+            self.get_controller(),
             "com/revrobotics/SparkPIDController",
             "setI",
             "(D)Lcom/revrobotics/REVLibError;",
             &[JValue::Double(i).as_jni()],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
     }
 
     pub fn set_d(&mut self, d: f64) {
-        call!(self.get_controller(),
+        call!(
+            self.get_controller(),
             "com/revrobotics/SparkPIDController",
             "setD",
             "(D)Lcom/revrobotics/REVLibError;",
             &[JValue::Double(d).as_jni()],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
     }
 
     pub fn set_ff(&mut self, ff: f64) {
-        call!(self.get_controller(),
+        call!(
+            self.get_controller(),
             "com/revrobotics/SparkPIDController",
             "setFF",
             "(D)Lcom/revrobotics/REVLibError;",
             &[JValue::Double(ff).as_jni()],
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
     }
 }

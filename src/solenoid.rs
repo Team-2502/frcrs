@@ -4,12 +4,12 @@ use jni::signature::{Primitive, ReturnType};
 use jni::sys::jboolean;
 
 pub struct Solenoid {
-    instance: GlobalRef
+    instance: GlobalRef,
 }
 
 pub enum ModuleType {
     Rev,
-    CTRE
+    CTRE,
 }
 
 impl Solenoid {
@@ -21,25 +21,30 @@ impl Solenoid {
                 "()Ledu/wpi/first/wpilibj/PneumaticsModuleType;",
                 &Vec::new(),
                 ReturnType::Object
-            ).l().unwrap(),
+            )
+            .l()
+            .unwrap(),
             ModuleType::CTRE => call_static!(
                 "frc/robot/Wrapper",
                 "ctrePCM",
                 "()Ledu/wpi/first/wpilibj/PneumaticsModuleType;",
                 &Vec::new(),
                 ReturnType::Object
-            ).l().unwrap(),
+            )
+            .l()
+            .unwrap(),
         };
 
         let instance = create!(
             "edu/wpi/first/wpilibj/Solenoid",
             "(Ledu/wpi/first/wpilibj/PneumaticsModuleType;I)V",
-            &[JValue::Object(&JObject::from(module_type_java)).as_jni(), JValue::Int(channel).as_jni()]
+            &[
+                JValue::Object(&JObject::from(module_type_java)).as_jni(),
+                JValue::Int(channel).as_jni()
+            ]
         );
 
-        Self {
-            instance
-        }
+        Self { instance }
     }
 
     pub fn set(&self, engaged: bool) {
@@ -72,6 +77,8 @@ impl Solenoid {
             "()Z",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Boolean)
-        ).z().unwrap()
+        )
+        .z()
+        .unwrap()
     }
 }

@@ -1,8 +1,8 @@
+use crate::call::{call, create};
+use crate::java;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
 use nalgebra::{Rotation3, Vector3};
-use crate::call::{call, create};
-use crate::java;
 
 pub struct Pigeon {
     instance: GlobalRef,
@@ -15,13 +15,14 @@ impl Pigeon {
         let instance = create!(
             "com/ctre/phoenix6/hardware/Pigeon2",
             "(ILjava/lang/String;)V",
-            &[JValue::Int(id).as_jni(),
+            &[
+                JValue::Int(id).as_jni(),
                 JValue::Object(&JObject::from(string)).as_jni()
             ]
         );
 
         Self {
-            instance: java().new_global_ref(instance).unwrap()
+            instance: java().new_global_ref(instance).unwrap(),
         }
     }
 
@@ -33,7 +34,9 @@ impl Pigeon {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap()
+        )
+        .d()
+        .unwrap()
     }
 
     pub fn get_rotation(&self) -> Vector3<f64> {
@@ -44,7 +47,9 @@ impl Pigeon {
             "()Ledu/wpi/first/math/geometry/Rotation3d;",
             &Vec::new(),
             ReturnType::Object
-        ).l().unwrap();
+        )
+        .l()
+        .unwrap();
 
         let x = call!(
             rotation.as_ref(),
@@ -53,7 +58,9 @@ impl Pigeon {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap();
+        )
+        .d()
+        .unwrap();
 
         let y = call!(
             rotation.as_ref(),
@@ -62,7 +69,9 @@ impl Pigeon {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap();
+        )
+        .d()
+        .unwrap();
 
         let z = call!(
             rotation.as_ref(),
@@ -71,7 +80,9 @@ impl Pigeon {
             "()D",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Double)
-        ).d().unwrap();
+        )
+        .d()
+        .unwrap();
 
         Vector3::new(x, y, z)
     }

@@ -1,11 +1,11 @@
 use std::fs;
-use std::process::{Command, exit};
+use std::process::{exit, Command};
 
+use anyhow::{anyhow, Context};
+use ssh2::Session;
 use std::io::Write;
 use std::net::Ipv4Addr;
 use std::path::Path;
-use anyhow::{anyhow, Context};
-use ssh2::Session;
 use tracing::error;
 
 pub fn find_rio(team: usize) -> anyhow::Result<Ipv4Addr> {
@@ -15,10 +15,10 @@ pub fn find_rio(team: usize) -> anyhow::Result<Ipv4Addr> {
     }
 
     for address in [
-        Ipv4Addr::new(10, (team/100) as u8, (team%100) as u8, 2),
+        Ipv4Addr::new(10, (team / 100) as u8, (team % 100) as u8, 2),
         Ipv4Addr::new(172, 22, 11, 2),
     ] {
-        return Ok(address)
+        return Ok(address);
     }
 
     Err(anyhow!("rio not found"))
@@ -62,7 +62,7 @@ pub fn deploy_executable(path: String, team: String) {
 }
 
 pub fn deploy_lib(path: String, team: String) {
-     Command::new("sh")
+    Command::new("sh")
         .arg("-c")
         .arg(format!("scp {} lvuser@roborio-{}-frc.local:.", path, team))
         .spawn()
@@ -70,7 +70,11 @@ pub fn deploy_lib(path: String, team: String) {
 }
 
 pub fn robot_command(executeable: String, team: String) {
-    let name = Path::new(&executeable).file_name().unwrap().to_str().unwrap();
+    let name = Path::new(&executeable)
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap();
 
     let command = format!("JAVA_HOME {}", name);
 

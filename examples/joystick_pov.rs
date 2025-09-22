@@ -1,7 +1,7 @@
-use tokio::runtime::Runtime;
-use tokio::task::LocalSet;
 use frcrs::input::Joystick;
 use frcrs::{observe_user_program_starting, refresh_data};
+use tokio::runtime::Runtime;
+use tokio::task::LocalSet;
 
 fn main() {
     let executor = Runtime::new().unwrap();
