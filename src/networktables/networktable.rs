@@ -74,6 +74,36 @@ pub struct NetworkTableEntry {
 }
 
 impl NetworkTableEntry {
+    pub fn set_float(&self, value: f64) {
+        call!(
+            &self.instance,
+            "edu/wpi/first/networktables/NetworkTableEntry",
+            "setDouble",
+            "(D)V",
+            &[JValue::Double(value).as_jni()],
+            ReturnType::Primitive(Primitive::Void)
+        )
+        .v()
+        .unwrap()
+    }
+
+    pub fn set_string(&self, value: &str) {
+        let java_str = java().new_string(value).unwrap();
+        let java_obj: JObject = java_str.into();
+
+        // Borrow JObject as reference for JValue::Object
+        call!(
+            &self.instance,
+            "edu/wpi/first/networktables/NetworkTableEntry",
+            "setString",
+            "(Ljava/lang/String;)V",
+            &[JValue::Object(&java_obj).as_jni()],
+            ReturnType::Primitive(Primitive::Void)
+        )
+        .v()
+        .unwrap()
+    }
+
     pub fn get_float(&self) -> f64 {
         call!(
             &self.instance,
@@ -85,5 +115,24 @@ impl NetworkTableEntry {
         )
         .d()
         .unwrap()
+    }
+
+    pub fn get_string(&self) -> String {
+        let default_str = java().new_string("").unwrap();
+        let default_obj: JObject = default_str.into();
+
+        let result = call!(
+            &self.instance,
+            "edu/wpi/first/networktables/NetworkTableEntry",
+            "getString",
+            "(Ljava/lang/String;)Ljava/lang/String;",
+            &[JValue::Object(&default_obj).as_jni()],
+            ReturnType::Object
+        )
+        .l()
+        .unwrap();
+
+        // Borrow result for get_string call
+        java().get_string((&result).into()).unwrap().into()
     }
 }
