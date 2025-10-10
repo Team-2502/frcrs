@@ -91,7 +91,6 @@ impl NetworkTableEntry {
         let java_str = java().new_string(value).unwrap();
         let java_obj: JObject = java_str.into();
 
-        // Borrow JObject as reference for JValue::Object
         call!(
             &self.instance,
             "edu/wpi/first/networktables/NetworkTableEntry",
@@ -132,7 +131,6 @@ impl NetworkTableEntry {
         .l()
         .unwrap();
 
-        // Borrow result for get_string call
         java().get_string((&result).into()).unwrap().into()
     }
 }
