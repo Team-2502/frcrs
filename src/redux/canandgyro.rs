@@ -34,16 +34,16 @@ impl CanAndGyro {
         .unwrap()
     }
 
-    pub fn set_angle(&self, yaw: f64) {
+    pub fn set_angle(&self, yaw: f64, timeout: f64) -> bool {
         call!(
             &self.instance,
             "com/reduxrobotics/sensors/canandgyro/Canandgyro",
             "setYaw",
-            "(D)V",
+            "(DD)Z",
             &Vec::new(),
-            ReturnType::Primitive(Primitive::Void)
+            ReturnType::Primitive(Primitive::Boolean)
         )
-            .v()
+            .z()
             .unwrap()
     }
 }
