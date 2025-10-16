@@ -31,14 +31,15 @@ impl NetworkTable {
         .l()
         .unwrap();
 
-        let string = java().new_string(name).unwrap();
+        let java_str = java().new_string(name).unwrap();
+        let java_obj: JObject = java_str.into();
 
         let table = call!(
             &instance,
             "edu/wpi/first/networktables/NetworkTableInstance",
             "getTable",
             "Ljava/lang/String;)Ledu/wpi/first/networktables/NetworkTable",
-            &[JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()],
+            &[JValue::Object(&java_obj).as_jni()],
             ReturnType::Object
         )
         .l()
@@ -50,14 +51,15 @@ impl NetworkTable {
     }
 
     pub fn get_entry(&self, name: &str) -> NetworkTableEntry {
-        let string = java().new_string(name).unwrap();
+        let java_str = java().new_string(name).unwrap();
+        let java_obj: JObject = java_str.into();
 
         let instance = call!(
             &self.instance,
             "edu/wpi/first/networktables/NetworkTable",
             "getEntry",
             "(Ljava/lang/String;)Ledu/wpi/first/networktables/NetworkTableEntry;",
-            &[JValue::Object(&JObject::from_raw(string.into_raw())).as_jni()],
+            &[JValue::Object(&java_obj).as_jni()],
             ReturnType::Object
         )
         .l()

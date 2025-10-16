@@ -11,14 +11,15 @@ pub struct SmartDashboard;
 
 impl SmartDashboard {
     pub fn put_number(key: String, data: f64) {
-        let key = java().new_string(key).unwrap();
+        let java_str = java().new_string(key).unwrap();
+        let java_obj: JObject = java_str.into();
 
         call_static!(
             "edu/wpi/first/wpilibj/smartdashboard/SmartDashboard",
             "putNumber",
             "(Ljava/lang/String;D)V",
             &[
-                JValue::Object(&JObject::from_raw(key.into_raw())).as_jni(),
+                JValue::Object(&java_obj).as_jni(),
                 JValue::Double(data).as_jni()
             ],
             ReturnType::Primitive(Void)
@@ -28,14 +29,15 @@ impl SmartDashboard {
     }
 
     pub fn put_bool(key: String, data: bool) {
-        let key = java().new_string(key).unwrap();
+        let java_str = java().new_string(key).unwrap();
+        let java_obj: JObject = java_str.into();
 
         call_static!(
             "edu/wpi/first/wpilibj/smartdashboard/SmartDashboard",
             "putBoolean",
             "(Ljava/lang/String;Z)V",
             &[
-                JValue::Object(&JObject::from_raw(key.into_raw())).as_jni(),
+                JValue::Object(&java_obj).as_jni(),
                 JValue::Bool(jboolean::from(data)).as_jni()
             ],
             ReturnType::Primitive(Void)
@@ -114,7 +116,8 @@ impl<T> Chooser<T> {
         self.options.push(option);
         let idx = self.options.len();
 
-        let string = java().new_string(name).unwrap();
+        let java_str = java().new_string(name).unwrap();
+        let java_obj: JObject = java_str.into();
 
         call!(
             &self.instance,
@@ -122,7 +125,7 @@ impl<T> Chooser<T> {
             "addOption",
             "(Ljava/lang/String;Ljava/lang/Object;)V",
             &[
-                JValue::Object(&JObject::from_raw(string.into_raw())).as_jni(),
+                JValue::Object(&java_obj).as_jni(),
                 JValue::Int(idx as i32).as_jni()
             ],
             ReturnType::Primitive(Void)
