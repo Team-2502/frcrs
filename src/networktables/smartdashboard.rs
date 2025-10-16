@@ -1,8 +1,9 @@
-use crate::call::{call, call_static};
+use std::ffi::c_void;
+use crate::call::{call, call_static, create};
 use crate::java;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::Primitive::{Int, Void};
-use jni::signature::ReturnType;
+use jni::signature::{Primitive, ReturnType};
 use jni::sys::jboolean;
 use nalgebra::Vector2;
 use uom::si::{angle::radian, f64::Angle};
@@ -166,3 +167,43 @@ pub fn set_position(position: Vector2<f64>, angle: Angle) {
     .unwrap();
 }
 */
+
+
+pub struct Field2d {
+    instance: GlobalRef,
+}
+
+
+impl Field2d {
+    pub fn new() -> Self {
+        let instance = create!(
+            "edu.wpi.first.wpilibj.smartdashboard.Field2d",
+            "(V)V",
+            &[JValue::Void.as_jni()]
+        );
+
+        Self {
+            instance: java().new_global_ref(instance).unwrap(),
+        }
+    }
+
+    pub fn set_position(position: Vector2<f64>, angle: Angle) {
+        let angle = angle.get::<radian>();
+
+        call_static!(
+            "edu.wpi.first.wpilibj.smartdashboard.Field2d",
+            "setRobotPose",
+            "(DDD)V",
+            &[
+                JValue::Double(position.x).as_jni(),
+                JValue::Double(position.y).as_jni(),
+                JValue::Double(angle).as_jni()
+            ],
+            ReturnType::Primitive(Void)
+        )
+            .v()
+            .unwrap();
+    }
+
+}
+
