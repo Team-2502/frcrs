@@ -98,14 +98,14 @@ impl Pigeon {
         );
     }
 
-    pub fn set_yaw(&self, yaw: f64) {
+    pub fn set_yaw(&self, yaw: f64) -> bool {
         call!(
             self.instance.as_obj(),
             "com/ctre/phoenix6/hardware/Pigeon2",
             "setYaw",
-            "(D)V",
+            "(D)Z",
             &Vec::new(),
-            ReturnType::Primitive(Primitive::Void)
+            ReturnType::Primitive(Primitive::Boolean)
         );
     }
 }
