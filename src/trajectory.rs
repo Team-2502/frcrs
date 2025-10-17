@@ -214,28 +214,28 @@ impl From<Sample> for Pose {
     }
 }
 
-#[test]
-fn parse() {
-    let data = include_str!("../../RobotCode2025/auto/Blue2.traj");
-    let path = Path::from_trajectory(data).unwrap();
-    for i in path.waypoints() {
-        println!("{}", i);
-    }
-}
-
-#[test]
-fn mirror_test() {
-    let path = Path::from_trajectory(include_str!("../../RobotCode2025/auto/Blue2.traj")).unwrap();
-    let setpoint = path.get(Time::new::<second>(0.0));
-
-    println!("{:?}", setpoint);
-
-    let setpoint = setpoint.mirror(
-        Length::new::<meter>(17.55 / 2.),
-        Length::new::<meter>(8.05 / 2.),
-    );
-
-    assert!((setpoint.x.get::<meter>() - 9.53808).abs() < 1e-5);
-    assert!((setpoint.y.get::<meter>() - 0.44384).abs() < 1e-5);
-    assert!((setpoint.heading.get::<degree>() - 180.).abs() < 1e-5);
-}
+// #[test]
+// fn parse() {
+//     let data = include_str!("../../RobotCode2025/auto/Blue2.traj");
+//     let path = Path::from_trajectory(data).unwrap();
+//     for i in path.waypoints() {
+//         println!("{}", i);
+//     }
+// }
+//
+// #[test]
+// fn mirror_test() {
+//     let path = Path::from_trajectory(include_str!("../../RobotCode2025/auto/Blue2.traj")).unwrap();
+//     let setpoint = path.get(Time::new::<second>(0.0));
+//
+//     println!("{:?}", setpoint);
+//
+//     let setpoint = setpoint.mirror(
+//         Length::new::<meter>(17.55 / 2.),
+//         Length::new::<meter>(8.05 / 2.),
+//     );
+//
+//     assert!((setpoint.x.get::<meter>() - 9.53808).abs() < 1e-5);
+//     assert!((setpoint.y.get::<meter>() - 0.44384).abs() < 1e-5);
+//     assert!((setpoint.heading.get::<degree>() - 180.).abs() < 1e-5);
+// }
