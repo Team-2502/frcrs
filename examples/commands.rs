@@ -21,7 +21,7 @@ impl MyRobot {
 }
 
 impl Robot for MyRobot {
-    fn robot_init(&mut self) {
+    async fn robot_init(&mut self) {
         println!("Robot init");
     }
 

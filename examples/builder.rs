@@ -1,5 +1,5 @@
 use frcrs::input::{Gamepad, Joystick};
-use frcrs::{observe_user_program_starting, refresh_data, Command, CommandScheduler};
+use frcrs::{observe_user_program_starting, refresh_data};
 use std::sync::{Arc, Mutex};
 use std::thread::sleep;
 use std::time::Duration;
