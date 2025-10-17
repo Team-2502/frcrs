@@ -106,6 +106,6 @@ impl Pigeon {
             "(D)Z",
             &Vec::new(),
             ReturnType::Primitive(Primitive::Boolean)
-        );
+        ).z().unwrap()
     }
 }
