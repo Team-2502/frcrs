@@ -97,4 +97,15 @@ impl Pigeon {
             ReturnType::Primitive(Primitive::Void)
         );
     }
+
+    pub fn set_yaw(&self, yaw: f64) {
+        call!(
+            self.instance.as_obj(),
+            "com/ctre/phoenix6/hardware/Pigeon2",
+            "setYaw",
+            "(D)V",
+            &Vec::new(),
+            ReturnType::Primitive(Primitive::Void)
+        );
+    }
 }
