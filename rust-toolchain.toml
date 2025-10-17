@@ -2,3 +2,4 @@
 channel = "stable"
 profile = "complete"
 targets = ["arm-unknown-linux-gnueabi"]
+components = ["rustfmt", "clippy"]

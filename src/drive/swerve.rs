@@ -103,7 +103,7 @@ impl Swerve {
         while _new_angle < lower_bound {
             _new_angle += 360.;
         }
-        while new_angle > upper_bound {
+        while _new_angle > upper_bound {
             _new_angle -= 360.;
         }
         if _new_angle - scope_ref > 180. {
