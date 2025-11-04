@@ -1,4 +1,3 @@
-use std::ffi::c_void;
 use crate::call::{call, call_static, create};
 use crate::java;
 use jni::objects::{GlobalRef, JObject, JValue};
@@ -6,6 +5,7 @@ use jni::signature::Primitive::{Int, Void};
 use jni::signature::{Primitive, ReturnType};
 use jni::sys::jboolean;
 use nalgebra::Vector2;
+use std::ffi::c_void;
 use uom::si::{angle::radian, f64::Angle};
 
 pub struct SmartDashboard;
@@ -168,11 +168,9 @@ pub fn set_position(position: Vector2<f64>, angle: Angle) {
 }
 */
 
-
 pub struct Field2d {
     instance: GlobalRef,
 }
-
 
 impl Field2d {
     pub fn new() -> Self {
@@ -201,9 +199,7 @@ impl Field2d {
             ],
             ReturnType::Primitive(Void)
         )
-            .v()
-            .unwrap();
+        .v()
+        .unwrap();
     }
-
 }
-

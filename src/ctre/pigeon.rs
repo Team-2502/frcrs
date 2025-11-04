@@ -99,7 +99,6 @@ impl Pigeon {
     }
 
     pub fn set_yaw(&self, yaw: f64) -> bool {
-
         call!(
             self.instance.as_obj(),
             "com/ctre/phoenix6/hardware/core/CorePigeon2",
@@ -107,6 +106,8 @@ impl Pigeon {
             "(D)Z",
             &[JValue::Double(yaw).as_jni()],
             ReturnType::Primitive(Primitive::Boolean)
-        ).z().unwrap()
+        )
+        .z()
+        .unwrap()
     }
 }

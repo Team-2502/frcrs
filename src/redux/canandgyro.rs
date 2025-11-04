@@ -43,7 +43,7 @@ impl CanAndGyro {
             &Vec::new(),
             ReturnType::Primitive(Primitive::Boolean)
         )
-            .z()
-            .unwrap()
+        .z()
+        .unwrap()
     }
 }
