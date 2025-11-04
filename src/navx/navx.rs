@@ -16,8 +16,8 @@ impl NavX {
     pub fn new() -> Self {
         let instance = call_static!(
             "frc/robot/Wrapper",
-            "AHRS",
-            "()Lcom/kauailabs/navx/frc/AHRS;",
+            "createAHRS",
+            "()Lcom/studica/navx/frc/AHRS;",
             &Vec::new(),
             ReturnType::Object
         )
