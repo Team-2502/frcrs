@@ -163,7 +163,7 @@ impl Spark {
             .call_static_method(
                 "frc/robot/Wrapper",
                 motor_type.as_str(),
-                "()Lcom/revrobotics/CANSparkMax$MotorType;",
+                "()Lcom/revrobotics/CANSparkLowLevel$MotorType;",
                 &Vec::new(),
             )
             .unwrap()
@@ -172,7 +172,7 @@ impl Spark {
 
         let instance = create!(
             "com/revrobotics/CANSparkMax",
-            "(ILcom/revrobotics/CANSparkMax$MotorType;)V",
+            "(ILcom/revrobotics/CANSparkMaxLowLevel$MotorType;)V",
             &[
                 JValue::Int(can_id).as_jni(),
                 JValue::Object(&JObject::from_raw(motortype.into_raw())).as_jni()

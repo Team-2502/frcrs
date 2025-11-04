@@ -38,10 +38,10 @@ import static edu.wpi.first.wpilibj.RobotBase.isReal;
 
 public class Wrapper {
     public static SparkLowLevel.MotorType kBrushless() {
-        return SparkMax.MotorType.kBrushless;
+        return SparkLowLevel.MotorType.kBrushless;
     }
     public static SparkLowLevel.MotorType kBrushed() {
-        return SparkMax.MotorType.kBrushed;
+        return SparkLowLevel.MotorType.kBrushed;
     }
 
     public static SparkBaseConfig.IdleMode kBrake() { return SparkBaseConfig.IdleMode.kBrake; }
@@ -50,7 +50,7 @@ public class Wrapper {
     public static SparkBase.ControlType kPosition() { return SparkBase.ControlType.kPosition; }
     public static SparkBase.ControlType kVelocity() { return SparkBase.ControlType.kVelocity; }
 
-    public static SparkFlex createSparkFlex(int id) { return new SparkFlex(id, SparkMax.MotorType.kBrushless); }
+    public static SparkFlex createSparkFlex(int id) { return new SparkFlex(id, SparkLowLevel.MotorType.kBrushless); }
 
     public static int getAllianceStation() {
         AllianceStationID allianceID = DriverStationJNI.getAllianceStation();
