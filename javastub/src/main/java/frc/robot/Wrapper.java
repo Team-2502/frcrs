@@ -9,7 +9,7 @@ import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.config.SparkBaseConfig;
-import com.studica.frc.AHRS;
+//import com.studica.frc.AHRS;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.AllianceStationID;
@@ -86,13 +86,13 @@ public class Wrapper {
         return 2.2;
     }
 
-    public static AHRS createAHRS() {
-        return new AHRS(AHRS.NavXComType.kMXP_SPI);
-    }
-
-    public static double getAngle(AHRS navx) {
-        return navx.getAngle();
-    }
+//     public static AHRS createAHRS() {
+//         return new AHRS(AHRS.NavXComType.kMXP_SPI);
+//     }
+//
+//     public static double getAngle(AHRS navx) {
+//         return navx.getAngle();
+//     }
 
     public static RumbleType kBothRumble() {
         return RumbleType.kBothRumble;
