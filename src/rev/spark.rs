@@ -321,4 +321,17 @@ impl Spark {
         .l()
         .unwrap();
     }
+
+    pub fn test(&self) {
+        call!(
+            self.instance.as_obj(),
+            "robot/frc/wrapper",
+            "test",
+            "(V)D",
+            &Vec::new(),
+            ReturnType::Primitive(Primitive::Double)
+        )
+            .d()
+            .unwrap();
+    }
 }
