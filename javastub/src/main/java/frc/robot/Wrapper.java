@@ -39,10 +39,10 @@ import static edu.wpi.first.wpilibj.RobotBase.isReal;
 
 public class Wrapper {
     public static SparkLowLevel.MotorType kBrushless() {
-        return SparkLowLevel.MotorType.kBrushless;
+        return spark.SparkLowLevel.MotorType.kBrushless;
     }
     public static SparkLowLevel.MotorType kBrushed() {
-        return SparkLowLevel.MotorType.kBrushed;
+        return spark.SparkLowLevel.MotorType.kBrushed;
     }
 
     public static SparkBaseConfig.IdleMode kBrake() { return SparkBaseConfig.IdleMode.kBrake; }
