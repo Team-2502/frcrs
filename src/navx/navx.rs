@@ -17,7 +17,7 @@ impl NavX {
         let instance = call_static!(
             "frc/robot/Wrapper",
             "createAHRS",
-            "()Lcom/studica/frc/AHRS;",
+            "()Lcom/kauailabs/frc/AHRS;",
             &Vec::new(),
             ReturnType::Object
         )

@@ -3,12 +3,13 @@ package frc.robot;
 import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.interfaces.LaserCanInterface;
 import com.ctre.phoenix6.StatusSignal;
-import com.revrobotics.spark.CANSparkBase;
-import com.revrobotics.spark.CANSparkFlex;
-import com.revrobotics.spark.CANSparkLowLevel;
-import com.revrobotics.spark.CANSparkMax;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.*;
 import com.revrobotics.spark.config.SparkBaseConfig;
-import com.studica.frc.AHRS;
+import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.AllianceStationID;
@@ -37,20 +38,20 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import static edu.wpi.first.wpilibj.RobotBase.isReal;
 
 public class Wrapper {
-    public static CANSparkLowLevel.MotorType kBrushless() {
+    public static SparkLowLevel.MotorType kBrushless() {
         return SparkLowLevel.MotorType.kBrushless;
     }
-    public static CANSparkLowLevel.MotorType kBrushed() {
+    public static SparkLowLevel.MotorType kBrushed() {
         return SparkLowLevel.MotorType.kBrushed;
     }
 
-    public static CANSparkBaseConfig.IdleMode kBrake() { return SparkBaseConfig.IdleMode.kBrake; }
-    public static CANSparkBaseConfig.IdleMode kCoast() { return SparkBaseConfig.IdleMode.kCoast; }
+    public static SparkBaseConfig.IdleMode kBrake() { return SparkBaseConfig.IdleMode.kBrake; }
+    public static SparkBaseConfig.IdleMode kCoast() { return SparkBaseConfig.IdleMode.kCoast; }
 
-    public static CANSparkBase.ControlType kPosition() { return SparkBase.ControlType.kPosition; }
-    public static CANSparkBase.ControlType kVelocity() { return SparkBase.ControlType.kVelocity; }
+    public static SparkBase.ControlType kPosition() { return SparkBase.ControlType.kPosition; }
+    public static SparkBase.ControlType kVelocity() { return SparkBase.ControlType.kVelocity; }
 
-    public static CANSparkFlex createSparkFlex(int id) { return new SparkFlex(id, SparkLowLevel.MotorType.kBrushless); }
+    public static SparkFlex createSparkFlex(int id) { return new SparkFlex(id, SparkLowLevel.MotorType.kBrushless); }
 
     public static int getAllianceStation() {
         AllianceStationID allianceID = DriverStationJNI.getAllianceStation();
@@ -164,4 +165,8 @@ public class Wrapper {
             return -1;
         }
     }
+
+//     public static void init_hal() {
+//         hal.initialize();
+//     }
 }
