@@ -166,37 +166,23 @@ impl Telemetry {
             .map(|data| data.value.clone())
     }
 
-    pub async fn update_pose_and_get_target(
-        coords: (f64, f64, f64),
-        red: bool,
-    ) -> Option<FieldPoint> {
-        let pose = RobotPose {
+    pub async fn set_robot_pose(coords: (f64, f64, f64), red: bool) {
+        let point = RobotPose {
             x: coords.0,
             y: coords.1,
             angle: coords.2,
             red,
         };
+        let json = serde_json::to_string(&point).unwrap();
+        Self::put_string(ROBOT_POSITION_KEY, json).await;
+    }
 
-        let json_pose = serde_json::to_string(&pose).unwrap();
-        let state = TELEMETRY_STATE.lock().await;
-        let mut telemetry_data = state.telemetry_data.write().await;
-
-        if let Some(existing) = telemetry_data
-            .iter_mut()
-            .find(|d| d.key == ROBOT_POSITION_KEY)
-        {
-            existing.value = json_pose;
+    pub async fn get_target_point() -> Option<FieldPoint> {
+        if let Some(json) = Self::get(FIELD_TARGET_KEY).await {
+            serde_json::from_str::<FieldPoint>(&json).ok()
         } else {
-            telemetry_data.push(TelemetryData {
-                key: ROBOT_POSITION_KEY.to_string(),
-                value: json_pose,
-            });
+            None
         }
-
-        telemetry_data
-            .iter()
-            .find(|d| d.key == FIELD_TARGET_KEY)
-            .and_then(|d| serde_json::from_str::<FieldPoint>(&d.value).ok())
     }
 }
 
