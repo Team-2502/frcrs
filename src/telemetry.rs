@@ -28,7 +28,6 @@ use tower_http::cors::{Any, CorsLayer};
 pub const FIELD_TARGET_KEY: &str = "field_target_point";
 pub const ROBOT_POSITION_KEY: &str = "robot_pose";
 
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct FieldPoint {
     pub x: f64,
@@ -185,7 +184,6 @@ impl Telemetry {
             None
         }
     }
-
 }
 
 async fn status_check() -> impl IntoResponse {
