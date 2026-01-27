@@ -49,6 +49,25 @@ pub struct SelectorData {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum TelemetryColor {
+    Red,
+    Orange,
+    Yellow,
+    Green,
+    Blue,
+    Purple,
+    White,
+    Black,
+    Gray,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct SliderData {
+    value: f64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TelemetryData {
     key: String,
     value: String,
@@ -183,6 +202,24 @@ impl Telemetry {
         } else {
             None
         }
+    }
+
+    pub async fn put_slider(key: &str, range: f64) {
+        let slider = SliderData {
+            value: 0.0_f64.clamp(-range, range),
+        };
+
+        let json = serde_json::to_string(&slider).unwrap();
+        Self::put_string(key, json).await;
+    }
+
+    pub async fn put_color(key: &str, color: TelemetryColor) {
+        let json = serde_json::json!({
+            "value": color
+        })
+        .to_string();
+
+        Self::put_string(key, json).await;
     }
 }
 
