@@ -221,6 +221,16 @@ impl Telemetry {
 
         Self::put_string(key, json).await;
     }
+
+    pub async fn get_slider(key: &str) -> Option<f64> {
+        if let Some(json) = Self::get(key).await {
+            serde_json::from_str::<SliderData>(&json)
+                .ok()
+                .map(|slider| slider.value)
+        } else {
+            None
+        }
+    }
 }
 
 async fn status_check() -> impl IntoResponse {
