@@ -8,9 +8,9 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import com.reduxrobotics.sensors.canandgyro.Canandgyro;
+// import com.reduxrobotics.sensors.canandgyro.Canandgyro;
 
-import au.grapplerobotics.CanBridge;
+// import au.grapplerobotics.CanBridge;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -28,8 +28,8 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {
-    CanBridge.runTCP();
-    Canandgyro gyro = new Canandgyro(9); 
+    // CanBridge.runTCP();
+    // Canandgyro gyro = new Canandgyro(9); 
   }
 
   /**

@@ -1,14 +1,14 @@
 package frc.robot;
 
-import au.grapplerobotics.LaserCan;
-import au.grapplerobotics.interfaces.LaserCanInterface;
+// import au.grapplerobotics.LaserCan;
+// import au.grapplerobotics.interfaces.LaserCanInterface;
 import com.ctre.phoenix6.StatusSignal;
-import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkLowLevel;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig;
-import com.studica.frc.AHRS;
+// import com.revrobotics.spark.SparkBase;
+// import com.revrobotics.spark.SparkFlex;
+// import com.revrobotics.spark.SparkLowLevel;
+// import com.revrobotics.spark.SparkMax;
+// import com.revrobotics.spark.config.SparkBaseConfig;
+// import com.studica.frc.AHRS;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.AllianceStationID;
@@ -37,20 +37,20 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import static edu.wpi.first.wpilibj.RobotBase.isReal;
 
 public class Wrapper {
-    public static SparkLowLevel.MotorType kBrushless() {
-        return SparkLowLevel.MotorType.kBrushless;
-    }
-    public static SparkLowLevel.MotorType kBrushed() {
-        return SparkLowLevel.MotorType.kBrushed;
-    }
+    // public static SparkLowLevel.MotorType kBrushless() {
+    //     return SparkLowLevel.MotorType.kBrushless;
+    // }
+    // public static SparkLowLevel.MotorType kBrushed() {
+    //     return SparkLowLevel.MotorType.kBrushed;
+    // }
 
-    public static SparkBaseConfig.IdleMode kBrake() { return SparkBaseConfig.IdleMode.kBrake; }
-    public static SparkBaseConfig.IdleMode kCoast() { return SparkBaseConfig.IdleMode.kCoast; }
+    // public static SparkBaseConfig.IdleMode kBrake() { return SparkBaseConfig.IdleMode.kBrake; }
+    // public static SparkBaseConfig.IdleMode kCoast() { return SparkBaseConfig.IdleMode.kCoast; }
 
-    public static SparkBase.ControlType kPosition() { return SparkBase.ControlType.kPosition; }
-    public static SparkBase.ControlType kVelocity() { return SparkBase.ControlType.kVelocity; }
+    // public static SparkBase.ControlType kPosition() { return SparkBase.ControlType.kPosition; }
+    // public static SparkBase.ControlType kVelocity() { return SparkBase.ControlType.kVelocity; }
 
-    public static SparkFlex createSparkFlex(int id) { return new SparkFlex(id, SparkLowLevel.MotorType.kBrushless); }
+    // public static SparkFlex createSparkFlex(int id) { return new SparkFlex(id, SparkLowLevel.MotorType.kBrushless); }
 
     public static int getAllianceStation() {
         AllianceStationID allianceID = DriverStationJNI.getAllianceStation();
@@ -85,13 +85,13 @@ public class Wrapper {
         return 2.2;
     }
 
-    public static AHRS createAHRS() {
-        return new AHRS(AHRS.NavXComType.kMXP_SPI);
-    }
+    // public static AHRS createAHRS() {
+    //     return new AHRS(AHRS.NavXComType.kMXP_SPI);
+    // }
 
-    public static double getAngle(AHRS navx) {
-        return navx.getAngle();
-    }
+    // public static double getAngle(AHRS navx) {
+    //     return navx.getAngle();
+    // }
 
     public static RumbleType kBothRumble() {
         return RumbleType.kBothRumble;
@@ -148,20 +148,20 @@ public class Wrapper {
         return PneumaticsModuleType.CTREPCM;
     }
 
-    public static int laserCanMeasurement(LaserCanInterface.Measurement measurement) {
-        if (measurement != null) {
-            return -1;
-        }
+    // public static int laserCanMeasurement(LaserCanInterface.Measurement measurement) {
+    //     if (measurement != null) {
+    //         return -1;
+    //     }
 
-        return measurement.distance_mm;
-    }
+    //     return measurement.distance_mm;
+    // }
 
-    public static int laserCanMeasureFull(LaserCan laserCan) {
-        LaserCan.Measurement measurement = laserCan.getMeasurement();
-        if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
-            return measurement.distance_mm;
-        } else {
-            return -1;
-        }
-    }
+    // public static int laserCanMeasureFull(LaserCan laserCan) {
+    //     LaserCan.Measurement measurement = laserCan.getMeasurement();
+    //     if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
+    //         return measurement.distance_mm;
+    //     } else {
+    //         return -1;
+    //     }
+    // }
 }
