@@ -25,10 +25,46 @@ use tokio::task::LocalSet;
 use tokio::time::sleep;
 use tower_http::cors::{Any, CorsLayer};
 
+pub const FIELD_TARGET_KEY: &str = "field_target_point";
+pub const ROBOT_POSITION_KEY: &str = "robot_pose";
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct FieldPoint {
+    pub x: f64,
+    pub y: f64,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct RobotPose {
+    pub x: f64,
+    pub y: f64,
+    pub angle: f64,
+    pub red: bool,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SelectorData {
     options: Vec<String>,
     selected: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum TelemetryColor {
+    Red,
+    Orange,
+    Yellow,
+    Green,
+    Blue,
+    Purple,
+    White,
+    Black,
+    Gray,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct SliderData {
+    value: f64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -147,6 +183,53 @@ impl Telemetry {
             .iter()
             .find(|data| data.key == key)
             .map(|data| data.value.clone())
+    }
+
+    pub async fn set_robot_pose(coords: (f64, f64, f64), red: bool) {
+        let point = RobotPose {
+            x: coords.0,
+            y: coords.1,
+            angle: coords.2,
+            red,
+        };
+        let json = serde_json::to_string(&point).unwrap();
+        Self::put_string(ROBOT_POSITION_KEY, json).await;
+    }
+
+    pub async fn get_target_point() -> Option<FieldPoint> {
+        if let Some(json) = Self::get(FIELD_TARGET_KEY).await {
+            serde_json::from_str::<FieldPoint>(&json).ok()
+        } else {
+            None
+        }
+    }
+
+    pub async fn put_slider(key: &str, range: f64) {
+        let slider = SliderData {
+            value: 0.0_f64.clamp(-range, range),
+        };
+
+        let json = serde_json::to_string(&slider).unwrap();
+        Self::put_string(key, json).await;
+    }
+
+    pub async fn put_color(key: &str, color: TelemetryColor) {
+        let json = serde_json::json!({
+            "value": color
+        })
+        .to_string();
+
+        Self::put_string(key, json).await;
+    }
+
+    pub async fn get_slider(key: &str) -> Option<f64> {
+        if let Some(json) = Self::get(key).await {
+            serde_json::from_str::<SliderData>(&json)
+                .ok()
+                .map(|slider| slider.value)
+        } else {
+            None
+        }
     }
 }
 
