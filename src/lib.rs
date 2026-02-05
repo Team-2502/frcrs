@@ -194,6 +194,37 @@ pub fn alliance_station() -> AllianceStation {
     AllianceStation(station as u8)
 }
 
+pub struct AllianceShift(u8);
+
+impl AllianceShift {
+    pub fn red(&self) -> bool {
+        match self.0 {
+            2 => true,
+            _ => false,
+        }
+    }
+    pub fn blue(&self) -> bool {
+        match self.0 {
+            1 => true,
+            _ => false,
+        }
+    }
+}
+
+pub fn alliance_shift() -> AllianceShift {
+    let shift = call_static!(
+        "frc/robot/Wrapper",
+        "getAllianceShift",
+        "()I",
+        &Vec::new(),
+        jni::signature::ReturnType::Primitive(Primitive::Int)
+    )
+    .i()
+    .unwrap();
+
+    AllianceShift(shift as u8)
+}
+
 pub async fn sleep_hz(mut instant: Instant, hz: i32) {
     let elapsed = instant.elapsed().as_secs_f64();
     let left = (1. / hz as f64 - elapsed).max(0.);
