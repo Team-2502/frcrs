@@ -13,6 +13,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.hal.DriverStationJNI;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -51,6 +52,25 @@ public class Wrapper {
     // public static SparkBase.ControlType kVelocity() { return SparkBase.ControlType.kVelocity; }
 
     // public static SparkFlex createSparkFlex(int id) { return new SparkFlex(id, SparkLowLevel.MotorType.kBrushless); }
+
+    public static int getAllianceShift() {
+        String gameData;
+        gameData = DriverStation.getGameSpecificMessage();
+        if(gameData.length() > 0)
+        {
+            switch (gameData.charAt(0))
+            {
+                case 'B' :
+                    return 1;
+                case 'R' :
+                    return 2;
+                default :
+                    return 0;
+          }
+        } else {
+          return 0;
+        }
+    }
 
     public static int getAllianceStation() {
         AllianceStationID allianceID = DriverStationJNI.getAllianceStation();
