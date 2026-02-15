@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.net.URL;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import static edu.wpi.first.wpilibj.RobotBase.isReal;
 
@@ -146,6 +147,14 @@ public class Wrapper {
 
     public static PneumaticsModuleType ctrePCM() {
         return PneumaticsModuleType.CTREPCM;
+    }
+    
+    public static MotorAlignmentValue allignedFollow() {
+        return MotorAlignmentValue.Aligned;
+    }
+    
+    public static MotorAlignmentValue invertFollow() {
+        return MotorAlignmentValue.Opposed;
     }
 
     // public static int laserCanMeasurement(LaserCanInterface.Measurement measurement) {
