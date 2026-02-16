@@ -21,6 +21,8 @@ pub struct LimelightResults {
     pub Fiducial: Vec<Fiducial>,
     pub botpose_orb_wpiblue: [f64; 6],
     pub botpose_wpiblue: [f64; 6],
+
+    pub imu: Option<[f64; 10]>,
 }
 
 impl core::default::Default for LimelightResults {
@@ -31,6 +33,8 @@ impl core::default::Default for LimelightResults {
             Fiducial: vec![],
             botpose_orb_wpiblue: [0.0; 6],
             botpose_wpiblue: [0.0; 6],
+
+            imu: None,
         }
     }
 }
