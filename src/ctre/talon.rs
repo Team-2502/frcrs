@@ -210,68 +210,49 @@ impl Talon {
     }
 
     pub fn follow(&self, master: &Talon, inverted: bool) {
-        match inverted {
-            true => {
-                let inverted = call!(
-                    self.instance.as_obj(),
-                    "frc/robot/Wrapper",
-                    "allignedFollow()",
-                    "()Lcom.ctre.phoenix6.signals.MotorAlignmentValue;",
-                    &Vec::new(),
-                    ReturnType::Object
-                ).l().unwrap();
-                
-                let follower = create!(
-                    "com/ctre/phoenix6/controls/Follower",
-                    "(ILcom.ctre.phoenix6.signals.MotorAlignmentValue;)V",
-                    &[
-                        JValue::Int(master.get_id()).as_jni(),
-                        JValue::Object(&inverted).as_jni(),
-                    ]
-                );
-                
-                call!(
-                    &self.instance.as_obj(),
-                    "com/ctre/phoenix6/hardware/core/CoreTalonFX",
-                    "setControl",
-                    "(Lcom/ctre/phoenix6/controls/Follower;)Lcom/ctre/phoenix6/StatusCode;",
-                    &[JValue::Object(&follower).as_jni()],
-                    ReturnType::Object
-                )
-                .l()
-                .unwrap();
-            }
-            false => {
-                let inverted = call_static!(
-                    "frc/robot/Wrapper",
-                    "invertFollow()",
-                    "()Lcom.ctre.phoenix6.signals.MotorAlignmentValue;",
-                    &Vec::new(),
-                    ReturnType::Object
-                ).l().unwrap();
-                
-                let follower = create!(
-                    "com/ctre/phoenix6/controls/Follower",
-                    "(ILcom.ctre.phoenix6.signals.MotorAlignmentValue;)V",
-                    &[
-                        JValue::Int(master.get_id()).as_jni(),
-                        JValue::Object(&inverted).as_jni(),
-                    ]
-                );
-                
-                call!(
-                    &self.instance.as_obj(),
-                    "com/ctre/phoenix6/hardware/core/CoreTalonFX",
-                    "setControl",
-                    "(Lcom/ctre/phoenix6/controls/Follower;)Lcom/ctre/phoenix6/StatusCode;",
-                    &[JValue::Object(&follower).as_jni()],
-                    ReturnType::Object
-                )
-                .l()
-                .unwrap();
-            }
+        let alignment = if inverted {
+            call_static!(
+                "frc/robot/Wrapper",
+                "invertFollow",
+                "()Lcom/ctre/phoenix6/signals/MotorAlignmentValue;",
+                &Vec::new(),
+                ReturnType::Object
+            )
+            .l()
+            .unwrap()
+        } else {
+            call_static!(
+                "frc/robot/Wrapper",
+                "allignedFollow",
+                "()Lcom/ctre/phoenix6/signals/MotorAlignmentValue;",
+                &Vec::new(),
+                ReturnType::Object
+            )
+            .l()
+            .unwrap()
         };
+
+        let follower = create!(
+            "com/ctre/phoenix6/controls/Follower",
+            "(ILcom/ctre/phoenix6/signals/MotorAlignmentValue;)V",
+            &[
+                JValue::Int(master.get_id()).as_jni(),
+                JValue::Object(&alignment).as_jni(),
+            ]
+        );
+
+        call!(
+            self.instance.as_obj(),
+            "com/ctre/phoenix6/hardware/core/CoreTalonFX",
+            "setControl",
+            "(Lcom/ctre/phoenix6/controls/Follower;)Lcom/ctre/phoenix6/StatusCode;",
+            &[JValue::Object(&follower).as_jni()],
+            ReturnType::Object
+        )
+        .l()
+        .unwrap();
     }
+
     pub fn zero(&self) {
         call!(
             &self.instance.as_obj(),
