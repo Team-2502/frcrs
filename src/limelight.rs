@@ -26,6 +26,11 @@ pub struct LimelightResults {
     pub stdev_mt2: [f64; 6],
 }
 
+#[derive(Deserialize, Clone)]
+pub struct LimelightStatus {
+    pub fused_yaw: f64,
+}
+
 impl core::default::Default for LimelightResults {
     fn default() -> Self {
         Self {
@@ -38,6 +43,12 @@ impl core::default::Default for LimelightResults {
             imu: None,
             stdev_mt2: [0.0; 6],
         }
+    }
+}
+
+impl core::default::Default for LimelightStatus {
+    fn default() -> Self {
+        Self { fused_yaw: 0.0 }
     }
 }
 
@@ -102,6 +113,10 @@ impl Limelight {
 
     pub async fn results(&self) -> Result<LimelightResults, LimelightError> {
         self.get_json("results").await
+    }
+
+    pub async fn status(&self) -> Result<LimelightStatus, LimelightError> {
+        self.get_json("status").await
     }
 
     pub async fn update_robot_orientation(&self, yaw: f64) -> Result<bool, LimelightError> {
