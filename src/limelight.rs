@@ -28,7 +28,7 @@ pub struct LimelightResults {
 
 #[derive(Deserialize, Clone)]
 pub struct LimelightStatus {
-    pub fused_yaw: f64,
+    pub finalYaw: f64,
 }
 
 impl core::default::Default for LimelightResults {
@@ -48,7 +48,7 @@ impl core::default::Default for LimelightResults {
 
 impl core::default::Default for LimelightStatus {
     fn default() -> Self {
-        Self { fused_yaw: 0.0 }
+        Self { finalYaw: 0.0 }
     }
 }
 
