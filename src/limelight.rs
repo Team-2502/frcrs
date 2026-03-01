@@ -95,6 +95,7 @@ impl Limelight {
     }
 
     pub async fn response(
+        &self,
         client: Client,
         socket: SocketAddr,
     ) -> Result<reqwest::Response, reqwest::Error> {
