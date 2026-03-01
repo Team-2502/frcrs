@@ -84,7 +84,7 @@ impl Limelight {
         let response = self
             .client
             .get(&url)
-            .timeout(Duration::from_millis(2000))
+            .timeout(Duration::from_millis(100))
             .send()
             .await?
             .json()
