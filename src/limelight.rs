@@ -22,7 +22,7 @@ pub struct LimelightResults {
     pub botpose_orb_wpiblue: [f64; 6],
     pub botpose_wpiblue: [f64; 6],
 
-    pub imu: Option<[f64; 10]>,
+    //pub imu: Option<[f64; 10]>,
     pub stdev_mt2: [f64; 6],
 }
 
@@ -40,7 +40,7 @@ impl core::default::Default for LimelightResults {
             botpose_orb_wpiblue: [0.0; 6],
             botpose_wpiblue: [0.0; 6],
 
-            imu: None,
+            //imu: None,
             stdev_mt2: [0.0; 6],
         }
     }
