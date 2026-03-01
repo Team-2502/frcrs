@@ -94,16 +94,13 @@ impl Limelight {
         Ok(response)
     }
 
-    pub async fn response(
-        &self,
-        client: Client,
-        socket: SocketAddr,
-    ) -> Result<reqwest::Response, reqwest::Error> {
-        let url = format!("http://{}:{}/{}", socket.ip(), socket.port(), "results");
+    pub async fn response(&self) -> Result<reqwest::Response, reqwest::Error> {
+        let url = format!("http://{}:{}/{}", self.ip.ip(), self.ip.port(), "results");
 
         println!("url: {:?}", url);
 
-        let response: reqwest::Response = client
+        let response: reqwest::Response = self
+            .client
             .get(&url)
             .timeout(Duration::from_millis(100))
             .send()
