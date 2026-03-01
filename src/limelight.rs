@@ -90,6 +90,26 @@ impl Limelight {
             .json()
             .await?;
 
+        //println!("{:?}", response.status());
+        Ok(response)
+    }
+
+    pub async fn response(
+        client: Client,
+        socket: SocketAddr,
+    ) -> Result<reqwest::Response, reqwest::Error> {
+        let url = format!("http://{}:{}/{}", socket.ip(), socket.port(), "status");
+
+        println!("url: {:?}", url);
+
+        let response: reqwest::Response = client
+            .get(&url)
+            .timeout(Duration::from_millis(100))
+            .send()
+            .await?; //.json().await?;
+
+        //println!("status: {:?}", response.status());
+
         Ok(response)
     }
 
