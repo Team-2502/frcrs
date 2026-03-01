@@ -98,7 +98,7 @@ impl Limelight {
         client: Client,
         socket: SocketAddr,
     ) -> Result<reqwest::Response, reqwest::Error> {
-        let url = format!("http://{}:{}/{}", socket.ip(), socket.port(), "status");
+        let url = format!("http://{}:{}/{}", socket.ip(), socket.port(), "results");
 
         println!("url: {:?}", url);
 
