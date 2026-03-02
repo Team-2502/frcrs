@@ -23,7 +23,7 @@ pub struct LimelightResults {
     pub botpose_wpiblue: [f64; 6],
 
     //pub imu: Option<[f64; 10]>,
-    pub stdev_mt2: [f64; 6],
+    pub stdev_mt1: [f64; 6],
 }
 
 #[derive(Deserialize, Clone)]
@@ -41,7 +41,7 @@ impl core::default::Default for LimelightResults {
             botpose_wpiblue: [0.0; 6],
 
             //imu: None,
-            stdev_mt2: [0.0; 6],
+            stdev_mt1: [0.0; 6],
         }
     }
 }
@@ -174,9 +174,9 @@ mod tests {
                 0.0
             ]
         );
-        assert_eq!(results.stdev_mt2[0], 0.00019906416892763364);
+        assert_eq!(results.stdev_mt1[0], 0.0014506798277613892);
         assert_eq!(status.finalYaw, -0.2972398258824448);
         println!("{}", status.finalYaw);
-        println!("result: {}", results.stdev_mt2[0]);
+        println!("result: {}", results.stdev_mt1[0]);
     }
 }
