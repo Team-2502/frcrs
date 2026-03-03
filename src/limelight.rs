@@ -40,7 +40,7 @@ impl core::default::Default for LimelightResults {
             Fiducial: vec![],
             botpose_orb_wpiblue: [0.0; 6],
             botpose_wpiblue: [0.0; 6],
-            botpose_tagcount: 1,
+            botpose_tagcount: 0,
 
             //imu: None,
             stdev_mt1: [0.0; 6],
