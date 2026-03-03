@@ -21,6 +21,7 @@ pub struct LimelightResults {
     pub Fiducial: Vec<Fiducial>,
     pub botpose_orb_wpiblue: [f64; 6],
     pub botpose_wpiblue: [f64; 6],
+    pub botpose_tagcount: i32,
 
     //pub imu: Option<[f64; 10]>,
     pub stdev_mt1: [f64; 6],
@@ -39,6 +40,7 @@ impl core::default::Default for LimelightResults {
             Fiducial: vec![],
             botpose_orb_wpiblue: [0.0; 6],
             botpose_wpiblue: [0.0; 6],
+            botpose_tagcount: 1,
 
             //imu: None,
             stdev_mt1: [0.0; 6],
@@ -163,6 +165,7 @@ mod tests {
         assert_eq!(results.tx, 0.3374213002711173);
         assert_eq!(results.ty, -23.007593523896787);
         assert_eq!(results.Fiducial[0].fID, 7);
+        assert_eq!(results.botpose_tagcount, 1);
         assert_eq!(
             results.botpose_orb_wpiblue,
             [
