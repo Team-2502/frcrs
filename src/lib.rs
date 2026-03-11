@@ -225,6 +225,18 @@ pub fn alliance_shift() -> AllianceShift {
     AllianceShift(shift as u8)
 }
 
+pub fn match_time() -> f64 {
+    call_static!(
+        "frc/robot/Wrapper",
+        "getAllianceShift",
+        "()D",
+        &Vec::new(),
+        jni::signature::ReturnType::Primitive(Primitive::Double)
+    )
+    .d()
+    .unwrap()
+}
+
 pub async fn sleep_hz(mut instant: Instant, hz: i32) {
     let elapsed = instant.elapsed().as_secs_f64();
     let left = (1. / hz as f64 - elapsed).max(0.);

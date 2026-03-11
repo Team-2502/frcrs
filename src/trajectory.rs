@@ -80,6 +80,7 @@ pub struct Sample {
     pub angular_velocity: f64,
 }
 
+#[derive(Debug)]
 pub struct Path {
     samples: Vec<PoseSample>,
     waypoints: Vec<f64>,
