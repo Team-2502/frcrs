@@ -92,6 +92,10 @@ public class Wrapper {
             return 0;
         }
     }
+    
+    public static double getMatchTime() {
+        return DriverStationJNI.getMatchTime();
+    }
 
     public static void startNetworkTables() {
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
