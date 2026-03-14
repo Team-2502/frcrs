@@ -231,30 +231,30 @@ impl Telemetry {
             None
         }
     }
-    
+
     pub async fn put_value(key: &str, value: f64) {
-            let state = TELEMETRY_STATE.lock().await;
-            let mut telemetry_data = state.telemetry_data.write().await;
+        let state = TELEMETRY_STATE.lock().await;
+        let mut telemetry_data = state.telemetry_data.write().await;
 
-            if let Some(existing) = telemetry_data.iter_mut().find(|data| data.key == key) {
-                existing.value = value.to_string();
-            } else {
-                telemetry_data.push(TelemetryData {
-                    key: key.to_string(),
-                    value: value.to_string(),
-                });
-            }
+        if let Some(existing) = telemetry_data.iter_mut().find(|data| data.key == key) {
+            existing.value = value.to_string();
+        } else {
+            telemetry_data.push(TelemetryData {
+                key: key.to_string(),
+                value: value.to_string(),
+            });
         }
+    }
 
-        pub async fn get_text_value(key: &str) -> Option<f64> {
-            let state = TELEMETRY_STATE.lock().await;
-            let telemetry_data = state.telemetry_data.read().await;
-    
-            telemetry_data
-                    .iter()
-                    .find(|data| data.key == key)
-                    .and_then(|data| data.value.parse::<f64>().ok())
-        }
+    pub async fn get_value(key: &str) -> Option<f64> {
+        let state = TELEMETRY_STATE.lock().await;
+        let telemetry_data = state.telemetry_data.read().await;
+
+        telemetry_data
+            .iter()
+            .find(|data| data.key == key)
+            .and_then(|data| data.value.parse::<f64>().ok())
+    }
 }
 
 async fn status_check() -> impl IntoResponse {
