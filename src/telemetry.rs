@@ -231,6 +231,30 @@ impl Telemetry {
             None
         }
     }
+    
+    pub async fn put_text_value(key: &str, value: String) {
+            let state = TELEMETRY_STATE.lock().await;
+            let mut telemetry_data = state.telemetry_data.write().await;
+
+            if let Some(existing) = telemetry_data.iter_mut().find(|data| data.key == key) {
+                existing.value = value;
+            } else {
+                telemetry_data.push(TelemetryData {
+                    key: key.to_string(),
+                    value,
+                });
+            }
+        }
+
+        pub async fn get_text_value(key: &str) -> Option<String> {
+            let state = TELEMETRY_STATE.lock().await;
+            let telemetry_data = state.telemetry_data.read().await;
+    
+            telemetry_data
+                .iter()
+                .find(|data| data.key == key)
+                .map(|data| data.value.clone())
+        }
 }
 
 async fn status_check() -> impl IntoResponse {
