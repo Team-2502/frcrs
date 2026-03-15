@@ -74,9 +74,20 @@ struct PoseSample {
 
 impl Path {
     pub fn from_trajectory(json: &str) -> Result<Self, serde_json::Error> {
-        let choreo: ChoreoTrajectory = serde_json::from_str(json)?;
+        let choreo = serde_json::from_str::<ChoreoTrajectory>(json)?;
 
-        let mut samples: Vec<PoseSample> = choreo
+        let mut valid_waypoints = choreo
+            .trajectory
+            .splits
+            .iter()
+            .filter_map(|&i| choreo.trajectory.waypoints.get(i).copied())
+            .collect::<Vec<_>>();
+
+        if let Some(&last) = choreo.trajectory.waypoints.last() {
+            valid_waypoints.push(last);
+        }
+
+        let mut samples = choreo
             .trajectory
             .samples
             .into_iter()
@@ -84,18 +95,14 @@ impl Path {
                 time: s.t,
                 pose: s.into(),
             })
-            .collect();
+            .collect::<Vec<_>>();
 
         samples.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap());
 
-        let waypoints = choreo
-            .trajectory
-            .splits
-            .iter()
-            .filter_map(|&i| choreo.trajectory.waypoints.get(i).copied())
-            .collect::<Vec<f64>>();
-
-        Ok(Self { samples, waypoints })
+        Ok(Self {
+            samples,
+            waypoints: valid_waypoints,
+        })
     }
 
     pub fn get(&self, time: Time) -> Pose {
@@ -260,7 +267,7 @@ mod tests {
 
         let waypoints = path.waypoints();
 
-        assert_eq!(waypoints.len(), 1);
+        assert_eq!(waypoints.len(), 2);
         assert_eq!(waypoints[0], 0.0);
     }
 
