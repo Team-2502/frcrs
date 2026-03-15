@@ -1,13 +1,12 @@
-#![allow(unused_imports)]
+#![allow(dead_code)]
 
-use ordered_float::NotNan;
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Mul, Sub};
 use uom::si::{
-    angle::{degree, radian},
+    angle::radian,
     angular_velocity::radian_per_second,
     f64::{Angle, AngularVelocity, Length, Time, Velocity},
-    length::{meter, millimeter},
+    length::meter,
     time::second,
     velocity::meter_per_second,
 };
@@ -17,17 +16,13 @@ pub struct ChoreoTrajectory {
     pub name: String,
     pub version: u32,
     pub snapshot: Snapshot,
-    pub params: Params,
-    pub trajectory: TrajectoryData,
+    pub trajectory: Trajectory,
     pub events: Vec<Event>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Snapshot {
     pub waypoints: Vec<SnapshotWaypoint>,
-    pub constraints: Vec<Constraint>,
-    #[serde(rename = "targetDt")]
-    pub target_dt: f64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -35,35 +30,17 @@ pub struct SnapshotWaypoint {
     pub x: f64,
     pub y: f64,
     pub heading: f64,
-    pub intervals: u32,
     pub split: bool,
-    #[serde(rename = "fixTranslation")]
-    pub fix_translation: bool,
-    #[serde(rename = "fixHeading")]
-    pub fix_heading: bool,
-    #[serde(rename = "overrideIntervals")]
-    pub override_intervals: bool,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Constraint {
-    // TODO: implement
-}
+pub struct Event {}
 
 #[derive(Serialize, Deserialize)]
-pub struct Params {
-    // TODO: implement
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Event {
-    // TODO: implement
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct TrajectoryData {
-    pub samples: Vec<Sample>,
+pub struct Trajectory {
     pub waypoints: Vec<f64>,
+    pub splits: Vec<usize>,
+    pub samples: Vec<Sample>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -72,10 +49,13 @@ pub struct Sample {
     pub x: f64,
     pub y: f64,
     pub heading: f64,
+
     #[serde(rename = "vx")]
     pub velocity_x: f64,
+
     #[serde(rename = "vy")]
     pub velocity_y: f64,
+
     #[serde(rename = "omega")]
     pub angular_velocity: f64,
 }
@@ -86,66 +66,55 @@ pub struct Path {
     waypoints: Vec<f64>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct PoseSample {
     time: f64,
     pose: Pose,
 }
 
 impl Path {
-    pub fn from_trajectory(trajectory: &str) -> Result<Self, serde_json::Error> {
-        let choreo = serde_json::from_str::<ChoreoTrajectory>(trajectory)?;
+    pub fn from_trajectory(json: &str) -> Result<Self, serde_json::Error> {
+        let traj: ChoreoTrajectory = serde_json::from_str(json)?;
 
-        let valid_waypoints = choreo
-            .snapshot
-            .waypoints
+        let waypoints = traj
+            .trajectory
+            .splits
             .iter()
-            .enumerate()
-            .filter(|(_, wp)| wp.split)
-            .map(|(i, _)| choreo.trajectory.waypoints[i])
+            .filter_map(|&i| traj.trajectory.waypoints.get(i).copied())
+            .collect::<Vec<_>>();
+
+        let mut samples: Vec<PoseSample> = traj
+            .trajectory
+            .samples
+            .into_iter()
+            .map(|s| PoseSample {
+                time: s.t,
+                pose: s.into(),
+            })
             .collect();
 
-        let trajectory_data = TrajectoryData {
-            samples: choreo.trajectory.samples,
-            waypoints: valid_waypoints,
-        };
-
-        Ok(Self::from_trajectory_data(trajectory_data))
-    }
-
-    fn from_trajectory_data(data: TrajectoryData) -> Self {
-        let mut samples = Vec::with_capacity(data.samples.len());
-        for sample in data.samples {
-            samples.push(PoseSample {
-                time: sample.t,
-                pose: sample.into(),
-            });
-        }
-
-        // Sort by time just in case
         samples.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap());
 
-        Self {
-            samples,
-            waypoints: data.waypoints,
-        }
+        Ok(Self { samples, waypoints })
     }
 
-    pub fn get(&self, elapsed: Time) -> Pose {
-        let t = elapsed.get::<second>();
+    pub fn get(&self, time: Time) -> Pose {
+        let t = time.get::<second>();
 
         match self
             .samples
-            .binary_search_by(|probe| probe.time.partial_cmp(&t).unwrap())
+            .binary_search_by(|s| s.time.partial_cmp(&t).unwrap())
         {
-            Ok(idx) => self.samples[idx].pose.clone(), // exact match
-            Err(0) => self.samples[0].pose.clone(),    // before first sample
-            Err(idx) if idx >= self.samples.len() => self.samples.last().unwrap().pose.clone(), // after last sample
-            Err(idx) => {
-                let before = &self.samples[idx - 1];
-                let after = &self.samples[idx];
-                let progress = (t - before.time) / (after.time - before.time);
-                before.pose.lerp(&after.pose, progress)
+            Ok(i) => self.samples[i].pose.clone(),
+            Err(0) => self.samples[0].pose.clone(),
+            Err(i) if i >= self.samples.len() => self.samples.last().unwrap().pose.clone(),
+            Err(i) => {
+                let a = &self.samples[i - 1];
+                let b = &self.samples[i];
+
+                let progress = (t - a.time) / (b.time - a.time);
+
+                a.pose.lerp(&b.pose, progress)
             }
         }
     }
@@ -154,7 +123,7 @@ impl Path {
         Time::new::<second>(self.samples.last().unwrap().time)
     }
 
-    pub fn waypoints(&self) -> &Vec<f64> {
+    pub fn waypoints(&self) -> &[f64] {
         &self.waypoints
     }
 }
@@ -170,73 +139,157 @@ pub struct Pose {
 }
 
 impl Pose {
-    fn lerp(&self, other: &Pose, l: f64) -> Pose {
+    fn lerp(&self, other: &Pose, t: f64) -> Pose {
         Pose {
-            x: lerp(self.x, other.x, l),
-            y: lerp(self.y, other.y, l),
-            heading: lerp(self.heading, other.heading, l),
-            angular_velocity: lerp(self.angular_velocity, other.angular_velocity, l),
-            velocity_x: lerp(self.velocity_x, other.velocity_x, l),
-            velocity_y: lerp(self.velocity_y, other.velocity_y, l),
+            x: lerp(self.x, other.x, t),
+            y: lerp(self.y, other.y, t),
+
+            heading: Angle::new::<radian>(lerp_angle(
+                self.heading.get::<radian>(),
+                other.heading.get::<radian>(),
+                t,
+            )),
+
+            angular_velocity: lerp(self.angular_velocity, other.angular_velocity, t),
+            velocity_x: lerp(self.velocity_x, other.velocity_x, t),
+            velocity_y: lerp(self.velocity_y, other.velocity_y, t),
         }
     }
 
-    /// X and Y are half of the field length and width
-    /// velocity might be wrong
-    pub fn mirror(&self, x: Length, y: Length) -> Pose {
+    pub fn mirror(&self, half_field_x: Length, half_field_y: Length) -> Pose {
         Pose {
-            x: x - self.x + x,
-            y: y - self.y + y,
-            heading: self.heading + Angle::new::<radian>(std::f64::consts::PI),
+            x: half_field_x * 2.0 - self.x,
+            y: half_field_y * 2.0 - self.y,
+
+            heading: Angle::new::<radian>(self.heading.get::<radian>() + std::f64::consts::PI),
+
             angular_velocity: -self.angular_velocity,
-            velocity_x: self.velocity_x,
-            velocity_y: self.velocity_y,
+
+            velocity_x: -self.velocity_x,
+            velocity_y: -self.velocity_y,
         }
     }
 }
 
-fn lerp<A>(a: A, b: A, l: f64) -> A
+fn lerp<T>(a: T, b: T, t: f64) -> T
 where
-    A: Sub<A, Output = A> + Add<A, Output = A> + Mul<f64, Output = A> + Clone,
+    T: Sub<T, Output = T> + Add<T, Output = T> + Mul<f64, Output = T> + Clone,
 {
-    a.clone() + (b - a) * l
+    a.clone() + (b - a) * t
+}
+
+fn lerp_angle(a: f64, b: f64, t: f64) -> f64 {
+    let mut diff = b - a;
+
+    while diff > std::f64::consts::PI {
+        diff -= 2.0 * std::f64::consts::PI;
+    }
+
+    while diff < -std::f64::consts::PI {
+        diff += 2.0 * std::f64::consts::PI;
+    }
+
+    a + diff * t
 }
 
 impl From<Sample> for Pose {
-    fn from(value: Sample) -> Self {
+    fn from(s: Sample) -> Self {
         Self {
-            x: Length::new::<meter>(value.x),
-            y: Length::new::<meter>(value.y),
-            heading: Angle::new::<radian>(value.heading),
-            angular_velocity: AngularVelocity::new::<radian_per_second>(value.angular_velocity),
-            velocity_x: Velocity::new::<meter_per_second>(value.velocity_x),
-            velocity_y: Velocity::new::<meter_per_second>(value.velocity_y),
+            x: Length::new::<meter>(s.x),
+            y: Length::new::<meter>(s.y),
+            heading: Angle::new::<radian>(s.heading),
+            angular_velocity: AngularVelocity::new::<radian_per_second>(s.angular_velocity),
+            velocity_x: Velocity::new::<meter_per_second>(s.velocity_x),
+            velocity_y: Velocity::new::<meter_per_second>(s.velocity_y),
         }
     }
 }
 
-// #[test]
-// fn parse() {
-//     let data = include_str!("../../RobotCode2025/auto/Blue2.traj");
-//     let path = Path::from_trajectory(data).unwrap();
-//     for i in path.waypoints() {
-//         println!("{}", i);
-//     }
-// }
-//
-// #[test]
-// fn mirror_test() {
-//     let path = Path::from_trajectory(include_str!("../../RobotCode2025/auto/Blue2.traj")).unwrap();
-//     let setpoint = path.get(Time::new::<second>(0.0));
-//
-//     println!("{:?}", setpoint);
-//
-//     let setpoint = setpoint.mirror(
-//         Length::new::<meter>(17.55 / 2.),
-//         Length::new::<meter>(8.05 / 2.),
-//     );
-//
-//     assert!((setpoint.x.get::<meter>() - 9.53808).abs() < 1e-5);
-//     assert!((setpoint.y.get::<meter>() - 0.44384).abs() < 1e-5);
-//     assert!((setpoint.heading.get::<degree>() - 180.).abs() < 1e-5);
-// }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use uom::si::{length::meter, time::second};
+
+    fn fake_path() -> &'static str {
+        r#"
+        {
+            "name": "test_path",
+            "version": 3,
+            "snapshot": {
+                "waypoints": []
+            },
+            "events": [],
+            "trajectory": {
+                "waypoints": [0.0, 1.0],
+                "splits": [0],
+                "samples": [
+                    {
+                        "t": 0.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "heading": 0.0,
+                        "vx": 0.0,
+                        "vy": 0.0,
+                        "omega": 0.0
+                    },
+                    {
+                        "t": 1.0,
+                        "x": 1.0,
+                        "y": 2.0,
+                        "heading": 1.0,
+                        "vx": 1.0,
+                        "vy": 2.0,
+                        "omega": 0.5
+                    }
+                ]
+            }
+        }
+        "#
+    }
+
+    #[test]
+    fn parse_json() {
+        let path = Path::from_trajectory(fake_path()).unwrap();
+
+        assert_eq!(path.samples.len(), 2);
+    }
+
+    #[test]
+    fn waypoints_parse_correctly() {
+        let path = Path::from_trajectory(fake_path()).unwrap();
+
+        let waypoints = path.waypoints();
+
+        assert_eq!(waypoints.len(), 1);
+        assert_eq!(waypoints[0], 0.0);
+    }
+
+    #[test]
+    fn duration_is_correct() {
+        let path = Path::from_trajectory(fake_path()).unwrap();
+
+        let duration = path.length();
+
+        assert_eq!(duration.get::<second>(), 1.0);
+    }
+
+    #[test]
+    fn exact_sample_retrieval() {
+        let path = Path::from_trajectory(fake_path()).unwrap();
+
+        let pose = path.get(Time::new::<second>(1.0));
+
+        assert_eq!(pose.x.get::<meter>(), 1.0);
+        assert_eq!(pose.y.get::<meter>(), 2.0);
+    }
+
+    #[test]
+    fn interpolation_midpoint() {
+        let path = Path::from_trajectory(fake_path()).unwrap();
+
+        let pose = path.get(Time::new::<second>(0.5));
+
+        assert!((pose.x.get::<meter>() - 0.5) < 1e-6);
+        assert!((pose.y.get::<meter>() - 1.0) < 1e-6);
+    }
+}

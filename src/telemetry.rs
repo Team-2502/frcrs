@@ -370,33 +370,33 @@ async fn load_layout() -> impl IntoResponse {
     }
 }
 
-#[test]
-fn telemetry() {
-    let executor = Runtime::new().unwrap();
-    let local = LocalSet::new();
+// #[test]
+// fn telemetry() {
+//     let executor = Runtime::new().unwrap();
+//     let local = LocalSet::new();
 
-    let controller = local.run_until(async {
-        Telemetry::init(5807);
+//     let controller = local.run_until(async {
+//         Telemetry::init(5807);
 
-        Telemetry::put_number("number test", 42.0).await;
-        Telemetry::put_string("string test", "hello".to_string()).await;
-        Telemetry::put_vec("vec test", vec![1, 2, 3]).await;
-        Telemetry::put_selector(
-            "selector test",
-            vec!["one".to_string(), "two".to_string(), "three".to_string()],
-        )
-        .await;
+//         Telemetry::put_number("number test", 42.0).await;
+//         Telemetry::put_string("string test", "hello".to_string()).await;
+//         Telemetry::put_vec("vec test", vec![1, 2, 3]).await;
+//         Telemetry::put_selector(
+//             "selector test",
+//             vec!["one".to_string(), "two".to_string(), "three".to_string()],
+//         )
+//         .await;
 
-        loop {
-            if let Some(selected) = Telemetry::get_selection("selector test").await {
-                println!("Current mode: {}", selected);
-            } else {
-                eprintln!("Failed to get from selector")
-            }
+//         loop {
+//             if let Some(selected) = Telemetry::get_selection("selector test").await {
+//                 println!("Current mode: {}", selected);
+//             } else {
+//                 eprintln!("Failed to get from selector")
+//             }
 
-            sleep(Duration::from_secs(5)).await;
-        }
-    });
+//             sleep(Duration::from_secs(5)).await;
+//         }
+//     });
 
-    executor.block_on(controller);
-}
+//     executor.block_on(controller);
+// }
