@@ -74,16 +74,9 @@ struct PoseSample {
 
 impl Path {
     pub fn from_trajectory(json: &str) -> Result<Self, serde_json::Error> {
-        let traj: ChoreoTrajectory = serde_json::from_str(json)?;
+        let choreo: ChoreoTrajectory = serde_json::from_str(json)?;
 
-        let waypoints = traj
-            .trajectory
-            .splits
-            .iter()
-            .filter_map(|&i| traj.trajectory.waypoints.get(i).copied())
-            .collect::<Vec<_>>();
-
-        let mut samples: Vec<PoseSample> = traj
+        let mut samples: Vec<PoseSample> = choreo
             .trajectory
             .samples
             .into_iter()
@@ -94,6 +87,13 @@ impl Path {
             .collect();
 
         samples.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap());
+
+        let waypoints = choreo
+            .trajectory
+            .splits
+            .iter()
+            .filter_map(|&i| choreo.trajectory.waypoints.get(i).copied())
+            .collect::<Vec<f64>>();
 
         Ok(Self { samples, waypoints })
     }
