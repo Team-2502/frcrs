@@ -14,7 +14,7 @@ pub struct Limelight {
     client: Client,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct LimelightResults {
     pub Fiducial: Vec<Fiducial>,
     pub botpose_orb_wpiblue: [f64; 6],
@@ -24,7 +24,7 @@ pub struct LimelightResults {
     pub stdev_mt1: [f64; 6],
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct LimelightStatus {
     pub finalYaw: f64,
 }
@@ -48,7 +48,7 @@ impl core::default::Default for LimelightStatus {
     }
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Fiducial {
     pub fID: i32,
     pub tx: f64,
