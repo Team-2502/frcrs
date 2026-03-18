@@ -17,7 +17,7 @@ pub enum RobotMode {
     Test,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct RobotState {
     buttons: BitVec,
 }
