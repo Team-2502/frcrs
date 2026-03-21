@@ -228,7 +228,7 @@ pub fn alliance_shift() -> AllianceShift {
 pub fn match_time() -> f64 {
     call_static!(
         "frc/robot/Wrapper",
-        "getAllianceShift",
+        "getMatchTime",
         "()D",
         &Vec::new(),
         jni::signature::ReturnType::Primitive(Primitive::Double)
