@@ -91,8 +91,8 @@ impl Pigeon {
         let accel = call!(
             self.instance.as_obj(),
             "com/ctre/phoenix6/hardware/core/Pigeon2",
-            "getAccelerationZ",
-            "()Ledu/wpi/first/units/measure/LinearAcceleration;",
+            "getAngularVelocityZWorld",
+            "()Ledu/wpi/first/units/measure/AngularVelocity;",
             &Vec::new(),
             ReturnType::Object
         )
@@ -102,7 +102,7 @@ impl Pigeon {
         call_static!(
             "frc/robot/Wrapper",
             "doubleAccel",
-            "(Ledu/wpi/first/units/measure/LinearAcceleration;)D",
+            "(Ledu/wpi/first/units/measure/AngularVelocity;)D",
             &[JValue::Object(&accel).as_jni()],
             ReturnType::Primitive(Primitive::Double)
         )

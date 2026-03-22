@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.Units;
 
 
@@ -184,8 +184,8 @@ public class Wrapper {
         return MotorAlignmentValue.Opposed;
     }
     
-    public static double doubleAccel(LinearAcceleration accel) {
-        return accel.in(Units.MetersPerSecondPerSecond);
+    public static double doubleAccel(AngularVelocity accel) {
+        return accel.in(Units.RadiansPerSecond);
     }
 
     // public static int laserCanMeasurement(LaserCanInterface.Measurement measurement) {
