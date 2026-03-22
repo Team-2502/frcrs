@@ -1,4 +1,4 @@
-use crate::call::{call, create};
+use crate::call::{call, call_static, create};
 use crate::java;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
@@ -85,6 +85,29 @@ impl Pigeon {
         .unwrap();
 
         Vector3::new(x, y, z)
+    }
+
+    pub fn get_angular_accel(&self) -> f64 {
+        let accel = call!(
+            self.instance.as_obj(),
+            "com/ctre/phoenix6/hardware/core/Pigeon2",
+            "getAccelerationZ",
+            "()Ledu/wpi/first/units/measure/LinearAcceleration;",
+            &Vec::new(),
+            ReturnType::Object
+        )
+        .l()
+        .unwrap();
+
+        call_static!(
+            "frc/robot/Wrapper",
+            "doubleAccel",
+            "(Ledu/wpi/first/units/measure/LinearAcceleration;)D",
+            &[JValue::Object(&accel).as_jni()],
+            ReturnType::Primitive(Primitive::Double)
+        )
+        .d()
+        .unwrap()
     }
 
     pub fn reset(&self) {
