@@ -87,8 +87,8 @@ impl Pigeon {
         Vector3::new(x, y, z)
     }
 
-    pub fn get_angular_accel(&self) -> f64 {
-        let accel = call!(
+    pub fn get_angular_velocity(&self) -> f64 {
+        let velocity = call!(
             self.instance.as_obj(),
             "com/ctre/phoenix6/hardware/core/Pigeon2",
             "getAngularVelocityZWorld",
@@ -101,9 +101,9 @@ impl Pigeon {
 
         call_static!(
             "frc/robot/Wrapper",
-            "doubleAccel",
+            "doubleVelocity",
             "(Ledu/wpi/first/units/measure/AngularVelocity;)D",
-            &[JValue::Object(&accel).as_jni()],
+            &[JValue::Object(&velocity).as_jni()],
             ReturnType::Primitive(Primitive::Double)
         )
         .d()

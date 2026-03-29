@@ -184,7 +184,7 @@ public class Wrapper {
         return MotorAlignmentValue.Opposed;
     }
     
-    public static double doubleAccel(AngularVelocity accel) {
+    public static double doubleVelocity(AngularVelocity accel) {
         return accel.in(Units.RadiansPerSecond);
     }
 
