@@ -91,7 +91,7 @@ impl Pigeon {
         let status_signal = call!(
             self.instance.as_obj(),
             "com/ctre/phoenix6/hardware/core/CorePigeon2",
-            "getAngularVelocityZ",
+            "getAngularVelocityZWorld",
             "()Lcom/ctre/phoenix6/StatusSignal;",
             &Vec::new(),
             ReturnType::Object
