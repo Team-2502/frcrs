@@ -183,10 +183,6 @@ public class Wrapper {
     public static MotorAlignmentValue invertFollow() {
         return MotorAlignmentValue.Opposed;
     }
-    
-    public static double doubleVelocity(AngularVelocity accel) {
-        return accel.in(Units.RadiansPerSecond);
-    }
 
     // public static int laserCanMeasurement(LaserCanInterface.Measurement measurement) {
     //     if (measurement != null) {
