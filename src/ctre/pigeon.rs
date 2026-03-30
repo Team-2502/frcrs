@@ -101,7 +101,7 @@ impl Pigeon {
 
         call_static!(
             "frc/robot/Wrapper",
-            "getValue",
+            "doubleVelocityStatusSignal",
             "(Lcom/ctre/phoenix6/StatusSignal;)D",
             &[JValue::Object(&status_signal).as_jni()],
             ReturnType::Primitive(Primitive::Double)
