@@ -200,7 +200,7 @@ impl Telemetry {
         if let Some(json) = Self::get(FIELD_TARGET_KEY).await {
             serde_json::from_str::<FieldPoint>(&json).ok()
         } else {
-            None
+            Some(FieldPoint { x: 0.0, y: 0.0 })
         }
     }
 
