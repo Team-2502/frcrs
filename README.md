@@ -15,29 +15,29 @@ The main design principle of frcrs is to split robot functionality into independ
 Here’s an example of how a subsystem might be implemented in frcrs:
 
 ```rust
-use frcrs::ctre::SRX;
+use frcrs::ctre::{ControlMode, Talon};
 use crate::constants;
 
 pub struct Drivetrain {
-    left: SRX,
-    right: SRX
+    left: Talon,
+    right: Talon
 }
 
 impl Drivetrain {
     pub fn new() -> Self {
         Self {
-            left: SRX::new(constants::drivetrain::LEFT),
-            right: SRX::new(constants::drivetrain::RIGHT)
+            left: Talon::new(constants::drivetrain::LEFT, Some("can0".to_owned())),
+            right: Talon::new(constants::drivetrain::RIGHT, Some("can0".to_owned()))
         }
     }
 
     pub fn drive(&self, left: f64, right: f64) {
-        self.left.set(-left);
-        self.right.set(-right);
+        self.left.set(ControlMode::Percent, -left);
+        self.right.set(ControlMode::Percent, -right);
     }
 }
 ```
-See an example [here](https://github.com/Team-2502/frcrs-template/tree/disco)
+See an example [here](https://github.com/Team-2502/RobotCode2026)
 # Getting Started
 1. Clone the Repository
     ```bash
@@ -58,7 +58,7 @@ See an example [here](https://github.com/Team-2502/frcrs-template/tree/disco)
    ```
 7. Add directory to path `$HOME/.gradle/toolchains/frc/YYYY/roborio/bin` where `YYYY` is the year of the toolchain
 8. Build frcrs with `cargo build --release --target arm-unknown-linux-gnueabi`
-9. Create robotcode, see an example [here](https://github.com/Team-2502/frcrs-template/tree/disco)
+9. Create robotcode, see an example [here](https://github.com/Team-2502/robot-boilerplate)
 10. Deploy your code, see deploy crate for deployment. An example toml is here
     ```toml
     [deploy]
