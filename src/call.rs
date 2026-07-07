@@ -81,4 +81,4 @@ macro_rules! once {
     }};
 }
 
-pub(crate) use {call, call_static, create, once, call_and_get};
+pub(crate) use {call, call_and_get, call_static, create, once};

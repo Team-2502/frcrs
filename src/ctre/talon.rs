@@ -1,4 +1,4 @@
-use crate::call::{call, call_static, create, call_and_get};
+use crate::call::{call, call_and_get, call_static, create};
 use crate::java;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
@@ -64,11 +64,7 @@ impl Talon {
     }
 
     pub fn setPID(&self, p: f64, i: f64, d: f64) {
-        let slot = create!(
-            "com/ctre/phoenix6/configs/Slot0Configs",
-            "()V",
-            &Vec::new()
-        );
+        let slot = create!("com/ctre/phoenix6/configs/Slot0Configs", "()V", &Vec::new());
 
         call!(
             slot.as_obj(),
