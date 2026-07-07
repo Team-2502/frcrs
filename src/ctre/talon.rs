@@ -1,4 +1,4 @@
-use crate::call::{call, call_static, create};
+use crate::call::{call, call_static, create, call_and_get};
 use crate::java;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{Primitive, ReturnType};
@@ -61,6 +61,67 @@ impl Talon {
         let instance = java().new_global_ref(instance).unwrap();
 
         Self { instance, id }
+    }
+
+    pub fn setPID(&self, p: f64, i: f64, d: f64) {
+        let slot = create!(
+            "com/ctre/phoenix6/configs/Slot0Configs",
+            "()V",
+            &Vec::new()
+        );
+
+        call!(
+            slot.as_obj(),
+            "com/ctre/phoenix6/configs/Slot0Configs",
+            "withKP",
+            "(D)V",
+            &[JValue::Double(p).as_jni()],
+            ReturnType::Primitive(Primitive::Void)
+        )
+        .v()
+        .unwrap();
+
+        call!(
+            slot.as_obj(),
+            "com/ctre/phoenix6/configs/Slot0Configs",
+            "withKI",
+            "(D)V",
+            &[JValue::Double(i).as_jni()],
+            ReturnType::Primitive(Primitive::Void)
+        )
+        .v()
+        .unwrap();
+
+        call!(
+            slot.as_obj(),
+            "com/ctre/phoenix6/configs/Slot0Configs",
+            "withKD",
+            "(D)V",
+            &[JValue::Double(d).as_jni()],
+            ReturnType::Primitive(Primitive::Void)
+        )
+        .v()
+        .unwrap();
+
+        let config = call_and_get!(
+            self.instance.as_obj(),
+            "com/ctre/phoenix6/hardware/core/CoreTalonFX",
+            "getConfigurator",
+            "(V)Lcom.ctre.phoenix6.configs.TalonFXConfigurator",
+            &Vec::new(),
+            ReturnType::Object
+        );
+
+        call!(
+            config.as_obj(),
+            "com/ctre/phoenix6/configs/TalonFXConfigurator",
+            "apply",
+            "(Lcom.ctre.phoenix6.configs.Slot0Configs;)V",
+            &[JValue::Object(&slot.as_obj()).as_jni()],
+            ReturnType::Primitive(Primitive::Void)
+        )
+        .v()
+        .unwrap();
     }
 
     /// Sets the output for the motor controller.

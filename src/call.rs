@@ -53,6 +53,26 @@ macro_rules! create {
     }};
 }
 
+macro_rules! call_and_get {
+    ($obj:expr, $path:tt, $method:tt, $sig:tt, $args:expr, $ret:expr) => {{
+        use crate::java;
+        use jni::objects::JMethodID;
+        use once_cell::sync::OnceCell;
+        static FNPTR: OnceCell<JMethodID> = OnceCell::new();
+        let mut java = java();
+        let fnptr = FNPTR.get_or_init(|| {
+            let class = java.find_class($path).unwrap();
+            java.get_method_id(class, $method, $sig).unwrap()
+        });
+
+        let obj = unsafe {
+            java.call_method_unchecked($obj, fnptr, $ret, $args)
+                .unwrap()
+        };
+        java.new_global_ref(obj.l().unwrap()).unwrap()
+    }};
+}
+
 macro_rules! once {
     ($code:expr) => {{
         static ONCE: OnceCell<JObject> = OnceCell::new();
@@ -61,4 +81,4 @@ macro_rules! once {
     }};
 }
 
-pub(crate) use {call, call_static, create, once};
+pub(crate) use {call, call_static, create, once, call_and_get};
